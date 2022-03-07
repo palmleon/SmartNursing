@@ -56,11 +56,7 @@ class Patient_Monitor():
     def Pulse(self,PI,pulse,sat,battery):
         # Suppongo, per ogni input, arrivi una stringa ogni  10s, con fc=1Hz.
         # Battery, potrebbe essere anche un solo valore ogni 10s(discorso di ridurre i bit mandati)
-
-        # Volendo, dato che qui faccio la media dei dati che arrivano, si potrebbe fare direttamente
-        # la media (e la deviazione standard del pulse) alla sorgente (cioè sul Raspberry).
-        # Da chiedere se questa soluzione può andare bene (dato che non volevano un semplice controllo a soglia)
-
+        
         # battery è la sola tensione di batteria
         if battery<2.8:# Per informare che il pulsossimetro si sta scaricando (es. suppongo sia scarico a 2.5V)
             #return f"ATTENZIONE, il paziente {self.__ID_P} ha il pulsossimetro quasi scarico"
@@ -98,6 +94,3 @@ class Patient_Monitor():
             
         if len(r)>2:
             return r
-        """else:
-            return # Messo solo perchè non ricordo se nel caso in cui non deve ritornare nulla, debba essere inserito per forza o meno
-            # In caso si toglie"""
