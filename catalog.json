@@ -1,0 +1,20 @@
+{
+    "services" : [],
+    "message-broker" : {},
+    "city" : "turin",
+    "desired-temperature" : 23,
+    "telegram-chat-id-list" : [],
+    "room-list" : [],
+    "common-room-list" : [],
+    "common-room-hourly-scheduling" : {},
+    "patient-room-hourly-scheduling" : {},
+    "patient-temperature-base-topic" : "",
+    "patient-saturation-base-topic" : "",
+    "patient-room-base-topic": "",
+    "common-room-base-topic" :"",
+    "alarm-base-topic" : "",
+    "patient-room-command-base-topic" : "",
+    "common-room-command-base-topic" : "",
+    "devices" : [],
+    "patients" : []
+}

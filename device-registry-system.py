@@ -1,0 +1,219 @@
+import os
+import json
+import cherrypy
+import time
+import datetime
+
+#Accesso al contenuto di self.catalog in parallelo? sia da metodo refresh che metodi REST
+
+
+class Catalog(object) :
+    exposed=True
+    def __init__(self) :
+        self.fp = open("catalog.json","r")
+        self.catalogList = json.load(self.fp)
+        self.fp.close()
+        #self.catalogList lettura del json del catalog 
+        
+
+    def computeDifference(self,t2,t1) :
+        t1 = datetime.datetime.strptime(t1, "%y-%m-%d %H:%M:%S")
+        diff = t2-t1
+        diff = diff.total_seconds()
+        return diff/60
+
+    def refreshList(self) :
+        while True :
+            time.sleep(120) # apsetto 2 minuti prima di refreshare
+            for i in range(len(self.catalogList['devices'])) :
+                if self.computeDifference(datetime.datetime.today(),self.catalogList['devices'][i].timestamp) > 2  :
+                    del self.catalogList['devices'][i]
+            
+            for i in range(len(self.catalogList['services'])) :
+                if self.computeDifference(datetime.datetime.today(),self.catalogList['services'][i].timestamp) > 2  :
+                    del self.catalogList['services'][i]
+            
+
+    def GET(self,*uri,**path):
+        if uri[0] == 'message-broker' :
+            return json.dumps(self.catalogList["message-broker"])
+
+        elif uri[0] == 'city' :
+            return json.dumps(self.catalogList['city'])
+
+        elif uri[0] == 'desired-temperature' :
+            return json.dumps(self.catalogList['desired-temperature'])
+        
+        elif uri[0] == 'telegram-chat-id-list' :
+            return json.dumps(self.catalogList['telegram-chat-id-list'])
+        
+        elif uri[0] == 'room-list' :
+            return json.dumps(self.catalogList['room-list'])
+
+        elif uri[0] == 'common-room-list' :
+            return json.dumps(self.catalogList['common-room-list'])
+        
+        elif uri[0] == 'common-room-hourly-scheduling' :
+            return json.dumps(self.catalogList['common-room-hourly-scheduling'])
+        
+        elif uri[0] == 'patient-room-hourly-scheduling' :
+            return json.dumps(self.catalogList['patient-room-hourly-scheduling'])
+
+        elif uri[0] == 'patient-temperature-base-topic' :
+            return json.dumps(self.catalogList['patient-temperature-base-topic'])
+
+        elif uri[0] == 'patient-saturation-base-topic' :
+            return json.dumps(self.catalogList['patient-saturation-base-topic'])
+
+        elif uri[0] == 'patient-room-base-topic' :
+            return json.dumps(self.catalogList['patient-room-base-topic'])
+        
+        elif uri[0] == 'common-room-base-topic' :
+            return json.dumps(self.catalogList['common-room-base-topic'])
+
+        elif uri[0] == 'alarm-base-topic' :
+            return json.dumps(self.catalogList['alarm-base-topic'])
+        elif uri[0] == 'patient-room-command-base-topic' :
+            return json.dumps(self.catalogList['patient-room-command-base-topic'])
+        elif uri[0] == 'commond-room-command-base-topic' :
+            return json.dumps(self.catalogList['commond-room-command-base-topic'])
+
+        elif uri[0] == 'devices' :
+            return json.dumps(self.catalogList["devices"])
+
+        elif uri[0] == 'device' :
+            for device in self.catalogList['devices'] :
+                if device['deviceID'] == int(uri[1]) :
+                    return json.dumps(device)
+            raise cherrypy.HTTPError(404,'device not found')
+        
+        elif uri[0] == 'services' :
+            return json.dumps(self.catalogList["services"])
+        elif uri[0] == 'service' :
+            for service in self.catalogList['services'] :
+                if device['serviceID'] == int(uri[1]) :
+                    return json.dumps(device)
+            raise cherrypy.HTTPError(404,'service not found')
+
+        elif uri[0] == 'patients' :
+            return json.dumps(self.catalogList["patients"])
+
+        elif uri[0] == 'patient' :
+            for patient in self.catalogList['patients'] :
+                if device['patientID'] == int(uri[1]) :
+                    return json.dumps(patient)
+            raise cherrypy.HTTPError(404,'patient not found')
+        else : 
+            raise cherrypy.HTTPError(400,'operation not found')
+
+    def POST(self,*uri,**path):
+        if uri[0] == 'add-device' :
+            newDevice = json.loads(cherrypy.request.body.read())
+            newDevice['timestamp'] = str(datetime.datetime.today())
+            self.catalogList['devices'].append(newDevice)
+            self.fp = open("catalog.json","w")
+            json.dump(self.catalogList,self.fp)
+            self.fp.close()
+            return 'operation ok'
+
+        elif uri[0] == 'add-patient' :
+            newPatient = json.loads(cherrypy.request.body.read())
+            self.catalogList['patients'].append(newPatient)
+            json.dump(self.catalogList,self.fp)
+            return 'operation ok'
+
+        elif uri[0] == 'add-telegram-chat-id' :
+            newId = json.loads(cherrypy.request.body.read())
+            self.catalogList['telegram-chat-id-list'].append(newId)
+            json.dump(self.catalogList,self.fp)
+            return 'operation ok'
+
+        elif uri[0] == 'add-service' :
+            newService = json.loads(cherrypy.request.body.read())
+            newService['timestamp'] = str(datetime.datetime.today())
+            self.catalogList['services'].append(newService)
+            json.dump(self.catalogList,self.fp)
+            return 'operation ok'
+        else : 
+            raise cherrypy.HTTPError(400,'operation not found')
+
+        
+
+        #da qui
+    def PUT(self,*uri,**path):
+        if uri[0] == 'update-device' :
+            newDevice = json.loads(cherrypy.request.body.read())
+            newDevice['timestamp'] = str(datetime.datetime.today())
+            id = newDevice['deviceID']
+            for i in range(len(self.catalogList['devices'])) :
+                if self.catalogList['devices'][i]['deviceID'] == id :
+                    del self.catalogList['devices'][i]
+            self.fp = open("catalog.json","w")
+            self.catalogList['devices'].append(newDevice)
+            json.dump(self.catalogList,self.fp)
+            self.fp.close()
+            return 'operation ok'
+        if uri[0] == 'update-service' :
+            newService = json.loads(cherrypy.request.body.read())
+            newService['timestamp'] = str(datetime.datetime.today())
+            id = newService['serviceID']
+            for i in range(len(self.catalogList['services'])) :
+                if self.catalogList['services'][i]['serviceID'] == id :
+                    del self.catalogList['services'][i]
+            self.fp = open("catalog.json","w")
+            self.catalogList['services'].append(newService)
+            json.dump(self.catalogList,self.fp)
+            self.fp.close()
+            return 'operation ok'
+        if uri[0] == 'update-patient' :
+            newPatient = json.loads(cherrypy.request.body.read())
+            id = newPatient['patientID']
+            for i in range(len(self.catalogList['patients'])) :
+                if self.catalogList['patients'][i]['patientID'] == id :
+                    del self.catalogList['patients'][i]
+            self.fp = open("catalog.json","w")
+            self.catalogList['patients'].append(newService)
+            json.dump(self.catalogList,self.fp)
+            self.fp.close()
+            return 'operation ok'
+    
+    def DELETE(self,*uri,**path) :
+        if uri[0] == 'delete-patient' :
+            id = int(uri[1])
+            for i in range(len(self.catalogList['patients'])) :
+                if self.catalogList['patients'][i]['patientID'] == id :
+                    del self.catalogList['patients'][i]
+            raise cherrypy.HTTPError(404,'patient not found')
+
+        elif uri[0] == 'delete-telegram-chat-id' :
+            id = int(uri[1])
+            for i in range(len(self.catalogList['telegram-chat-id-list'])) :
+                if self.catalogList['telegram-chat-id-list'][i] == id :
+                    del self.catalogList['telegram-chat-id-list'][i]
+            raise cherrypy.HTTPError(404,'id  not found')
+
+        elif uri[0] == 'delete-service' :
+            id = int(uri[1])
+            for i in range(len(self.catalogList['services'])) :
+                if self.catalogList['services'][i]['serviceID'] == id :
+                    del self.catalogList['services'][i]
+            raise cherrypy.HTTPError(404,'service not found')
+        else : 
+            raise cherrypy.HTTPError(400,'operation not found')
+
+
+
+
+if __name__ == "__main__" :
+    conf={ 
+        '/':{
+            'request.dispatch':cherrypy.dispatch.MethodDispatcher(),
+            'tool.session.on':True
+        }
+    }
+    c = Catalog()
+    cherrypy.tree.mount(c,'/catalog',conf)
+    cherrypy.engine.start()
+    c.refreshList()
+    cherrypy.engine.block()
+    
