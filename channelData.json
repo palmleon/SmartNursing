@@ -1,7 +1,7 @@
 {
-  "api_creation" : "YTN43QRA4IWIEBIN",
-  "name" : "",
-  "public_flag" : true,
+  "api_key" : "YTN43QRA4IWIEBIN",
+  "name" : "NewChannel",
+  "public_flag" : false,
   "field1" : null,
   "field2" : null,
   "field3" : null,

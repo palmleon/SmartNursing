@@ -1,8 +1,22 @@
-from dataclasses import field
 from MyMQTT import *
 import json
 import requests
 import time
+class channelManager():
+    def __init__(self,channelName='NewChannel'):
+        self.channelName = channelName
+        self.channelData = json.load(open('channelData.json'))
+    def createChannel(self):
+        requests.post('https://api.thingspeak.com/channels.json',json = self.channelData)
+    def uploadToChannel(self,s):
+        for i in range(len(s['e'])):
+            field_t = s['e'][i]
+            requests.get('https://api.thingspeak.com/update?api_key=VNU8XPP4S4XB4BJA&field{}={}'.format(i+1,field_t['v']))
+            time.sleep(20)
+    def channelFeed(self):
+        r = requests.get('https://api.thingspeak.com/channels/1667352/feeds.json?api_key=R4I754QO2D02Z1OE&results=2')
+        print(r.text)
+        
 
 class thinkSpeakAdaptor():
     def __init__(self,clientID,topic,broker,port):
@@ -18,12 +32,9 @@ class thinkSpeakAdaptor():
         s = str(msg).replace("'",'"')
         s = s[2:-1]
         s = json.loads(s)
-        self.uploadToChannel(s)
-    def uploadToChannel(self,s):
-        for fields in range(len(s['e'])):
-            field = s['e'][fields]
-            # requests here apparently works only the first time
-            requests.get('https://api.thingspeak.com/update?api_key=VNU8XPP4S4XB4BJA&field{}={}'.format(fields+1,field['v']))
+        c = channelManager('test')
+        #c.channelFeed()
+        c.createChannel()
 if __name__ == '__main__':
     tAdaptor = thinkSpeakAdaptor('ThinkSpeakAdaptor','dapis/test1','test.mosquitto.org',1883)
     tAdaptor.start()
