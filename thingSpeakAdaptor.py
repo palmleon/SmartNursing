@@ -8,9 +8,21 @@ class channelManager():
         self.channelData = json.load(open('channelData.json'))
     def createChannel(self):
         requests.post('https://api.thingspeak.com/channels.json',json = self.channelData)
-    def uploadToChannel(self,s):
-        for i in range(len(s['e'])):
-            field_t = s['e'][i]
+    def checkChannel(self,channelName):
+        #not tested
+        keys_data = json.load(open('readKeys.json'))
+        for keys in keys_data:
+            r = requests.get('https://api.thingspeak.com/channels/1667352/feeds.json?api_key={}E&results=2'.format(keys))
+            r = r.json()
+            print(r)
+            r = r['channel']
+            if channelName == r['name']:
+                return 1
+        return 0
+
+    def uploadToChannel(self,json_received):
+        for i in range(len(json_received['e'])):
+            field_t = json_received['e'][i]
             requests.get('https://api.thingspeak.com/update?api_key=VNU8XPP4S4XB4BJA&field{}={}'.format(i+1,field_t['v']))
             time.sleep(20)
     def channelFeed(self):
@@ -29,12 +41,11 @@ class thinkSpeakAdaptor():
     def start (self):
         self.client.start()
     def notify(self,topic,msg):
-        s = str(msg).replace("'",'"')
-        s = s[2:-1]
-        s = json.loads(s)
+        json_received = str(msg).replace("'",'"')
+        json_received = json_received[2:-1]
+        json_received = json.loads(json_received)
         c = channelManager('test')
-        #c.channelFeed()
-        c.createChannel()
+        c.checkChannel('test')
 if __name__ == '__main__':
     tAdaptor = thinkSpeakAdaptor('ThinkSpeakAdaptor','dapis/test1','test.mosquitto.org',1883)
     tAdaptor.start()
