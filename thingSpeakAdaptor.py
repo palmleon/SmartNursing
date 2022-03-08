@@ -1,3 +1,4 @@
+from dataclasses import field
 from MyMQTT import *
 import json
 import requests
@@ -19,13 +20,10 @@ class thinkSpeakAdaptor():
         s = json.loads(s)
         self.uploadToChannel(s)
     def uploadToChannel(self,s):
-        perfusion = s['e'][0]
-        saturation = s['e'][1]
-        pulse_rate = s['e'][2]
-        requests.get('https://api.thingspeak.com/update?api_key=VNU8XPP4S4XB4BJA&field1={}'.format(saturation['v']))
-        requests.get('https://api.thingspeak.com/update?api_key=VNU8XPP4S4XB4BJA&field2={}'.format(pulse_rate['v']))
-        requests.get('https://api.thingspeak.com/update?api_key=VNU8XPP4S4XB4BJA&field3={}'.format(perfusion['v']))
-
+        for fields in range(len(s['e'])):
+            field = s['e'][fields]
+            # requests here apparently works only the first time
+            requests.get('https://api.thingspeak.com/update?api_key=VNU8XPP4S4XB4BJA&field{}={}'.format(fields+1,field['v']))
 if __name__ == '__main__':
     tAdaptor = thinkSpeakAdaptor('ThinkSpeakAdaptor','dapis/test1','test.mosquitto.org',1883)
     tAdaptor.start()
