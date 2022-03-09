@@ -1,6 +1,6 @@
 {
     "services" : [],
-    "message-broker" : {},
+    "message-broker" : {"port" : 1883, "name": "test.mosquitto.org"},
     "city" : "turin",
     "desired-temperature" : 23,
     "telegram-chat-id-list" : [],
@@ -8,13 +8,13 @@
     "common-room-list" : [],
     "common-room-hourly-scheduling" : {},
     "patient-room-hourly-scheduling" : {},
-    "patient-temperature-base-topic" : "",
-    "patient-saturation-base-topic" : "",
-    "patient-room-base-topic": "",
-    "common-room-base-topic" :"",
-    "alarm-base-topic" : "",
-    "patient-room-command-base-topic" : "",
-    "common-room-command-base-topic" : "",
+    "patient-temperature-base-topic" : "group01/IoTProject/Patient/Temperature/",
+    "patient-saturation-base-topic" : "group01/IoTProject/Patient/Pulsation/",
+    "patient-room-base-topic": "group01/IoTProject/PatientRoom/",
+    "common-room-base-topic" :"group01/IoTProject/CommonRoom/",
+    "alarm-base-topic" : "group01/IoTProject/PatientAlarm/",
+    "patient-room-command-base-topic" : "group01/IoTProject/PatientRoomCommand/",
+    "common-room-command-base-topic" : "group01/IoTProject/CommonRoomCommand/",
     "devices" : [],
     "patients" : []
 }
