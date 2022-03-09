@@ -1,4 +1,3 @@
-import os
 import json
 import cherrypy
 import time
@@ -6,18 +5,16 @@ import datetime
 
 #Accesso al contenuto di self.catalog in parallelo? sia da metodo refresh che metodi REST
 
-
 class Catalog(object) :
     exposed=True
     def __init__(self) :
         self.fp = open("catalog.json","r")
         self.catalogList = json.load(self.fp)
         self.fp.close()
-        #self.catalogList lettura del json del catalog 
         
 
     def computeDifference(self,t2,t1) :
-        t1 = datetime.datetime.strptime(t1, "%y-%m-%d %H:%M:%S")
+        t1 = datetime.datetime.strptime(t1, "%Y-%m-%d %H:%M:%S.%f")
         diff = t2-t1
         diff = diff.total_seconds()
         return diff/60
@@ -25,13 +22,12 @@ class Catalog(object) :
     def refreshList(self) :
         while True :
             time.sleep(120) # apsetto 2 minuti prima di refreshare
-            for i in range(len(self.catalogList['devices'])) :
-                if self.computeDifference(datetime.datetime.today(),self.catalogList['devices'][i].timestamp) > 2  :
-                    del self.catalogList['devices'][i]
-            
-            for i in range(len(self.catalogList['services'])) :
-                if self.computeDifference(datetime.datetime.today(),self.catalogList['services'][i].timestamp) > 2  :
-                    del self.catalogList['services'][i]
+            print('parto a refreshare')
+            self.catalogList['devices'] = list(filter(lambda dev : self.computeDifference(datetime.datetime.today(),dev['timestamp']) < 2,self.catalogList['devices']))
+            self.catalogList['services'] = list(filter(lambda dev : self.computeDifference(datetime.datetime.today(),dev['timestamp']) < 2,self.catalogList['services']))
+            self.fp = open("catalog.json","w")
+            json.dump(self.catalogList,self.fp)
+            self.fp.close()
             
 
     def GET(self,*uri,**path):
@@ -73,9 +69,9 @@ class Catalog(object) :
 
         elif uri[0] == 'alarm-base-topic' :
             return json.dumps(self.catalogList['alarm-base-topic'])
-        elif uri[0] == 't' :
+        elif uri[0] == 'patient-room-command-base-topic' :
             return json.dumps(self.catalogList['patient-room-command-base-topic'])
-        elif uri[0] == 'commond-room-command-base-topic' :
+        elif uri[0] == 'common-room-command-base-topic' :
             return json.dumps(self.catalogList['commond-room-command-base-topic'])
 
         elif uri[0] == 'devices' :
@@ -139,11 +135,11 @@ class Catalog(object) :
 
         
 
-        #da qui
     def PUT(self,*uri,**path):
         if uri[0] == 'update-device' :
             newDevice = json.loads(cherrypy.request.body.read())
             newDevice['timestamp'] = str(datetime.datetime.today())
+            print(newDevice)
             id = newDevice['deviceID']
             for i in range(len(self.catalogList['devices'])) :
                 if self.catalogList['devices'][i]['deviceID'] == id :
@@ -217,3 +213,4 @@ if __name__ == "__main__" :
     c.refreshList()
     cherrypy.engine.block()
     
+
