@@ -6,28 +6,38 @@ class channelManager():
     def __init__(self,channelName='NewChannel'):
         self.channelName = channelName
         self.channelData = json.load(open('channelData.json'))
+        self.mainApiKey = self.channelData["api_key"]
+        self.channelList = []
     def createChannel(self):
         requests.post('https://api.thingspeak.com/channels.json',json = self.channelData)
-    def checkChannel(self,channelName):
-        #not tested
-        keys_data = json.load(open('readKeys.json'))
-        for keys in keys_data:
-            r = requests.get('https://api.thingspeak.com/channels/1667352/feeds.json?api_key={}E&results=2'.format(keys))
-            r = r.json()
-            print(r)
-            r = r['channel']
-            if channelName == r['name']:
-                return 1
+    def listChannels(self):
+        thingSpeakList = requests.get('https://api.thingspeak.com/channels.json?api_key={}'.format(self.mainApiKey))
+        thingSpeakList = json.loads(thingSpeakList.text)
+        for i in range(len(thingSpeakList)):
+            self.channelList.append(thingSpeakList[i])
+    def checkChannel(self,channelID):
+        for channels in range(len(self.channelList)):
+            if channelID == self.channelList[channels]['name']:
+                return self.channelList[channels]
         return 0
-
     def uploadToChannel(self,json_received):
-        for i in range(len(json_received['e'])):
-            field_t = json_received['e'][i]
-            requests.get('https://api.thingspeak.com/update?api_key=VNU8XPP4S4XB4BJA&field{}={}'.format(i+1,field_t['v']))
-            time.sleep(20)
-    def channelFeed(self):
-        r = requests.get('https://api.thingspeak.com/channels/1667352/feeds.json?api_key=R4I754QO2D02Z1OE&results=2')
-        print(r.text)
+        channelToUpdate = self.checkChannel(json_received['bn'])
+        write_api = channelToUpdate['api_keys'][0]['api_key']
+        read_api = channelToUpdate['api_keys'][1]['api_key']
+        if channelToUpdate != 0:
+            for i in range(len(json_received['e'])):
+                update_value = json_received['e'][i]
+                field_number = self.channelFeed(update_value['n'])
+                requests.get('https://api.thingspeak.com/update?api_key={}&field{}={}'.format(write_api,field_number,update_value['v']))
+                time.sleep(20)
+    def channelFeed(self,field_name):
+        feed = requests.get('https://api.thingspeak.com/channels/1667352/feeds.json?api_key=R4I754QO2D02Z1OE&results=2')
+        feed = feed.json()
+        feed = feed['channel']
+        for i in range(1,9):
+            if 'field{}'.format(i) in feed.keys():
+                if feed['field{}'.format(i)] == field_name:
+                    return i
         
 
 class thinkSpeakAdaptor():
@@ -44,8 +54,11 @@ class thinkSpeakAdaptor():
         json_received = str(msg).replace("'",'"')
         json_received = json_received[2:-1]
         json_received = json.loads(json_received)
-        c = channelManager('test')
-        c.checkChannel('test')
+        c = channelManager()
+        c.listChannels()
+        c.uploadToChannel(json_received)
+
+
 if __name__ == '__main__':
     tAdaptor = thinkSpeakAdaptor('ThinkSpeakAdaptor','dapis/test1','test.mosquitto.org',1883)
     tAdaptor.start()
