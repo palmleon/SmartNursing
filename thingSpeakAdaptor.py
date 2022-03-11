@@ -1,10 +1,10 @@
+from asyncore import read
 from MyMQTT import *
 import json
 import requests
 import time
 class channelManager():
-    def __init__(self,channelName='NewChannel'):
-        self.channelName = channelName
+    def __init__(self):
         self.channelData = json.load(open('channelData.json'))
         self.mainApiKey = self.channelData["api_key"]
         self.channelList = []
@@ -24,14 +24,15 @@ class channelManager():
         channelToUpdate = self.checkChannel(json_received['bn'])
         write_api = channelToUpdate['api_keys'][0]['api_key']
         read_api = channelToUpdate['api_keys'][1]['api_key']
+        channelID = channelToUpdate['id']
         if channelToUpdate != 0:
             for i in range(len(json_received['e'])):
                 update_value = json_received['e'][i]
-                field_number = self.channelFeed(update_value['n'])
+                field_number = self.channelFeed(channelID,read_api,update_value['n'])
                 requests.get('https://api.thingspeak.com/update?api_key={}&field{}={}'.format(write_api,field_number,update_value['v']))
                 time.sleep(20)
-    def channelFeed(self,field_name):
-        feed = requests.get('https://api.thingspeak.com/channels/1667352/feeds.json?api_key=R4I754QO2D02Z1OE&results=2')
+    def channelFeed(self,channelID,read_api,field_name):
+        feed = requests.get('https://api.thingspeak.com/channels/{}/feeds.json?api_key={}&results=2'.format(channelID,read_api))
         feed = feed.json()
         feed = feed['channel']
         for i in range(1,9):
