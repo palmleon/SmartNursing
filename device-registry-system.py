@@ -31,6 +31,9 @@ class Catalog(object) :
             
 
     def GET(self,*uri,**path):
+        if len(uri) != 1 :
+            raise cherrypy.HTTPError(500,'Wrong parameters number')
+
         if uri[0] == 'message-broker' :
             return json.dumps(self.catalogList["message-broker"])
 
@@ -103,6 +106,9 @@ class Catalog(object) :
             raise cherrypy.HTTPError(400,'operation not found')
 
     def POST(self,*uri,**path):
+        if len(uri) != 1 :
+            raise cherrypy.HTTPError(500,'Wrong parameters number')
+
         if uri[0] == 'add-device' :
             newDevice = json.loads(cherrypy.request.body.read())
             newDevice['timestamp'] = str(datetime.datetime.today())
@@ -136,6 +142,9 @@ class Catalog(object) :
         
 
     def PUT(self,*uri,**path):
+        if len(uri) != 1 :
+            raise cherrypy.HTTPError(500,'Wrong parameters number')
+
         if uri[0] == 'update-device' :
             newDevice = json.loads(cherrypy.request.body.read())
             newDevice['timestamp'] = str(datetime.datetime.today())
@@ -172,8 +181,14 @@ class Catalog(object) :
             json.dump(self.catalogList,self.fp)
             self.fp.close()
             return 'operation ok'
+        else : 
+            raise cherrypy.HTTPError(400,'operation not found')
+
     
     def DELETE(self,*uri,**path) :
+        if len(uri) != 1 :
+            raise cherrypy.HTTPError(500,'Wrong parameters number')
+
         if uri[0] == 'delete-patient' :
             id = int(uri[1])
             for i in range(len(self.catalogList['patients'])) :
