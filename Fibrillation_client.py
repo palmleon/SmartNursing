@@ -1,12 +1,13 @@
 from Fibrillation_Analyzer import *
 from MyMQTT import MyMQTT
 import time
+import json
 
-class Patient_Monitor_client():
+class Fibrillation_Monitor_client():
   def __init__(self):
     # Qui andrà la richiesta al registro per prendere tutti i dati necessari
     self.__clientID="clientID"
-    self.__broker="broker"
+    self.__broker="test.mosquitto.org"
     self.__port=1883
     self.__topic_sub="group01/IoTProject/Patient/Pulsation/+"
     self.__base_topic_pub="group01/IoTproject/PatientAlarm/"
@@ -27,7 +28,7 @@ class Patient_Monitor_client():
     self.client.mySubscribe(self.__topic_sub)
 
   def notify(self,topic,msg): # Metodo che analizza i dati arrivati utilizzando i metodi dell'analyzer e, in caso, pubblica i warning
-
+    msg=json.loads(msg)
     ID_P=topic.split("/")[-1] # Prendo l'ID del PZ alla fine del topic
 
     evento=msg["e"] # Prendo la lista degli eventi
@@ -59,3 +60,8 @@ class Patient_Monitor_client():
         to_pub["time"]=time.time()
         # Publish allert
         self.client.myPublish(self.__base_topic_pub+"/"+ID_P,to_pub)
+
+if __name__=="__main__":
+  F=Fibrillation_Monitor_client()
+  while True:
+    pass

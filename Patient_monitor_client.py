@@ -1,6 +1,7 @@
 from Patient_monitor_Analyzer import *
 from MyMQTT import MyMQTT
 import time
+import json
 
 class Patient_Monitor_client():
   def __init__(self):
@@ -29,7 +30,7 @@ class Patient_Monitor_client():
     self.client.mySubscribe(self.__topic_sub_P)
 
   def notify(self,topic,msg): # Metodo che analizza i dati arrivati utilizzando i metodi dell'analyzer e, in caso, pubblica i warning
-
+    msg=json.loads(msg)
     ID_P=topic.split("/")[-1] # Prendo l'ID del PZ alla fine del topic
 
     evento=msg["e"] # Prendo la lista degli eventi
