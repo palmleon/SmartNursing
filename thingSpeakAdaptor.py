@@ -1,35 +1,46 @@
-from asyncore import read
 from MyMQTT import *
 import json
 import requests
 import time
-class channelManager():
+class channelManager(): #class for all methods related to ThingSpeak channels
     def __init__(self):
         self.channelData = json.load(open('channelData.json'))
         self.mainApiKey = self.channelData["api_key"]
         self.channelList = []
-    def createChannel(self):
+    def createChannel(self,cData = None): #create a ThingSpeak channel from channelData.json
         print('Adding new channel')
-        if self.checkChannel(self.channelData['name']) == 0:
-            requests.post('https://api.thingspeak.com/channels.json',json = self.channelData)
+        if cData == None:
+            cData = self.channelData
+        if self.checkChannel(cData['name']) == 0:
+            requests.post('https://api.thingspeak.com/channels.json',json = cData)
         else:
             print('Channel with the same name already present')
-    def listChannels(self):
+    def deleteChannel(self,cData = None): #delete a channel from a json dict
+        print('Deleting channel')
+        if cData == None:
+            cData = self.channelData
+        if self.checkChannel(cData['name']) == 0:
+            requests.delete('https://api.thingspeak.com/channels.json',json = cData)
+        else:
+            print('The provided channel does not exist')
+    def listChannels(self): #add to the list "channelList" all ThingSpeak channels with provided API
         thingSpeakList = requests.get('https://api.thingspeak.com/channels.json?api_key={}'.format(self.mainApiKey))
         thingSpeakList = json.loads(thingSpeakList.text)
         for i in range(len(thingSpeakList)):
             self.channelList.append(thingSpeakList[i])
-    def checkChannel(self,channelID):
+    def checkChannel(self,channelID): #check if a channelID (in our case channel name) is present in channelList
         for channels in range(len(self.channelList)):
             if channelID == self.channelList[channels]['name']:
                 return self.channelList[channels]
         return 0
-    def uploadToChannel(self,json_received):
+    #upload channel based on json received (channel name) and field (json content)
+    #if bn not in channelList createChannel and then upload
+    def uploadToChannel(self,json_received): 
         channelToUpdate = self.checkChannel(json_received['bn'])
-        write_api = channelToUpdate['api_keys'][0]['api_key']
-        read_api = channelToUpdate['api_keys'][1]['api_key']
-        channelID = channelToUpdate['id']
         if channelToUpdate != 0:
+            write_api = channelToUpdate['api_keys'][0]['api_key']
+            read_api = channelToUpdate['api_keys'][1]['api_key']
+            channelID = channelToUpdate['id']
             print('Upload in progress')
             for i in range(len(json_received['e'])):
                 print('...')
@@ -38,7 +49,14 @@ class channelManager():
                 requests.get('https://api.thingspeak.com/update?api_key={}&field{}={}'.format(write_api,field_number,update_value['v']))
                 time.sleep(20)
             print('Upload concluded')
-    def channelFeed(self,channelID,read_api,field_name):
+        else:
+            cData = self.channelData
+            cData["name"] = json_received["bn"]
+            for i in range(len(json_received['e'])):
+                cData['field{}'.format(i+1)] = json_received['e'][i]['n']
+            self.createChannel(cData)
+            self.uploadToChannel(json_received)
+    def channelFeed(self,channelID,read_api,field_name): #retrive a chosen field number based on contents
         feed = requests.get('https://api.thingspeak.com/channels/{}/feeds.json?api_key={}&results=2'.format(channelID,read_api))
         feed = feed.json()
         feed = feed['channel']
@@ -48,7 +66,7 @@ class channelManager():
                     return i
         
 
-class thinkSpeakAdaptor():
+class thinkSpeakAdaptor(): #class related to the interaction with MQTT 
     def __init__(self,clientID,topic,broker,port):
         self.topic=topic
         self.client=MyMQTT(clientID,broker,port,self)
