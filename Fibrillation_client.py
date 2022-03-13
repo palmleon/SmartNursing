@@ -37,7 +37,6 @@ class Fibrillation_Monitor_client():
     # battery non necessario, altrimenti vuol dire che c'è stato errore
     # Pi dovrebbe essere lungo quanto gli altri vettori, basta inizializzare solo questo
     Pi=[]
-    temp=-1
     for ev in evento:
       if ev["n"]=="battery":
         battery=ev["v"]
@@ -52,14 +51,15 @@ class Fibrillation_Monitor_client():
         pulse=ev["v"]
     
     if len(Pi)>1:
-      r=self.analyzer.fibrillation(ID_P,Pi,pulse,sat,battery)
+      r=self.analyzer.fibrillation(ID_P,Pi,pulse,battery)
       if len(r)>1:
         to_pub=self.__allert
         to_pub["ID_PZ"]=ID_P
         to_pub["allert"]=r
         to_pub["time"]=time.time()
         # Publish allert
-        self.client.myPublish(self.__base_topic_pub+"/"+ID_P,to_pub)
+        self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
+        #print(f"Published: {to_pub}\nat topic: {self.__base_topic_pub}{ID_P}")
 
 if __name__=="__main__":
   F=Fibrillation_Monitor_client()
