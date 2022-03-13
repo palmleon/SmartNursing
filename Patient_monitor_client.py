@@ -6,8 +6,8 @@ import json
 class Patient_Monitor_client():
   def __init__(self):
     # Qui andrà la richiesta al registro per prendere tutti i dati necessari
-    self.__clientID="clientID"
-    self.__broker="broker"
+    self.__clientID="kjshfkjdaghgf"
+    self.__broker="test.mosquitto.org"
     self.__port=1883
     self.__topic_sub_T="group01/IoTProject/Patient/Temperature/+"
     self.__topic_sub_P="group01/IoTProject/Patient/Pulsation/+"
@@ -58,7 +58,7 @@ class Patient_Monitor_client():
     
     if temp>-1:
       r=self.analyzer.Temperature(ID_P,temp,battery)
-      if len(r)>1:
+      if r!=None:
         to_pub=self.__allert
         to_pub["ID_PZ"]=ID_P
         to_pub["allert"]=r
@@ -68,10 +68,15 @@ class Patient_Monitor_client():
     
     if len(Pi)>1:
       r=self.analyzer.Pulse(ID_P,Pi,pulse,sat,battery)
-      if len(r)>1:
+      if r!=None:
         to_pub=self.__allert
         to_pub["ID_PZ"]=ID_P
         to_pub["allert"]=r
         to_pub["time"]=time.time()
         # Publish allert
         self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
+
+if __name__=="__main__":
+  F=Patient_Monitor_client()
+  while True:
+    pass

@@ -52,7 +52,7 @@ class Fibrillation_Monitor_client():
     
     if len(Pi)>1:
       r=self.analyzer.fibrillation(ID_P,Pi,pulse,battery)
-      if len(r)>1:
+      if r!=None:
         to_pub=self.__allert
         to_pub["ID_PZ"]=ID_P
         to_pub["allert"]=r

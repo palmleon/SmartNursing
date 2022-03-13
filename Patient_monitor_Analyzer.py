@@ -59,10 +59,10 @@ class Patient_Monitor():
         pulse=np.mean(pulse)
         sat=np.mean(sat)
 
-        #r=""
-        r=[]
+        r=""
+        #r=[]
         if sat<=95:
-            r=f"ATTENZIONE, il paziente {ID_P} è in ipossia. Saturazione al {sat} %\n"
+            r=f"ATTENZIONE, il paziente {ID_P} è in ipossia. Saturazione al {sat} % \n"
             #r=[[7, self.__ID_P, sat]]
         if pulse<70:
             r+= f"ATTENZIONE, il paziente {ID_P} ha un battito cardiaco basso: {pulse} bpm"

@@ -12,20 +12,20 @@ class Publisher_Test():
         self.client.mySubscribe("group01/IoTproject/PatientAlarm/Antonio")
     
     def send(self):
-        b=randint(2,3)
-        t=randint(30,40)
+        b=randint(3,3)
+        t=randint(37,37)
         print(f"\nTemperature: {t}")
         print(f"Battery: {b}")
 
-        Pi=[randint(4,100) for i in range(9)]
+        Pi=[randint(4,20) for i in range(9)]
         print(f"Stringa PI generata: {Pi}")
-        s=[randint(94,100) for i in range(9)]
+        s=[randint(96,96) for i in range(9)]
         print(f"Stringa sat generata: {s}")
-        p=[randint(65,145) for i in range(9)]
+        p=[randint(141,141) for i in range(9)]
         print(f"Stringa pulse generata: {p}")
 
         msg_sat={"bn" : "ID_sat", "bt" : time.time(), "e" : [{ "n":"battery", "u" : "V", "v" :b }, { "n":"perfusion index", "u" : "", "v" :Pi }, {"n":"saturation", "u" : "perc" , "v":s}, {"n":"pulse rate" , "u" : "bpm" , "v" : p}]}
-        msg_temp={"bn" : "ID_sat", "bt" : time.time(), "e" : [{ "n":"battery", "u" : "V", "v" :b }, { "n":"temperature", "u" : "cel", "v" :t }]}
+        msg_temp={"bn" : "ID_temp", "bt" : time.time(), "e" : [{ "n":"battery", "u" : "V", "v" :b }, { "n":"temperature", "u" : "cel", "v" :t }]}
 
         self.client.myPublish("group01/IoTProject/Patient/Pulsation/Antonio",msg_sat)
         time.sleep(10)

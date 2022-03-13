@@ -38,5 +38,5 @@ class Fibrillation_Monitor():
         
         pulse=np.std(pulse)
 
-        if pulse>0.1: # VALORE SOGLIA MESSO A CASO
+        if pulse>5: # VALORE SOGLIA MESSO A CASO
             return f"ATTENZIONE, il paziente {ID_P} è in un possibile stato di fibrillazione"
