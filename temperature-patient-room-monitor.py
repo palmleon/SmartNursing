@@ -7,7 +7,7 @@ import datetime
 class temperature_patient_room_monitor() :
     def __init__(self) :
         r = requests.post("https://localhost:8080/catalog/add-service",data = {
-            'serviceID' : 2,
+            'serviceID' : 3,
             'name' : 'temperature-patient-room-monitor'
         })
         r = requests.get("https://localhost:8080/catalog/message-broker")
@@ -31,8 +31,8 @@ class temperature_patient_room_monitor() :
     def updateService(self) :
         while True :
             time.sleep(100)
-            r = requests.put("https://localhost:8080/catalog/add-service",data = {
-                'serviceID' : 2,
+            r = requests.put("https://localhost:8080/catalog/update-service",data = {
+                'serviceID' : 3,
                 'name' : 'temperature-patient-room-monitor'
             })
     

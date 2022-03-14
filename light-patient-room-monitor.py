@@ -28,7 +28,7 @@ class light_patient_room_monitor() :
     def updateService(self) :
         while True :
             time.sleep(100)
-            r = requests.put("https://localhost:8080/catalog/add-service",data = {
+            r = requests.put("https://localhost:8080/catalog/update-service",data = {
                 'serviceID' : 1,
                 'name' : 'light-patient-room-monitor'
             })

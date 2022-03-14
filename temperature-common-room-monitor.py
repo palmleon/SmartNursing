@@ -8,7 +8,7 @@ class temperature_patient_room_monitor() :
     def __init__(self) :
         r = requests.post("https://localhost:8080/catalog/add-service",data = {
             'serviceID' : 2,
-            'name' : 'temperature-patient-room-monitor'
+            'name' : 'temperature-common-room-monitor'
         })
         r = requests.get("https://localhost:8080/catalog/message-broker")
         mb = r.json()
@@ -31,9 +31,9 @@ class temperature_patient_room_monitor() :
     def updateService(self) :
         while True :
             time.sleep(100)
-            r = requests.put("https://localhost:8080/catalog/add-service",data = {
+            r = requests.put("https://localhost:8080/catalog/update-service",data = {
                 'serviceID' : 2,
-                'name' : 'temperature-patient-room-monitor'
+                'name' : 'temperature-common-room-monitor'
             })
     
 
