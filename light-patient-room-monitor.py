@@ -7,7 +7,7 @@ import requests
 class light_patient_room_monitor() :
     def __init__(self) :
         r = requests.post("https://localhost:8080/catalog/add-service",data = {
-            'serviceID' : 1
+            'serviceID' : 1,
             'name' : 'light-patient-room-monitor'
         })
         r = requests.get("https://localhost:8080/catalog/city")
@@ -29,7 +29,7 @@ class light_patient_room_monitor() :
         while True :
             time.sleep(100)
             r = requests.put("https://localhost:8080/catalog/add-service",data = {
-                'serviceID' : 1
+                'serviceID' : 1,
                 'name' : 'light-patient-room-monitor'
             })
     
