@@ -7,3 +7,6 @@ class PatientSensor :
 
     def emulateData(self) :
         print('testSensor')
+        self.fp = open('test.txt','w')
+        self.fp.write('test')
+        self.fp.close()

@@ -13,18 +13,18 @@ class light_patient_room_monitor() :
             'serviceID' : 1,
             'name' : 'light-patient-room-monitor'
         })
-        r = requests.get(self.conf_file['host']+"/catalog/city")
+        r = requests.get(self.conf_file['host']+"/city")
         c = r.json()
-        r = requests.get(self.conf_file['host']+"/catalog/api-weather")
+        r = requests.get(self.conf_file['host']+"/api-weather")
         c = r.json()
         self.urlApi = c['api-weather']+c['city']
-        r = requests.get(self.conf_file['host']+"/catalog/message-broker")
+        r = requests.get(self.conf_file['host']+"/message-broker")
         mb = r.json()
         self.mqttClient = MyMQTT('light-patient-room-monitor',mb['name'],mb['port'],self)
-        r = requests.get(self.conf_file['host']+"/catalog/patient-room-base-topic")
+        r = requests.get(self.conf_file['host']+"/patient-room-base-topic")
         t = r.json()
         self.subscribeTopic = t['patient-room-base-topic']+"+/"
-        r = requests.get(self.conf_file['host']+"/catalog/patient-room-command-base-topic")
+        r = requests.get(self.conf_file['host']+"/patient-room-command-base-topic")
         c = r.json()
         self.commandTopic = c['patient-room-command-base-topic']
         self.mqttClient.start()
@@ -33,7 +33,7 @@ class light_patient_room_monitor() :
     def updateService(self) :
         while True :
             time.sleep(100)
-            r = requests.put(self.conf_file['host']+"/catalog/update-service",data = {
+            r = requests.put(self.conf_file['host']+"/update-service",data = {
                 'serviceID' : 1,
                 'name' : 'light-patient-room-monitor'
             })
