@@ -39,7 +39,8 @@ class Catalog(object) :
 
         elif uri[0] == 'city' :
             return json.dumps(self.catalogList['city'])
-
+        elif uri[0] == 'api-weather' :
+            return json.dumps(self.catalogList['api-weather'])
         elif uri[0] == 'desired-temperature' :
             return json.dumps(self.catalogList['desired-temperature'])
         
@@ -113,28 +114,22 @@ class Catalog(object) :
             newDevice = json.loads(cherrypy.request.body.read())
             newDevice['timestamp'] = str(datetime.datetime.today())
             self.catalogList['devices'].append(newDevice)
-            self.fp = open("catalog.json","w")
-            json.dump(self.catalogList,self.fp)
-            self.fp.close()
             return 'operation ok'
 
         elif uri[0] == 'add-patient' :
             newPatient = json.loads(cherrypy.request.body.read())
             self.catalogList['patients'].append(newPatient)
-            json.dump(self.catalogList,self.fp)
             return 'operation ok'
 
         elif uri[0] == 'add-telegram-chat-id' :
             newId = json.loads(cherrypy.request.body.read())
             self.catalogList['telegram-chat-id-list'].append(newId)
-            json.dump(self.catalogList,self.fp)
             return 'operation ok'
 
         elif uri[0] == 'add-service' :
             newService = json.loads(cherrypy.request.body.read())
             newService['timestamp'] = str(datetime.datetime.today())
             self.catalogList['services'].append(newService)
-            json.dump(self.catalogList,self.fp)
             return 'operation ok'
         else : 
             raise cherrypy.HTTPError(400,'operation not found')
@@ -153,10 +148,8 @@ class Catalog(object) :
             for i in range(len(self.catalogList['devices'])) :
                 if self.catalogList['devices'][i]['deviceID'] == id :
                     del self.catalogList['devices'][i]
-            self.fp = open("catalog.json","w")
             self.catalogList['devices'].append(newDevice)
-            json.dump(self.catalogList,self.fp)
-            self.fp.close()
+            
             return 'operation ok'
         if uri[0] == 'update-service' :
             newService = json.loads(cherrypy.request.body.read())
@@ -165,10 +158,8 @@ class Catalog(object) :
             for i in range(len(self.catalogList['services'])) :
                 if self.catalogList['services'][i]['serviceID'] == id :
                     del self.catalogList['services'][i]
-            self.fp = open("catalog.json","w")
             self.catalogList['services'].append(newService)
-            json.dump(self.catalogList,self.fp)
-            self.fp.close()
+            
             return 'operation ok'
         if uri[0] == 'update-patient' :
             newPatient = json.loads(cherrypy.request.body.read())
@@ -176,10 +167,8 @@ class Catalog(object) :
             for i in range(len(self.catalogList['patients'])) :
                 if self.catalogList['patients'][i]['patientID'] == id :
                     del self.catalogList['patients'][i]
-            self.fp = open("catalog.json","w")
             self.catalogList['patients'].append(newService)
-            json.dump(self.catalogList,self.fp)
-            self.fp.close()
+            
             return 'operation ok'
         else : 
             raise cherrypy.HTTPError(400,'operation not found')

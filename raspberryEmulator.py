@@ -1,8 +1,13 @@
 import time
-
+import requests
+import threading
+from roomSensor import *
+from patientSensor import *
 class RaspberryEmulator :
     def __init__(self) :
         self.rooms = {}
+        self.roomEmulator = PatientSensor()
+        self.patientEmulator = RoomSensor()
         r = requests.get("https://localhost:8080/catalog/common-room-list")
         c = r.json()
         self.commonRoomList = c['common-room-list']
@@ -105,4 +110,17 @@ class RaspberryEmulator :
 
 if __name__ == "__main__" :  
     e = RaspberryEmulator()
-    e.listenUserCommand()
+    t1 = threading.Thread(target=e.listenUserCommand)
+    t2 = threading.Thread(target=e.emulateCommonRoomData)
+    t3 = threading.Thread(target=e.emulatePatientData)
+    t4 = threading.Thread(target=e.emulatePatientRoomData)
+    t5 = threading.Thread(target=e.updateServices)
+
+    t1.join()
+    t2.join()
+    t3.join()
+    t4.join()
+    t5.join()
+    
+    
+    

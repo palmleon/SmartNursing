@@ -8,6 +8,7 @@
     "desired-temperature": 23,
     "telegram-chat-id-list": [],
     "room-list": [],
+    "api-weather" : "http://api.weatherstack.com/current?access_key=36fcb02003026b9fae56e4c0a5a228fe&query=",
     "common-room-list": [],
     "common-room-hourly-scheduling": {
         "night" : [21,10],

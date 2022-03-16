@@ -6,23 +6,24 @@ import datetime
 
 class temperature_patient_room_monitor() :
     def __init__(self) :
-        r = requests.post("https://localhost:8080/catalog/add-service",data = {
+        self.conf_file = json.load(open('confing.json'))
+        r = requests.post(self.conf_file['host']+"/add-service",data = {
             'serviceID' : 2,
             'name' : 'temperature-common-room-monitor'
         })
-        r = requests.get("https://localhost:8080/catalog/message-broker")
+        r = requests.get(self.conf_file['host']+"/message-broker")
         mb = r.json()
         self.mqttClient = MyMQTT('light-patient-room-monitor',mb['name'],mb['port'],self)
-        r = requests.get("https://localhost:8080/catalog/patient-room-base-topic")
+        r = requests.get(self.conf_file['host']+"/patient-room-base-topic")
         t = r.json()
         self.subscribeTopic = t['patient-room-base-topic']+"+/"
-        r = requests.get("https://localhost:8080/catalog/desired-temperature")
+        r = requests.get(self.conf_file['host']+"/desired-temperature")
         t = r.json()
         self.desiredTemperature = t['desired-temperature']
-        r = requests.get("https://localhost:8080/catalog/common-room-hourly-scheduling")
+        r = requests.get(self.conf_file['host']+"/common-room-hourly-scheduling")
         t = r.json()
         self.hourlyScheduling = t['common-room-hourly-scheduling']
-        r = requests.get("https://localhost:8080/catalog/patient-room-command-base-topic")
+        r = requests.get(self.conf_file['host']+"/patient-room-command-base-topic")
         c = r.json()
         self.commandTopic = c['patient-room-command-base-topic']
         self.mqttClient.start()
@@ -31,7 +32,7 @@ class temperature_patient_room_monitor() :
     def updateService(self) :
         while True :
             time.sleep(100)
-            r = requests.put("https://localhost:8080/catalog/update-service",data = {
+            r = requests.put(self.conf_file['host']+"/update-service",data = {
                 'serviceID' : 2,
                 'name' : 'temperature-common-room-monitor'
             })
