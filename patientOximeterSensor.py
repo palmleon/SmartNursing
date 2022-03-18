@@ -25,7 +25,7 @@ class Temperature_sensor():
             self.__baseMessage["ox"]=random.randint(low=96,high=100,size=10)
             self.__baseMessage["pulse"]=random.randint(low=70,high=74,size=10)
         elif ID_P==4:
-            # Paziente con pulsossimetro messo male
+            # Paziente con pulsossimetro messo male (solo per fibrillation)
             self.__baseMessage["battery-value"]=random.uniform(low=2.81,high=3.0)
             self.__baseMessage["PI"]=random.uniform(low=0,high=4,size=6)+random.uniform(low=4,high=20,size=4)
             self.__baseMessage["ox"]=random.randint(low=96,high=100,size=10)
@@ -54,5 +54,12 @@ class Temperature_sensor():
             self.__baseMessage["PI"]=random.uniform(low=4,high=20,size=10)
             self.__baseMessage["ox"]=random.randint(low=96,high=100,size=10)
             self.__baseMessage["pulse"]=random.randint(low=70,high=90,size=10)
+        else:
+            # Paziente combinato saturazione bassa e battito alto
+            self.__baseMessage["battery-value"]=random.uniform(low=2.81,high=3.0)
+            self.__baseMessage["PI"]=random.uniform(low=4,high=20,size=10)
+            self.__baseMessage["ox"]=random.randint(low=93,high=95,size=10)
+            self.__baseMessage["pulse"]=random.randint(low=100,high=104,size=10)
+
         self.__baseMessage["patientID"]=ID_P
         return self.__baseMessage
