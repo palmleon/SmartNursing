@@ -6,7 +6,7 @@ import datetime
 #Accesso al contenuto di self.catalog in parallelo? sia da metodo refresh che metodi REST
 
 class Catalog(object) :
-    exposed=True
+    exposed = True
     def __init__(self) :
         self.fp = open("catalog.json","r")
         self.catalogList = json.load(self.fp)
@@ -21,7 +21,7 @@ class Catalog(object) :
 
     def refreshList(self) :
         while True :
-            time.sleep(120) # apsetto 2 minuti prima di refreshare
+            time.sleep(60*20) # apsetto 20 minuti prima di refreshare
             print('parto a refreshare')
             self.catalogList['devices'] = list(filter(lambda dev : self.computeDifference(datetime.datetime.today(),dev['timestamp']) < 2,self.catalogList['devices']))
             self.catalogList['services'] = list(filter(lambda dev : self.computeDifference(datetime.datetime.today(),dev['timestamp']) < 2,self.catalogList['services']))
@@ -76,7 +76,7 @@ class Catalog(object) :
         elif uri[0] == 'patient-room-command-base-topic' :
             return json.dumps(self.catalogList['patient-room-command-base-topic'])
         elif uri[0] == 'common-room-command-base-topic' :
-            return json.dumps(self.catalogList['commond-room-command-base-topic'])
+            return json.dumps(self.catalogList['common-room-command-base-topic'])
 
         elif uri[0] == 'devices' :
             return json.dumps(self.catalogList["devices"])
@@ -214,7 +214,7 @@ if __name__ == "__main__" :
     c = Catalog()
     cherrypy.tree.mount(c,'/catalog',conf)
     cherrypy.engine.start()
-    c.refreshList()
+    #c.refreshList()
     cherrypy.engine.block()
     
 

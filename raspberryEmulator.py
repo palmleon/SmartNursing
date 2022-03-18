@@ -4,46 +4,46 @@ import threading
 from MyMQTT import *
 
 from roomSensor import *
-from patientSensor import *
+from patientTemperatureSensor import *
 import json
 class RaspberryEmulator :
     def __init__(self) :
         self.rooms = {}
-        
-        self.conf_file = json.load(open('confing.json'))
+        self.roomSensor = RoomSensor()
+        self.patientTemperatureSensor = Temperature_sensor()
+        self.conf_file = json.load(open('config.json'))
         r = requests.get(self.conf_file['host']+"/message-broker")
         mb = r.json()
         self.mqttClient = MyMQTT('raspberry-emulator',mb['name'],mb['port'],self)
         r = requests.get(self.conf_file['host']+"/patient-room-command-base-topic")
         c = r.json()
-        self.patientRoomCommandTopic = c['patient-room-command-base-topic']
+        
+        self.patientRoomCommandTopic = c
         r = requests.get(self.conf_file['host']+"/common-room-command-base-topic")
         c = r.json()
-        self.commonRoomCommandTopic = c['common-room-command-base-topic']
+        self.commonRoomCommandTopic = c
 
-        self.roomEmulator = PatientSensor()
-        self.patientEmulator = RoomSensor()
+        
         r = requests.get(self.conf_file['host']+"/common-room-list")
         c = r.json()
         self.commonRoomList = c
-        r = requests.get(self.conf_file['host']+"/common-room-list")
-        c = r.json()
-        self.commonRoomList = c
+        print('stanze comuni',r.json())
+        
         r = requests.get(self.conf_file['host']+"/patient-room-base-topic")
         c = r.json()
-        self.patientRoomTopic = c['patient-room-base-topic']
+        self.patientRoomTopic = c
 
         r = requests.get(self.conf_file['host']+"/common-room-base-topic")
         c = r.json()
-        self.commonRoomTopic = c['common-room-base-topic']
+        self.commonRoomTopic = c
 
         r = requests.get(self.conf_file['host']+"/patient-saturation-base-topic")
         c = r.json()
-        self.patientSaturationTopic = c['patient-saturation-base-topic']
+        self.patientSaturationTopic = c
         
         r = requests.get(self.conf_file['host']+"/patient-temperature-base-topic")
         c = r.json()
-        self.patientTemperatureTopic = c['patient-temperature-base-topic']
+        self.patientTemperatureTopic = c
 
         self.mqttClient.start()
         self.mqttClient.mySubscribe(self.commonRoomCommandTopic)
@@ -63,34 +63,38 @@ class RaspberryEmulator :
 
     def emulateCommonRoomData(self) :
         while True :
-            time.sleep(60*60) #send data every hour
+            time.sleep(30) #send data every hour
+            
             for room in self.commonRoomList :
+                print("simulo per stanza ",room)
                 #self.roomEmulator.emulateData()
                 #fare publish
-                pass
+                print("stanza emulata "+str(self.roomSensor.emulateData(room)))
+                
 
 
     def emulatePatientRoomData(self) :
         while True :
-            time.sleep(60*60) #send data every hour
+            time.sleep(20) #send data every hour
+            print("simulo per le seguenti stanze ",str(list(self.rooms.keys())))
             for room in list(self.rooms.keys()) :
                 if len(self.rooms[room]) != 0 :
                     #self.roomEmulator.emulateData()
                     #fare publish
-                    pass
+                    print("stanza emulata "+str(self.roomSensor.emulateData(room)))
 
     def emulatePatientData(self) :
         while True :
-            time.sleep(60*1) #send data every minute
+            time.sleep(10) #send data every minute
             for room in list(self.rooms.keys()) :
                 for id in self.rooms[room] :
                     #emulatePatientData(id)   
                     # #fare publish                     
-                    pass
+                    print("paziente emulato "+str(self.patientTemperatureSensor.emulateData(id)))
             
     def updateServices(self) :
         while True :
-            time.sleep(100) #update every 100 seconds
+            time.sleep(19*60) #update every 19 minutes
             for commonRoom in self.commonRoomList :
                 r = requests.put(self.conf_file['host']+"/update-device",data = {
                             'deviceID' : commonRoom,

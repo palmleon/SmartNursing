@@ -1,4 +1,4 @@
-from time import time
+import time
 from MyMQTT import *
 import json
 import requests 
@@ -7,7 +7,7 @@ import datetime
 class temperature_patient_room_monitor() :
     def __init__(self) :
         
-        self.conf_file = json.load(open('confing.json'))
+        self.conf_file = json.load(open('config.json'))
 
         r = requests.post(self.conf_file['host']+"/add-service",data = {
             'serviceID' : 3,
@@ -18,16 +18,16 @@ class temperature_patient_room_monitor() :
         self.mqttClient = MyMQTT('light-patient-room-monitor',mb['name'],mb['port'],self)
         r = requests.get(self.conf_file['host']+"/patient-room-base-topic")
         t = r.json()
-        self.subscribeTopic = t['patient-room-base-topic']+"+/"
+        self.subscribeTopic = t+"+/"
         r = requests.get(self.conf_file['host']+"/desired-temperature")
         t = r.json()
-        self.desiredTemperature = t['desired-temperature']
+        self.desiredTemperature = t
         r = requests.get(self.conf_file['host']+"/patient-room-hourly-scheduling")
         t = r.json()
-        self.hourlyScheduling = t['patient-room-hourly-scheduling']
+        self.hourlyScheduling = t
         r = requests.get(self.conf_file['host']+"/patient-room-command-base-topic")
         c = r.json()
-        self.commandTopic = c['patient-room-command-base-topic']
+        self.commandTopic = c
         self.mqttClient.start()
         self.mqttClient.mySubscribe(self.subscribeTopic)
 

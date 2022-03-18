@@ -1,1 +1,54 @@
-{"services": [], "message-broker": {"port": 1883, "name": "test.mosquitto.org"}, "city": "Turin", "desired-temperature": 23, "telegram-chat-id-list": [], "room-list": [], "api-weather": "http://api.weatherstack.com/current?access_key=36fcb02003026b9fae56e4c0a5a228fe&query=", "common-room-list": [], "common-room-hourly-scheduling": {"night": [21, 10], "expected-range-hours": [[10, 13], [15, 19]]}, "patient-room-hourly-scheduling": {"night": [21, 10], "expected-range-hours": [[13, 15], [19, 21]]}, "patient-temperature-base-topic": "group01/IoTProject/Patient/Temperature/", "patient-saturation-base-topic": "group01/IoTProject/Patient/Pulsation/", "patient-room-base-topic": "group01/IoTProject/PatientRoom/", "common-room-base-topic": "group01/IoTProject/CommonRoom/", "alarm-base-topic": "group01/IoTProject/PatientAlarm/", "patient-room-command-base-topic": "group01/IoTProject/PatientRoomCommand/", "common-room-command-base-topic": "group01/IoTProject/CommonRoomCommand/", "devices": [], "patients": []}
+{
+    "services": [],
+    "message-broker": {
+        "port": 1883,
+        "name": "test.mosquitto.org"
+    },
+    "city": "Turin",
+    "desired-temperature": 23,
+    "telegram-chat-id-list": [],
+    "room-list": [],
+    "api-weather": "http://api.weatherstack.com/current?access_key=36fcb02003026b9fae56e4c0a5a228fe&query=",
+    "common-room-list": [1,2,3,4],
+    "common-room-hourly-scheduling": {
+        "night": [
+            21,
+            10
+        ],
+        "expected-range-hours": [
+            [
+                10,
+                13
+            ],
+            [
+                15,
+                19
+            ]
+        ]
+    },
+    "patient-room-hourly-scheduling": {
+        "night": [
+            21,
+            10
+        ],
+        "expected-range-hours": [
+            [
+                13,
+                15
+            ],
+            [
+                19,
+                21
+            ]
+        ]
+    },
+    "patient-temperature-base-topic": "group01/IoTProject/Patient/Temperature/",
+    "patient-saturation-base-topic": "group01/IoTProject/Patient/Pulsation/",
+    "patient-room-base-topic": "group01/IoTProject/PatientRoom/",
+    "common-room-base-topic": "group01/IoTProject/CommonRoom/",
+    "alarm-base-topic": "group01/IoTProject/PatientAlarm/",
+    "patient-room-command-base-topic": "group01/IoTProject/PatientRoomCommand/",
+    "common-room-command-base-topic": "group01/IoTProject/CommonRoomCommand/",
+    "devices": [],
+    "patients": []
+}
