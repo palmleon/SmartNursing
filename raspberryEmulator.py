@@ -50,10 +50,10 @@ class RaspberryEmulator :
         self.mqttClient.mySubscribe(self.patientRoomCommandTopic)
 
         for room in self.commonRoomList :
-             r = requests.post(self.conf_file['host']+"/add-device",data = {
+             r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
                                                                     'deviceID' : room,
                                                                     'name' : 'light-patient-room-monitor'
-        })
+        }))
 
 
 
@@ -96,24 +96,24 @@ class RaspberryEmulator :
         while True :
             time.sleep(19*60) #update every 19 minutes
             for commonRoom in self.commonRoomList :
-                r = requests.put(self.conf_file['host']+"/update-device",data = {
+                r = requests.put(self.conf_file['host']+"/update-device",json.dumps(data = {
                             'deviceID' : commonRoom,
                             'name' : 'patient-room-device-'+id
-                        })
+                        }))
 
 
 
             for room in list(self.rooms.keys()) :
                 if len(self.rooms[room]) != 0:
-                    r = requests.put(self.conf_file['host']+"/update-device",data = {
+                    r = requests.put(self.conf_file['host']+"/update-device",json.dumps(data = {
                             'deviceID' : id,
                             'name' : 'patient-room-device-'+id
-                        })
+                        }))
                     for id in self.rooms[room] :
-                        r = requests.put(self.conf_file['host']+"/update-device",data = {
+                        r = requests.put(self.conf_file['host']+"/update-device",json.dumps(data = {
                             'deviceID' : id,
                             'name' : 'patient-device-'+id
-                        })
+                        }))
             
 
     def listenUserCommand(self) :
@@ -130,20 +130,20 @@ class RaspberryEmulator :
                 if roomId in self.rooms :
                     if patientId not in self.rooms[roomId] :
                         self.rooms[roomId].append(patientId)
-                        r = requests.post(self.conf_file['host']+"/add-device",data = {
+                        r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
                                                                             'deviceID' : patientId,
                                                                             'name' : 'light-patient-room-monitor'
-        })
+        }))
                 else :
                     self.rooms[roomId] = [patientId]
-                    r = requests.post(self.conf_file['host']+"/add-device",data = {
+                    r = requests.post(self.conf_file['host']+"/add-device",json.dumps(data = {
                                                                         'deviceID' : roomId,
                                                                         'name' : 'light-patient-room-monitor'
-                                                                    })
-                    r = requests.post(self.conf_file['host']+"/add-device",data = {
+                                                                    }))
+                    r = requests.post(self.conf_file['host']+"/add-device",json.dumps(data = {
                                                                     'deviceID' : patientId,
                                                                     'name' : 'light-patient-room-monitor'
-        })
+        }))
             if choice == 0 :
                 patientId = int(input("Inserisci id paziente da rimuvere "))
                 for room in list(self.rooms.keys()) :

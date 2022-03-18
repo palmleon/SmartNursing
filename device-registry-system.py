@@ -107,6 +107,7 @@ class Catalog(object) :
             raise cherrypy.HTTPError(400,'operation not found')
 
     def POST(self,*uri,**path):
+        #aggiungere controllo di eliminazione duplicati
         if len(uri) != 1 :
             raise cherrypy.HTTPError(500,'Wrong parameters number')
 

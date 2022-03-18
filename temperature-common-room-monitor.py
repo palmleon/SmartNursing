@@ -7,10 +7,10 @@ import datetime
 class temperature_patient_room_monitor() :
     def __init__(self) :
         self.conf_file = json.load(open('config.json'))
-        r = requests.post(self.conf_file['host']+"/add-service",data = {
+        r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps ({
             'serviceID' : 2,
             'name' : 'temperature-common-room-monitor'
-        })
+        }))
         r = requests.get(self.conf_file['host']+"/message-broker")
         mb = r.json()
         self.mqttClient = MyMQTT('light-patient-room-monitor',mb['name'],mb['port'],self)
@@ -32,10 +32,10 @@ class temperature_patient_room_monitor() :
     def updateService(self) :
         while True :
             time.sleep(100)
-            r = requests.put(self.conf_file['host']+"/update-service",data = {
+            r = requests.put(self.conf_file['host']+"/update-service",json.dumps(data = {
                 'serviceID' : 2,
                 'name' : 'temperature-common-room-monitor'
-            })
+            }))
     
 
     def getSeason(self) :
