@@ -64,10 +64,10 @@ class Patient_Monitor():
         if sat<=95:
             r=f"ATTENZIONE, il paziente {ID_P} è in ipossia. Saturazione al {sat} % \n"
             #r=[[7, self.__ID_P, sat]]
-        if pulse<70:
+        if pulse<55:
             r+= f"ATTENZIONE, il paziente {ID_P} ha un battito cardiaco basso: {pulse} bpm"
             #r+=[[8, ID_P, pulse]]
-        elif pulse>140:
+        elif pulse>100:
             r+=f"ATTENZIONE, il paziente {ID_P} ha un battito cardiaco alto: {pulse} bpm"
             #r+=[[9, ID_P, pulse]]
             
