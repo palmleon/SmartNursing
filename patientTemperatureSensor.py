@@ -22,5 +22,6 @@ class Temperature_sensor():
             # Paziente con febbre e con batteria carica
             self.__baseMessage["battery-value"]=random.uniform(low=2.81,high=3.0)
             self.__baseMessage["temperature-value"]=random.uniform(low=37.1,high=37.5)
+        
         self.__baseMessage["patientID"]=ID_P
         return self.__baseMessage
