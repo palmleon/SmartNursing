@@ -27,11 +27,13 @@ class Fibrillation_Monitor_client():
     # Richiesta dei topic di subscribe e publish
     r = requests.get(self.__register+"/patient-saturation-base-topic")
     mb = r.json()
-    self.__topic_sub=mb["patient-saturation-base-topic"]+"+"
+    # Per ora, in mb abbiamo direttamente il topic, non coppia key/value
+    self.__topic_sub=mb+"+"
 
-    r = requests.get(self.__register+"/patient-saturation-base-topic")
+    r = requests.get(self.__register+"/alarm-base-topic")
     mb = r.json()
-    self.__base_topic_pub=mb["alarm-base-topic"]
+    # Per ora, in mb abbiamo direttamente il topic, non coppia key/value
+    self.__base_topic_pub=mb
 
     # Creating analyzer
     self.analyzer=Fibrillation_Monitor()
