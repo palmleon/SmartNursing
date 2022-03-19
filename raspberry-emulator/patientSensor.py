@@ -1,4 +1,3 @@
-from traceback import print_tb
 
 
 class PatientSensor :
@@ -6,7 +5,7 @@ class PatientSensor :
         pass
 
     def emulateData(self) :
-        print('testSensor')
+        #print('testSensor')
         self.fp = open('test.txt','w')
         self.fp.write('test')
         self.fp.close()

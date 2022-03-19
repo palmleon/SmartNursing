@@ -1,0 +1,42 @@
+version :  "2"
+services :
+
+#temperature common room
+  c_tcri : 
+    image : tcri
+    links : 
+      - c_dsri
+    depends_on :
+      - c_dsri
+    stdin_open : true
+    tty : true
+#temperature common room
+  c_tpri : 
+    image : tpri
+    links : 
+      - c_dsri
+    depends_on :
+      - c_dsri
+    stdin_open : true
+    tty : true
+#light patient room monitor
+  c_lprmi : 
+    image : lprmi
+    stdin_open : true
+    tty : true
+    links : 
+      - c_dsri
+    depends_on :
+      - c_dsri
+    
+ 
+      
+
+  #device registry system
+  c_drsi:
+    image: drsi 
+    ports :
+      - 8080:8080
+    expose : 
+      - 8080:8080
+

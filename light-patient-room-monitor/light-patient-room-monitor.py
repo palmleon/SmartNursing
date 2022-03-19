@@ -34,7 +34,7 @@ class light_patient_room_monitor() :
     def updateService(self) :
         while True :
             time.sleep(100)
-            r = requests.put(self.conf_file['host']+"/update-service",json.dumps(data = {
+            r = requests.put(self.conf_file['host']+"/update-service",data = json.dumps({
                 'serviceID' : 1,
                 'name' : 'light-patient-room-monitor'
             }))

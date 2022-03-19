@@ -63,13 +63,14 @@ class RaspberryEmulator :
 
     def emulateCommonRoomData(self) :
         while True :
-            time.sleep(30) #send data every hour
+            time.sleep(5) #send data every hour
             
             for room in self.commonRoomList :
-                print("simulo per stanza ",room)
-                #self.roomEmulator.emulateData()
-                #fare publish
-                print("stanza emulata "+str(self.roomSensor.emulateData(room)))
+                dataEmulated = self.roomSensor.emulateData(room)
+                self.mqttClient.myPublish(self.commonRoomTopic+str(room),dataEmulated)
+                print("simulo per stanza ",room," al seguente topic ",self.commonRoomTopic+str(room))
+
+                #print("stanza emulata "+str(self.roomSensor.emulateData(room)))
                 
 
 
@@ -82,7 +83,7 @@ class RaspberryEmulator :
                     #self.roomEmulator.emulateData()
                     #fare publish
                     print("stanza emulata "+str(self.roomSensor.emulateData(room)))
-
+                    
     def emulatePatientData(self) :
         while True :
             time.sleep(10) #send data every minute
@@ -96,7 +97,7 @@ class RaspberryEmulator :
         while True :
             time.sleep(19*60) #update every 19 minutes
             for commonRoom in self.commonRoomList :
-                r = requests.put(self.conf_file['host']+"/update-device",json.dumps(data = {
+                r = requests.put(self.conf_file['host']+"/update-device",data = json.dumps({
                             'deviceID' : commonRoom,
                             'name' : 'patient-room-device-'+id
                         }))
@@ -105,12 +106,12 @@ class RaspberryEmulator :
 
             for room in list(self.rooms.keys()) :
                 if len(self.rooms[room]) != 0:
-                    r = requests.put(self.conf_file['host']+"/update-device",json.dumps(data = {
+                    r = requests.put(self.conf_file['host']+"/update-device",data = json.dumps({
                             'deviceID' : id,
                             'name' : 'patient-room-device-'+id
                         }))
                     for id in self.rooms[room] :
-                        r = requests.put(self.conf_file['host']+"/update-device",json.dumps(data = {
+                        r = requests.put(self.conf_file['host']+"/update-device",data = json.dumps({
                             'deviceID' : id,
                             'name' : 'patient-device-'+id
                         }))
@@ -136,11 +137,11 @@ class RaspberryEmulator :
         }))
                 else :
                     self.rooms[roomId] = [patientId]
-                    r = requests.post(self.conf_file['host']+"/add-device",json.dumps(data = {
+                    r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
                                                                         'deviceID' : roomId,
                                                                         'name' : 'light-patient-room-monitor'
                                                                     }))
-                    r = requests.post(self.conf_file['host']+"/add-device",json.dumps(data = {
+                    r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
                                                                     'deviceID' : patientId,
                                                                     'name' : 'light-patient-room-monitor'
         }))
@@ -156,7 +157,9 @@ class RaspberryEmulator :
 
 
 
-if __name__ == "__main__" :  
+if __name__ == "__main__" :
+    #a = int(input('test se mi prendi'))
+    #print(a)  
     e = RaspberryEmulator()
     t1 = threading.Thread(target=e.listenUserCommand)
     t2 = threading.Thread(target=e.emulateCommonRoomData)

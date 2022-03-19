@@ -1,0 +1,7 @@
+DATO DI  UNA STANZA (LUMINOSITA' E TEMPERATURA INSIEME)
+{
+    roomID : 1
+    temperature-value : 38
+    light-value : 23
+    battery-status : 2.3
+}
