@@ -63,7 +63,7 @@ class RaspberryEmulator :
 
     def emulateCommonRoomData(self) :
         while True :
-            time.sleep(5) #send data every hour
+            time.sleep(30) #send data every hour
             
             for room in self.commonRoomList :
                 dataEmulated = self.roomSensor.emulateData(room)
@@ -82,16 +82,19 @@ class RaspberryEmulator :
                 if len(self.rooms[room]) != 0 :
                     #self.roomEmulator.emulateData()
                     #fare publish
-                    print("stanza emulata "+str(self.roomSensor.emulateData(room)))
+                    dataEmulated = self.roomSensor.emulateData(room)
+                    self.mqttClient.myPublish(self.patientRoomTopic+str(room),dataEmulated)
+                    print("simulo per stanza ",room," al seguente topic ",self.patientRoomTopic+str(room))
                     
     def emulatePatientData(self) :
         while True :
             time.sleep(10) #send data every minute
             for room in list(self.rooms.keys()) :
                 for id in self.rooms[room] :
+                    pass
                     #emulatePatientData(id)   
                     # #fare publish                     
-                    print("paziente emulato "+str(self.patientTemperatureSensor.emulateData(id)))
+                    #print("paziente emulato "+str(self.patientTemperatureSensor.emulateData(id)))
             
     def updateServices(self) :
         while True :

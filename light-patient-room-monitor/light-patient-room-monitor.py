@@ -20,15 +20,15 @@ class light_patient_room_monitor() :
         self.urlApi = a+c
         r = requests.get(self.conf_file['host']+"/message-broker")
         mb = r.json()
-        #self.mqttClient = MyMQTT('light-patient-room-monitor',mb['name'],mb['port'],self)
+        self.mqttClient = MyMQTT('light-patient-room-monitor',mb['name'],mb['port'],self)
         r = requests.get(self.conf_file['host']+"/patient-room-base-topic")
         t = r.json()
-        self.subscribeTopic = t+"+/"
+        self.subscribeTopic = t+"+"
         r = requests.get(self.conf_file['host']+"/patient-room-command-base-topic")
         c = r.json()
         self.commandTopic = c
-        #self.mqttClient.start()
-        #self.mqttClient.mySubscribe(self.subscribeTopic)
+        self.mqttClient.start()
+        self.mqttClient.mySubscribe(self.subscribeTopic)
         print('starta')
 
     def updateService(self) :
@@ -54,13 +54,13 @@ class light_patient_room_monitor() :
     
     def notify(self,topic,payload) :
         message = dict(json.loads(payload))
-        room = message['room']
-        if message['open'] == 1 :
+        room = message['roomID']
+        if message['light-value'] == 1 :
             #fai la richiesta 
             # invoca funzione che ritorna  
             luminosity = self.setLuminosity()  
-            MyMQTT.myPublish(self.commandTopic,{'l' : luminosity, 'room' : room })     
-
+            #MyMQTT.myPublish(self.commandTopic,{'l' : luminosity, 'room' : room })     
+            print("command "+str({'switch' : luminosity, 'room' : room }))
     
         
 

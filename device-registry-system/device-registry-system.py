@@ -143,14 +143,11 @@ class Catalog(object) :
 
         if uri[0] == 'update-device' :
             newDevice = json.loads(cherrypy.request.body.read())
-            newDevice['timestamp'] = str(datetime.datetime.today())
-            print(newDevice)
+            #print(newDevice)
             id = newDevice['deviceID']
             for i in range(len(self.catalogList['devices'])) :
                 if self.catalogList['devices'][i]['deviceID'] == id :
-                    del self.catalogList['devices'][i]
-            self.catalogList['devices'].append(newDevice)
-            
+                    self.catalogList['devices'][i]['timestamp'] = str(datetime.datetime.today())
             return 'operation ok'
         if uri[0] == 'update-service' :
             newService = json.loads(cherrypy.request.body.read())
@@ -158,18 +155,14 @@ class Catalog(object) :
             id = newService['serviceID']
             for i in range(len(self.catalogList['services'])) :
                 if self.catalogList['services'][i]['serviceID'] == id :
-                    del self.catalogList['services'][i]
-            self.catalogList['services'].append(newService)
-            
+                    self.catalogList['services'][i]['timestamp'] = str(datetime.datetime.today())
             return 'operation ok'
         if uri[0] == 'update-patient' :
             newPatient = json.loads(cherrypy.request.body.read())
             id = newPatient['patientID']
             for i in range(len(self.catalogList['patients'])) :
                 if self.catalogList['patients'][i]['patientID'] == id :
-                    del self.catalogList['patients'][i]
-            self.catalogList['patients'].append(newService)
-            
+                    self.catalogList['patients'][i]['timestamp'] = str(datetime.datetime.today())
             return 'operation ok'
         else : 
             raise cherrypy.HTTPError(400,'operation not found')

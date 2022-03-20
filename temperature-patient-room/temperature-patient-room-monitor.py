@@ -9,16 +9,16 @@ class temperature_patient_room_monitor() :
         
         self.conf_file = json.load(open('config.json'))
 
-        r = requests.post(self.conf_file['host']+"/add-service",json.dumps(data = {
+        r = requests.post(self.conf_file['host']+"/add-service",data = json.dumps({
             'serviceID' : 3,
             'name' : 'temperature-patient-room-monitor'
         }))
         r = requests.get(self.conf_file['host']+"/message-broker")
         mb = r.json()
-        #self.mqttClient = MyMQTT('light-patient-room-monitor',mb['name'],mb['port'],self)
+        self.mqttClient = MyMQTT('light-patient-room-monitor',mb['name'],mb['port'],self)
         r = requests.get(self.conf_file['host']+"/patient-room-base-topic")
         t = r.json()
-        self.subscribeTopic = t+"+/"
+        self.subscribeTopic = t+"+"
         r = requests.get(self.conf_file['host']+"/desired-temperature")
         t = r.json()
         self.desiredTemperature = t
@@ -28,8 +28,8 @@ class temperature_patient_room_monitor() :
         r = requests.get(self.conf_file['host']+"/patient-room-command-base-topic")
         c = r.json()
         self.commandTopic = c
-        #self.mqttClient.start()
-        #self.mqttClient.mySubscribe(self.subscribeTopic)
+        self.mqttClient.start()
+        self.mqttClient.mySubscribe(self.subscribeTopic)
         print('starta')
 
     def updateService(self) :
@@ -87,25 +87,25 @@ class temperature_patient_room_monitor() :
             else : #not night and not presence 
                 expected = self.expectedPresence(currentHour)
                 if expected == True and season == 'hot':
-                    return self.defineCommand(self.desiredTemperature+2)
+                    return self.defineCommand(self.desiredTemperature+2,currentTemperature,season)
                 elif expected == True and season == 'cold':
-                    return self.defineCommand(self.desiredTemperature-2)
+                    return self.defineCommand(self.desiredTemperature-2,currentTemperature,season)
                 elif expected == False and season == 'hot':
-                    return self.defineCommand(self.desiredTemperature+4)
+                    return self.defineCommand(self.desiredTemperature+4,currentTemperature,season)
                 elif expected == False and season == 'cold':
-                    return self.defineCommand(self.desiredTemperature-4)
+                    return self.defineCommand(self.desiredTemperature-4,currentTemperature,season)
             
     
     def notify(self,topic,payload) :
         message = dict(json.loads(payload))
         #suppongo di ricevere nel messaggio id room sotto la chiave room ed sotto la chiave presence  l info se utente c'è o meno e sotto la chiave temperature la temperatue corrente
-        room = message['room']
-        if message['open'] == 1 :
-            #fai la richiesta 
-            # invoca funzione che ritorna  
-            command = self.setTemperature(message['presence'],message['temperature'])  
-            MyMQTT.myPublish(self.commandTopic,{'switch' : command, 'room' : room })     
-
+        room = message['roomID']
+        
+        #fai la richiesta 
+        # invoca funzione che ritorna  
+        command = self.setTemperature(message['presence-value'],message['temperature-value'])  
+        #MyMQTT.myPublish(self.commandTopic,{'switch' : command, 'room' : room })     
+        print("command "+str({'switch' : command, 'room' : room }))
     
         
 

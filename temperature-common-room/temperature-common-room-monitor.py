@@ -84,32 +84,32 @@ class temperature_patient_room_monitor() :
                 return self.defineCommand(self.desiredTemperature-4,currentTemperature,season)
 
         else : #not night
-            if presence == True :
+            if presence == 1 :
                 return self.defineCommand(self.desiredTemperature,currentTemperature,season)
             else : #not night and not presence 
                 expected = self.expectedPresence(currentHour)
                 if expected == True and season == 'hot':
-                    return self.defineCommand(self.desiredTemperature+2)
+                    return self.defineCommand(self.desiredTemperature+2,currentTemperature,season)
                 elif expected == True and season == 'cold':
-                    return self.defineCommand(self.desiredTemperature-2)
+                    return self.defineCommand(self.desiredTemperature-2,currentTemperature,season)
                 elif expected == False and season == 'hot':
-                    return self.defineCommand(self.desiredTemperature+4)
+                    return self.defineCommand(self.desiredTemperature+4,currentTemperature,season)
                 elif expected == False and season == 'cold':
-                    return self.defineCommand(self.desiredTemperature-4)
+                    return self.defineCommand(self.desiredTemperature-4,currentTemperature,season)
             
     
     def notify(self,topic,payload) :
         message = dict(json.loads(payload))
-        print('ricevurto '+str(message))
+        #print('ricevurto '+str(message))
         #suppongo di ricevere nel messaggio id room sotto la chiave room ed sotto la chiave presence  l info se utente c'è o meno e sotto la chiave temperature la temperatue corrente
-        """
-        room = message['room']
-        if message['open'] == 1 :
-            #fai la richiesta 
-            # invoca funzione che ritorna  
-            command = self.setTemperature(message['presence'],message['temperature'])  
-            MyMQTT.myPublish(self.commandTopic,{'switch' : command, 'room' : room })     
-        """
+        
+        room = message['roomID']
+        #fai la richiesta 
+        # invoca funzione che ritorna  
+        command = self.setTemperature(message['presence-value'],message['temperature-value'])  
+        #MyMQTT.myPublish(self.commandTopic,{'switch' : command, 'room' : room })  ù
+        print("command "+str({'switch' : command, 'room' : room }))   
+        
 if __name__ == "__main__" :
     temperature_patient_room_monitor_istnace = temperature_patient_room_monitor()
     #invocare thread che esegue la registrazione del servizio, che forse è opzionale
