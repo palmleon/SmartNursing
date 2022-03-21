@@ -13,7 +13,7 @@ class temperature_patient_room_monitor() :
         }))
         r = requests.get(self.conf_file['host']+"/message-broker")
         mb = r.json()
-        self.mqttClient = MyMQTT('light-patient-room-monitor',mb['name'],mb['port'],self)
+        self.mqttClient = MyMQTT('temperatrue-common-room-monitor',mb['name'],mb['port'],self)
         r = requests.get(self.conf_file['host']+"/common-room-base-topic")
         t = r.json()
         self.subscribeTopic = t+"+"
