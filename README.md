@@ -1,2 +1,0 @@
-# SmartClinic 
-Amedeo's branch
