@@ -1,0 +1,30 @@
+Note su patyent monitor:
+
+Suppongo che la classe di elaborazione generi solo i messaggi da mandare a telegram (tramite classe client).
+I dati da mandare a Thingspeak, dato che non devono essere elaborati prima, li manderà direttamente
+il message broker a Thingspeak in modo da potersi sottoscrivere a specifico ID_paziente e quindi
+specifico ID_pulse e ID_Termo, per quanto riguarda sia dati registrati che batteria'''   
+
+
+    '''
+ATTENZIONE si dovrebbe pensare ad un modo (eventualmente nel client) per cui,
+dopo aver restituito un messaggio di emergenza, si silenzi per un po' di tempo. Altrimenti, se si riceve
+per lo stesso paziente una segnalazione di warning ogni 10s, l'infermiere impazzisce
+(considerando più pazienti presenti).
+
+Si può anche pensare che l'infermiere, una volta ricevuto il messaggio non riceve più altri warning per quel paziente
+e che ritorna a riceverli se si verifica una di due condizioni: preme un tasto di conferma su telegram
+(scrivendo tipo /ok [paziente ID] e si genera quindi una richiesta GET verso il servizio client
+(nell'url metti l'ID PZ) che riattiva l'analisi) o passa più di tot tempo''' # Deve farlo Telegram
+
+
+    '''
+I Return sono scritti in due modi possibili:
+-return dell'intera stringa del messaggio da far vedere all'infermiere
+-return con codice allarme (che corrisponde ad un messaggio specifico) e valori da stampare (se serve, anche ID)
+Nel secondo caso il bot telegram, una volta ricevuto il messaggio, associa ad un codice allarme
+un template di stringa da riempire con i campi necessari.
+In questo modo, si risparmia sui bit da inviare sulla rete (minor latenza, minor probabilità di errore)''' # Da verificare successivamente
+
+NOTE GENERALI:
+ATTENZIONE va verificato se dobbiamo mettere anche un controllo sul fatto che si disconnetta un dispositivo?

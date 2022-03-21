@@ -1,0 +1,6 @@
+{
+    "host" : "http://c_dsri:8080/catalog",
+    "serviceID" : "1a",
+    "name": "Fibrillation-monitor",
+    "template_allarm": {"ID_PZ":"","allert":"","time":0}
+}
