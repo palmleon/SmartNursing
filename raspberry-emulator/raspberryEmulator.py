@@ -4,11 +4,13 @@ import threading
 from MyMQTT import *
 from roomSensor import *
 from patientTemperatureSensor import *
+from patientOximeterSensor import *
 import json
 class RaspberryEmulator :
     def __init__(self) :
         self.rooms = {}
         self.roomSensor = RoomSensor()
+        self.patientOximeterSensor = Oximeter_sensor()
         self.patientTemperatureSensor = Temperature_sensor()
         self.conf_file = json.load(open('config.json'))
         r = requests.get(self.conf_file['host']+"/message-broker")
@@ -74,20 +76,18 @@ class RaspberryEmulator :
             time.sleep(10) #send data every minute
             for room in list(self.rooms.keys()) :
                 for id in self.rooms[room] :
-                    pass
-                    #emulatePatientData(id)   
-                    # #fare publish                     
-                    #print("paziente emulato "+str(self.patientTemperatureSensor.emulateData(id)))
+                    dataEmulated = self.patientOximeterSensor.emulate(id)
+                    self.mqttClient.myPublish(self.patientSaturationTopic+str(id),dataEmulated)
+                    print("simulo ossimetro per paziente ",id," al seguente topic ",self.patientSaturationTopic+str(id))
     
     def emulatePatientTemperatureData(self) :
         while True :
-            time.sleep(10) #send data every minute
+            time.sleep(30) #send data every minute
             for room in list(self.rooms.keys()) :
                 for id in self.rooms[room] :
-                    pass
-                    #emulatePatientData(id)   
-                    # #fare publish                     
-                    #print("paziente emulato "+str(self.patientTemperatureSensor.emulateData(id)))
+                    dataEmulated = self.patientTemperatureSensor.emulate(id)
+                    self.mqttClient.myPublish(self.patientTemperatureTopic+str(id),dataEmulated)
+                    print("simulo temperatura per paziente ",id," al seguente topic ",self.patientTemperatureTopic+str(id))
             
     def updateServices(self) :
         while True :

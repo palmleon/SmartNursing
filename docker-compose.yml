@@ -29,8 +29,25 @@ services :
     stdin_open : true
     tty : true
 
+#fibbrilation
+  cf :
+    image : fi 
+    links : 
+      - cdrsi
+    depends_on :
+      - cdrsi
+    stdin_open : true
+    tty : true
 
-
+#Patient monitor
+  cpm :
+    image : pmi 
+    links : 
+      - cdrsi
+    depends_on :
+      - cdrsi
+    stdin_open : true
+    tty : true
 
 #temperature patient room
   ctpri : 

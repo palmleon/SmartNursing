@@ -7,7 +7,7 @@ import requests
 class Patient_Monitor_client():
   def __init__(self):
     # Apertura file di configurazione
-    fp=open('Fibrillation_config.json')
+    fp=open('Patient_monitor_config.json')
     conf_file = json.load(fp)
     fp.close
     #Acquisizione ID,nome e url registro
