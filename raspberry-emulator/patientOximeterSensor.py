@@ -3,7 +3,7 @@ import time
 
 class Oximeter_sensor():
     def __init__(self):
-        self.__baseMessage={"bn" :"_oximeter","bt":0,"e":[{"n":"battery","u":"V","v":0},{"n":"perfusion index","u":"perc","v":0},{"n":"saturation","u":"perc","v":0}, {"n":"pulse rate","u":"bpm","v":0}]}
+        self.__baseMessage={"bn" :"","bt":0,"e":[{"n":"battery","u":"V","v":0},{"n":"perfusion index","u":"perc","v":0},{"n":"saturation","u":"perc","v":0}, {"n":"pulse rate","u":"bpm","v":0}]}
     
     def emulate(self,ID_P):
         # Una  lista di 10 valori ogni 10 secondi di PI, saturazione e battiti (associati ad un solo valore di batteria)
@@ -62,6 +62,6 @@ class Oximeter_sensor():
             self.__baseMessage["e"][2]["v"]= (random.randint(low=93,high=95,size= 10).tolist())
             self.__baseMessage["e"][3]["v"]= (random.randint(low=100,high=104,size= 10).tolist())
 
-        self.__baseMessage["bn"]=ID_P+self.__baseMessage["bn"]
+        #self.__baseMessage["bn"]=ID_P
         self.__baseMessage["bt"]=time.time()
         return self.__baseMessage
