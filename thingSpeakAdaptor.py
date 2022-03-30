@@ -5,8 +5,13 @@ import time
 class channelManager(): #class for all methods related to ThingSpeak channels
     def __init__(self):
         self.channelData = json.load(open('channelData.json'))
-        self.mainApiKey = self.channelData["api_key"]
+        self.mainApiKey = self.channelData["api_key"] #modify from catalogue
         self.channelList = []
+        # self.conf_file = json.load(open('config.json'))
+        # r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
+        #     'serviceID' : 6,
+        #     'name' : 'ThingSpeakAdapter'
+        # }))
     def createChannel(self,cData = None): #create a ThingSpeak channel from channelData.json
         print('Adding new channel')
         if cData == None:
@@ -47,7 +52,7 @@ class channelManager(): #class for all methods related to ThingSpeak channels
                 update_value = json_received['e'][i]
                 field_number = self.channelFeed(channelID,read_api,update_value['n'])
                 requests.get('https://api.thingspeak.com/update?api_key={}&field{}={}'.format(write_api,field_number,update_value['v']))
-                time.sleep(20)
+                time.sleep(16)
             print('Upload concluded')
         else:
             cData = self.channelData
