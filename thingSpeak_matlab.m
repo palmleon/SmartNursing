@@ -16,10 +16,32 @@ for col=1:width(data)
     i = 1;
     for row=1:height(data)
         if ~isnan(data(row,col))
-            n_data(i,col) = data(row,col)
+            n_data(i,col) = data(row,col);
             i = i+1;
         end
     end
 end
-
+% temperature average (temperature is always in the first column)
+temp_sum = 0;
+count = 0;
+for row=1:height(n_data)
+    if n_data(row) >= 35
+        temp_sum = temp_sum + n_data(row);
+        count = count + 1;
+    end
+end
+temp_avg = temp_sum/count;
+% avg saturation and pulse rate
+sum_sat = 0;
+sum_pulse = 0;
+count = 0;
+for row=1:height(n_data)
+    if n_data(row,4) >= 4
+        sum_sat = sum_sat + n_data(row,2);
+        sum_pulse = sum_pulse + n_data(row,3);
+        count = count + 1;
+    end
+end
+avg_pulse = sum_pulse/count;
+avg_sat = sum_sat/count;
 
