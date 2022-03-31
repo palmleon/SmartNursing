@@ -1,0 +1,13 @@
+{
+  "api_key" : "YTN43QRA4IWIEBIN",
+  "name" : "Patient",
+  "public_flag" : false,
+  "field1" : "Patient Saturation",
+  "field2" : "Patient Pulse Rate",
+  "field3" : "Patient Temperature",
+  "field4" : "Perfusion Index",
+  "field5" : "Battery Temp Sensor",
+  "field6" : "Battery Sat Sensor",
+  "field7" : null,
+  "field8" : null
+}
