@@ -18,16 +18,23 @@ class channelManager():  # class for all methods related to ThingSpeak channels
         print('Adding new channel')
         if cData == None:
             cData = self.channelData
+        if self.checkChannel(cData['name']) != 0:
+            requests.post('https://api.thingspeak.com/channels.json', json=cData)
         else:
-            if self.checkChannel(cData['name']) != 0:
-                requests.post('https://api.thingspeak.com/channels.json', json=cData)
-            else:
-                print('Channel with the same name already present')
+            print('Channel with the same name already present')
     
     def uploadToChannel(self,json_received): 
         channelToUpdate = self.checkChannel(json_received['bn'])
         print(channelToUpdate)
-        if channelToUpdate != 0:
+        if channelToUpdate == 0 or channelToUpdate == -1: #channel to update not present -> creation then update
+            cData = self.channelData
+            cData["name"] = json_received["bn"]
+            for i in range(len(json_received['e'])):
+                cData['field{}'.format(i+1)] = json_received['e'][i]['n']
+            self.createChannel(cData)
+            self.listChannels()
+            self.uploadToChannel(json_received)
+        else:
             write_api = channelToUpdate['api_keys'][0]['api_key']
             read_api = channelToUpdate['api_keys'][1]['api_key']
             channelID = channelToUpdate['id']
@@ -40,13 +47,7 @@ class channelManager():  # class for all methods related to ThingSpeak channels
                 requests.get('https://api.thingspeak.com/update?api_key={}&field{}={}'.format(write_api,field_number,update_value['v']))
                 time.sleep(16)
             print('Upload concluded')
-        else:
-            cData = self.channelData
-            cData["name"] = json_received["bn"]
-            #for i in range(len(json_received['e'])):
-            #    cData['field{}'.format(i+1)] = json_received['e'][i]['n']
-            self.createChannel(cData)
-            #self.uploadToChannel(json_received)
+            return 0
     
     def deleteChannel(self,channelID=None):  # delete a channel from a json dict
         if channelID!=None:
@@ -112,12 +113,7 @@ class channelManager():  # class for all methods related to ThingSpeak channels
                     return self.channelList[channels]
             return 0
         return -1
-    
-    # upload channel based on json received (channel name) and field (json content)
-    # if bn not in channelList createChannel and then upload
-    
-    
-    
+     
     def channelFeed(self,channelID,read_api,field_name): #retrive a chosen field number based on contents
         feed = requests.get('https://api.thingspeak.com/channels/{}/feeds.json?api_key={}&results=2'.format(channelID,read_api))
         feed = feed.json()

@@ -17,15 +17,15 @@ class thinkSpeakAdaptor(): #class related to the interaction with MQTT
         print('New data received')
         c = channelManager()
         c.listChannels()
+        json_received = str(msg).replace("'",'"')
+        json_received = json_received[2:-1]
+        json_received = json.loads(json_received)
         if topic == 'dapis/test1':
-            json_received = str(msg).replace("'",'"')
-            json_received = json_received[2:-1]
-            json_received = json.loads(json_received)
             c.uploadToChannel(json_received)
         elif topic == 'dapis/maintainance': #in case we want channel creation via mqtt
             print('maintanance')
             #print(c.channelList)
-            #c.deleteChannel()
+            c.deleteChannel(json_received['bn'])
             #c.clearChannel('ID Paziente 1')
             
 
