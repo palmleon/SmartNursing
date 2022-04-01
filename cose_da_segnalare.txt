@@ -1,0 +1,5 @@
+- Bisogna allertare lo staff anche in caso di temperatura/illuminazione anomala? [Secondo me sì]
+- Cosa succede se nella clinica vengono ricavate nuove stanze? [Andrebbe considerata l'idea di aggiungerle]
+  Chi si occupa di aggiungerle? [Admin]
+  E' possibile aggiungerle e come? [Bot]
+- E' possibile impostare anche l'illuminazione di una stanza (magari permettendo sia una configurazione automatica che manuale)?
