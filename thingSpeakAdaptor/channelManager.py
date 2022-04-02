@@ -1,7 +1,7 @@
 import json
 import requests
 import time
-from data_checker import *
+
 class channelManager():
     """Class containing all methods related to ThingSpeak channels"""
     def __init__(self):
@@ -66,12 +66,9 @@ class channelManager():
         cJson: dict
             dict containing data"""
         self.listChannels()
-        if data_check(cJson) == 0:
-            if self.isChannelinList(cJson['bn']) == 0:
-                self.createChannel(cJson)
-            self.channelUpdater(cJson)
-        else:
-            print('Data will not be considered')
+        if self.isChannelinList(cJson['bn']) == 0:
+            self.createChannel(cJson)
+        self.channelUpdater(cJson)
 
     def channelFeed(self,channelID,read_api,field_name,len): #retrive a chosen field number based on contents
         feed = requests.get('https://api.thingspeak.com/channels/{}/feeds.json?api_key={}&results=2'.format(channelID,read_api))
@@ -98,11 +95,17 @@ class channelManager():
         channelID = channelToUpdate['id']
         print('Upload in progress')
         for i in range(len(cJson['e'])):
-            print('...')
             update_value = cJson['e'][i]
             field_number = self.channelFeed(channelID,read_api,update_value['n'],len(cJson['e']))
-            requests.get('https://api.thingspeak.com/update?api_key={}&field{}={}'.format(write_api,field_number,update_value['v']))
-            time.sleep(16)
+            if type(update_value['v']) == list:
+                for i in range(0,len(update_value['v'])):
+                    print('...')
+                    requests.get('https://api.thingspeak.com/update?api_key={}&field{}={}'.format(write_api,field_number,update_value['v'][i]))
+                    time.sleep(16)
+            else:
+                print('...')
+                requests.get('https://api.thingspeak.com/update?api_key={}&field{}={}'.format(write_api,field_number,update_value['v']))
+                time.sleep(16)
         print('Upload concluded')
         
     def deleteChannel(self,channelID=None):
