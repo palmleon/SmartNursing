@@ -16,9 +16,7 @@ for i=1:len
     temperature = data(:,4).temperature;
     saturation = data(:,2).saturation;
     pulseRate = data(:,3).pulseRate;
-return %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-end
-% Remove NAN elements
+    % Remove NAN elements
     k=1;
     sum_index = 0;
     h = 1;
@@ -26,7 +24,7 @@ end
         if ~isnan(perfusion_index(j))
             if perfusion_index(j)>4
                 n_perfusion_index(k) = perfusion_index(j);
-                if ~isnan(saturation(j))
+                if ~isnan(perfusion_index(j))
                 sum_index = sum_index + n_perfusion_index(k);
                 k = k+1;
             end
