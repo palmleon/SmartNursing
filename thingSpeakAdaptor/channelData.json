@@ -8,6 +8,6 @@
   "field4" : "pulse rate",
   "field5" : "battery termometer",
   "field6" : "temperature",
-  "field7" : null,
+  "field7" : "day_flag",
   "field8" : null
 }
