@@ -70,7 +70,22 @@ class channelManager():
             self.createChannel(cJson)
         self.channelUpdater(cJson)
 
-    def channelFeed(self,channelID,read_api,field_name,len): #retrive a chosen field number based on contents
+    def channelFeed(self,channelID,read_api,field_name,len):
+        """Retrive a chosen field number based on contents\n
+        Parameters
+        ----------
+        channelID: str
+            Name of the channel we are working with
+        read_api: str
+            ThingSpeak read API
+        field_name: str
+            Name of the field we use to find the corresponding index
+        len: int
+            length of the payload dict containing data (2 or 4)
+            
+        Returns
+        -------
+            Field Number: int (1-8)"""
         feed = requests.get('https://api.thingspeak.com/channels/{}/feeds.json?api_key={}&results=2'.format(channelID,read_api))
         feed = feed.json()
         feed = feed['channel']
