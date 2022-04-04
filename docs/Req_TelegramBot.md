@@ -51,7 +51,7 @@ Specification document for the Bot.
 
 ## USE CASE SCENARIO
 
-### Scenario 1: Authenticate User
+### Scenario 1: Authenticating User
 
 | Field | Description |
 | ------| ----------- |
@@ -62,7 +62,7 @@ Specification document for the Bot.
 | | The system checks whether the user exists and the password is correct |
 | | The system informs the user that he/she has been authenticated |
 
-### Scenario 2: User looks for info about a patient
+### Scenario 2: Searching info about a Patient
 
 | Field | Description |
 | ------| ----------- |
@@ -75,7 +75,7 @@ Specification document for the Bot.
 |       | The system checks whether the Patient exists and that kind of information is available |
 |       | The system returns the desired information |
 
-### Scenario 3: System Administrator registers a patient
+### Scenario 3: Registering a Patient - SysAdm
 
 | Field | Description |
 | ------| ----------- |
@@ -88,7 +88,7 @@ Specification document for the Bot.
 |       | The system verifies that the Patient Data are not already present (i.e. there is no other Patient with exactly the same data) |
 |       | The system registers the patient and returns a success message to the User |
 
-### Scenario 3.1: Nurse registers a patient
+### Scenario 3.1: Registering a Patient - Nurse
 
 | Field | Description |
 | ------| ----------- |
@@ -102,7 +102,7 @@ Specification document for the Bot.
 |       | The system forwards the request to a System Administrator, who is the only role authorized to perform this kind of operation |
 |       | System Administrator registers a patient: See Scenario 3.2 |
 
-### Scenario 3.2: System Administrator handles a Patient Registration Request
+### Scenario 3.2: Handling a Patient Registration Request
 
 | Field | Description |
 | ------| ----------- |
@@ -116,7 +116,7 @@ Specification document for the Bot.
 |       | The User decides whether to accept the Request |
 |       | The system follows the User decision and returns an acknowledge message |
 
-### Scenario 4: System Administrator removes a patient
+### Scenario 4: Removing a Patient - SysAdm
 
 | Field | Description |
 | ------| ----------- |
@@ -136,7 +136,7 @@ Specification document for the Bot.
 |       | - The user chooses the user to remove |
 |       | - The system returns a success message to the User |
 
-### Scenario 4.1: Nurse removes a patient
+### Scenario 4.1: Removing a Patient - Nurse
 
 | Field | Description |
 | ------| ----------- |
@@ -159,7 +159,7 @@ Specification document for the Bot.
 |       | - The system informs that a System Administrator will handle the request |
 |       | - The System Administrator handles the request: see Scenario 4.2 |
 
-### Scenario 4.2: System Administrator handles a Patient Removal Request
+### Scenario 4.2: Handling a Patient Removal Request
 
 | Field | Description |
 | ------| ----------- |
@@ -173,7 +173,7 @@ Specification document for the Bot.
 |       | The User decides whether to accept the Request |
 |       | The system follows the User decision and returns an acknowledge message |
 
-### Scenario 5: System Administrator edits a patient
+### Scenario 5: Editing a Patient - SysAdm
 
 | Field | Description |
 | ------| ----------- |
@@ -198,7 +198,7 @@ Specification document for the Bot.
 |       | - The system updates its information |
 |       | - The system returns a success message to the User |
 
-### Scenario 5.1: Nurse edits a patient
+### Scenario 5.1: Editing a Patient - Nurse
 
 | Field | Description |
 | ------| ----------- |
@@ -225,7 +225,7 @@ Specification document for the Bot.
 |       | - The system informs that a System Administrator will handle the request |
 |       | - The System Administrator handles the request: see Scenario 5.2 |
 
-### Scenario 5.2: System Administrator handles a Patient Edit Request
+### Scenario 5.2: Handling a Patient Edit Request
 
 | Field | Description |
 | ------| ----------- |
@@ -239,7 +239,7 @@ Specification document for the Bot.
 |       | The User decides whether to accept the Request |
 |       | The system follows the User decision and returns an acknowledge message |
 
-### Scenario 6: Warning the staff that there is a medical emergency
+### Scenario 6: Warning a Medical Emergency
 
 | Field | Description |
 | ------| ----------- |
@@ -252,7 +252,7 @@ Specification document for the Bot.
 |       | The system reads the list of all Users that are currently working in the clinic |
 |       | The system forwards the warning to those Users |
 
-### Scenario 7: User sets desired Room Temperature/Lighting
+### Scenario 7: Setting Room Temperature/Lighting
 
 | Field | Description |
 | ------| ----------- |
@@ -267,7 +267,7 @@ Specification document for the Bot.
 |       | The User sets the new value for the parameter |
 |       | The system forwards the request to the Room Temperature/Lighting manager |
 
-### Scenario 8: User monitors Room Temperature/Lighting
+### Scenario 8: Monitoring Room Temperature/Lighting
 
 | Field | Description |
 | ------| ----------- |
@@ -282,7 +282,7 @@ Specification document for the Bot.
 |       | The system forwards the request to the Room Temperature/Lighting manager, asking for the searched value |
 |       | The User reads the value for the parameter |
 
-### Scenario 9: System Administrator registers a new Room
+### Scenario 9: Registering a new Room
 
 | Field | Description |
 | ------| ----------- |
@@ -295,7 +295,7 @@ Specification document for the Bot.
 |       | The system verifies whether a Room with the same ID already exists (in case of manual definition of the Room ID) |
 |       | The system forwards the request to the Room and Patient catalog, which proceeds to fulfill it |
 
-### Scenario E.1: User is not authenticated successfully
+### Scenario E.1: Failed Authentication
 
 | Field | Description |
 | ------| ----------- |
@@ -308,9 +308,26 @@ Specification document for the Bot.
 |       | If credentials are correct: |
 |       | - The User is logged in case of success with a success message |
 |       | Otherwise: |
-|       | - the procedure is repeated until the User can log in |
+|       | - The System asks to retry to go back |
 
-### Scenario E.2.1: User looks for a patient/room, but they are not defined correctly by the User
+### Scenario E.1.2: Performing an unauthorized operation
+
+| Field | Description |
+| ------| ----------- |
+| Actor | Nurses, System Administrator |
+| Pre-condition | The User is not logged in and s/he is not authenticated |
+|               | The User tries to perform any operation |
+| Post-condition | The User in not able to fulfill the task |
+| Steps | The system asks for User ID and Password |
+|       | The User inserts them |
+|       | The system looks for the User and his/her password |
+|       | If credentials are correct: |
+|       | - The User is logged in case of success with a success message |
+|       | - The System starts and fulfills the desired operation |
+|       | Otherwise: |
+|       | - The System asks to retry or go back |
+
+### Scenario E.2.1: Searching an incorrectly defined Patient/Room
 
 | Field | Description |
 | ------| ----------- |
@@ -331,7 +348,7 @@ Specification document for the Bot.
 |       | Otherwise: |
 |       | - Cancel the operation |
 
-### Scenario E.2.2: User looks for a patient/room, but it does not exist
+### Scenario E.2.2: Searching a non-existing Patient/Room
 
 | Field | Description |
 | ------| ----------- |
@@ -351,7 +368,7 @@ Specification document for the Bot.
 |       | Otherwise: |
 |       | - Cancel the operation |
 
-### Scenario E.3: User tries to register a duplicate patient
+### Scenario E.3: Registering a duplicate Patient
 
 | Field | Description |
 | ------| ----------- |
@@ -370,7 +387,7 @@ Specification document for the Bot.
 |       | Otherwise: |
 |       | - Cancel the operation |
 
-### Scenario E.4: User tries to register a patient with invalid input
+### Scenario E.4: Register an incorrectly defined Patient
 
 | Field | Description |
 | ------| ----------- |
@@ -390,7 +407,7 @@ Specification document for the Bot.
 |       | Otherwise: |
 |       | - Cancel the operation |
 
-### Scenario E.5.1: User tries to remove a patient that does not exist
+### Scenario E.5.1: Removing a non-existing Patient
 
 | Field | Description |
 | ------| ----------- |
@@ -410,7 +427,7 @@ Specification document for the Bot.
 |       | Otherwise: |
 |       | - Cancel the operation |
 
-### Scenario E.5.2: User tries to remove a patient, but they are not correctly defined by the User
+### Scenario E.5.2: Removing an incorrectly defined Patient
 
 | Field | Description |
 | ------| ----------- |
@@ -430,7 +447,7 @@ Specification document for the Bot.
 |       | Otherwise: |
 |       | - Cancel the operation |
 
-### Scenario E.6.1: User tries to edit a patient that does not exist
+### Scenario E.6.1: Editing a non-existing Patient
 
 | Field | Description |
 | ------| ----------- |
@@ -450,7 +467,7 @@ Specification document for the Bot.
 |       | Otherwise: |
 |       | - Cancel the operation |
 
-### Scenario E.6.2: User tries to edit a patient, but they are not correctly defined by the User
+### Scenario E.6.2: Editing an incorrectly defined Patient
 
 | Field | Description |
 | ------| ----------- |
@@ -470,7 +487,7 @@ Specification document for the Bot.
 |       | Otherwise: |
 |       | - Cancel the operation |
 
-### Scenario E.7: The Bot tries to warn the staff, but the message is lost
+### Scenario E.7: Warning message lost
 
 | Field | Description |
 | ------| ----------- |
@@ -483,7 +500,7 @@ Specification document for the Bot.
 |       | If no acknowledge: |
 |       | - Retry |
 
-### Scenario E.8: User tries to manage a Room that does not exist
+### Scenario E.8: Managing a non-existent Room
 
 | Field | Description |
 | ------| ----------- |
@@ -503,7 +520,7 @@ Specification document for the Bot.
 |       | Otherwise: |
 |       | - Cancel the operation |
 
-### Scenario E.9: System Administrator tries to register a duplicate Room
+### Scenario E.9: Registering a duplicate Room
 
 | Field | Description |
 | ------| ----------- |
@@ -527,7 +544,96 @@ Specification document for the Bot.
 
 ```plantuml
 @startuml
-actor Customer
+actor Nurse as N
+actor SystemAdministrator as S
+usecase (Authenticating User) as (UC1)
+usecase (Searching info about a Patient) as UC2
+usecase (Registering a Patient - SysAdm) as UC3
+usecase (Registering a Patient - Nurse) as UC3.1
+usecase (Handling a Patient Registration Request) as UC3.2
+usecase (Removing a Patient - SysAdm) as UC4
+usecase (Removing a Patient - Nurse) as UC4.1
+usecase (Handling a Patient Removal Request) as UC4.2
+usecase (Editing a Patient - SysAdm) as UC5 
+usecase (Editing a Patient - Nurse) as UC5.1
+usecase (Handling a Patient Edit Request) as UC5.2
+usecase (Warning a Medical Emergency) as UC6
+usecase (Setting Room Temperature/Lighting) as UC7
+usecase (Monitoring Room Temperature/Lighting) as UC8
+usecase (Registering a new Room) as UC9
+usecase (Failed Authentication) as (UCE.1.1)
+usecase (Performing an unauthorized operation) as (UCE.1.2)
+usecase (Searching an incorrectly defined Patient/Room) as (UCE.2.1)
+usecase (Searching a non-existing Patient/Room) as (UCE.2.2)
+usecase (Registering a duplicate Patient) as (UCE.3)
+usecase (Register an incorrectly defined Patient) as (UCE.4)
+usecase (Removing a non-existing Patient) as (UCE.5.1)
+usecase (Removing an incorrectly defined Patient) as (UCE.5.2)
+usecase (Editing a non-existing Patient) as (UCE.6.1)
+usecase (Editing an incorrectly defined Patient) as (UCE.6.2)
+usecase (Warning message lost) as (UCE.7)
+usecase (Managing a non-existent Room) as (UCE.8)
+usecase (Registering a duplicate Room) as (UCE.9)
+
+UCE.1.1 .> UC1 : extends
+UCE.1.2 .> UCE.1.1 : include
+UC2 <. UCE.2.1 : extends
+UC2 <. UCE.2.2: extends
+UC3 <. UCE.3 : extends
+UC3 <. UCE.4 : extends
+UCE.5.1 .> UC4: extends
+UCE.5.2 .> UC4: extends
+UCE.6.1 .> UC5: extends
+UCE.6.2 .> UC5: extends
+UCE.7 ..> UC6 : extends
+UCE.8 ..> UC7 : extends
+UCE.8 ..> UC8 : extends
+UCE.9 ..> UC9 : extends
+N --> UC1
+UC1 <- S
+N --> UC2
+UC2 <- S
+S --> UC3
+N -> UC3.1
+UC3.2 <- S
+S --> UC4
+N -> UC4.1
+UC4.2 <-- S
+S --> UC5
+N --> UC5.1
+UC5.2 <-- S
+N <-- UC6
+N --> UC7
+N --> UC8
+UC8 <-- S
+UC9 <-- S
+N --> UCE.1.1
+UCE.1.1 <-- S
+N --> UCE.1.2
+UCE.1.2 <-- S
+N --> UCE.2.1
+UCE.2.1 <-- S
+N -> UCE.2.2
+UCE.2.2 <-- S
+N -> UCE.3
+UCE.3 <-- S
+N -> UCE.4
+UCE.4 <-- S
+N -> UCE.5.1
+UCE.5.1 <-- S
+N -> UCE.5.2
+UCE.5.2 <-- S
+N -> UCE.6.1
+UCE.6.1 <-- S
+N -> UCE.6.2
+UCE.6.2 <- S
+N <- UCE.7
+N -> UCE.8
+S --> UCE.8
+S --> UCE.9
+UC3.1 ..> UC3.2 : include
+UC4.1 ..> UC5.2 : include
+UC5.1 ..> UC5.2 : include
 @enduml
 ```
 
@@ -538,5 +644,5 @@ actor Customer
 
 ## SYSTEM DIAGRAM
 
-- Cloud: Where the Bot resides
 - Mobile phones and PCs: Where the Users can access the Bot
+- Cloud: Where the Bot resides
