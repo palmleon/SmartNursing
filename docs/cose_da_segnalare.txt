@@ -1,0 +1,10 @@
+- Bisogna allertare lo staff anche in caso di temperatura/illuminazione anomala? [Secondo me sì]
+- Cosa succede se nella clinica vengono ricavate nuove stanze? [Andrebbe considerata l'idea di aggiungerle]
+  Chi si occupa di aggiungerle? [Admin]
+  E' possibile aggiungerle e come? [Bot]
+- E' possibile impostare anche l'illuminazione di una stanza (magari permettendo sia una configurazione automatica che manuale)?
+- Gli utenti (staff medico e amministratori) sono autenticati una volta per tutte, al primo accesso al bot? (Questo permette di ricevere notifiche senza dover effettuare il login)
+- Gli infermieri sono registrati nel sistema e sono registrati con il loro turno di lavoro (in questo modo, le notifiche sono inoltrate solo a chi sta lavorando)
+- Da definire: 
+  - come "il sistema rimuove/edita/registra" un paziente o una stanza
+  - come "il sistema setta la temperatura/illuminazione" di una stanza

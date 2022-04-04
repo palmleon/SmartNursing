@@ -295,117 +295,248 @@ Specification document for the Bot.
 |       | The system verifies whether a Room with the same ID already exists (in case of manual definition of the Room ID) |
 |       | The system forwards the request to the Room and Patient catalog, which proceeds to fulfill it |
 
-Exception Scenarios:
-
-- User is not authenticated successfully
-- User looks for a patient/room, but it does not exist
-- User tries to register a duplicate patient
-- User tries to register a patient with invalid input
-- User tries to remove a patient that does not exist
-- User tries to edit a patient that does not exist
-- Invalid input
-- The Bot tries to warn the staff, but the message is lost
-- User tries to manage a Room that does not exist
-- System Administrator tries to register a duplicate Room
-
-### Scenario 3: User registers a patient
+### Scenario E.1: User is not authenticated successfully
 
 | Field | Description |
 | ------| ----------- |
-| Actor |  |
-| Pre-condition |  |
-| Post-condition |  |
-| Steps |  |
+| Actor | Nurses, System Administrator |
+| Pre-condition | The User is not logged in and s/he is not authenticated |
+| Post-condition | The User is logged in |
+| Steps | The system asks for User ID and Password |
+|       | The User inserts them |
+|       | The system looks for the User and his/her password |
+|       | If credentials are correct: |
+|       | - The User is logged in case of success with a success message |
+|       | Otherwise: |
+|       | - the procedure is repeated until the User can log in |
 
-### Scenario 3: User registers a patient
-
-| Field | Description |
-| ------| ----------- |
-| Actor |  |
-| Pre-condition |  |
-| Post-condition |  |
-| Steps |  |
-
-### Scenario 3: User registers a patient
+### Scenario E.2.1: User looks for a patient/room, but they are not defined correctly by the User
 
 | Field | Description |
 | ------| ----------- |
-| Actor |  |
-| Pre-condition |  |
-| Post-condition |  |
-| Steps |  |
+| Actor | Nurses, System Administrator |
+| Pre-condition | The User looks for a patient/room that exists |
+|               | The patient/room is not correctly inserted by the User|
+|               | The User has already tried to look for the patient/room |
+|               | The System has already looked for the Patient/Room |
+| Post-condition | The User finds the Room/Patient |
+| Steps | The System returns an Error message |
+|       | The System asks the User to retry or go back |
+|       | In case of Retry: |
+|       | - Repeat the Triggering Scenario until the search is performed again
+|       | - In case of success: |
+|       | --  return a success message to the User |
+|       | - Otherwise: |
+|       | --  repeat Scenario E.2.1 |
+|       | Otherwise: |
+|       | - Cancel the operation |
 
-### Scenario 3: User registers a patient
-
-| Field | Description |
-| ------| ----------- |
-| Actor |  |
-| Pre-condition |  |
-| Post-condition |  |
-| Steps |  |
-
-### Scenario 3: User registers a patient
-
-| Field | Description |
-| ------| ----------- |
-| Actor |  |
-| Pre-condition |  |
-| Post-condition |  |
-| Steps |  |
-
-### Scenario 3: User registers a patient
+### Scenario E.2.2: User looks for a patient/room, but it does not exist
 
 | Field | Description |
 | ------| ----------- |
-| Actor |  |
-| Pre-condition |  |
-| Post-condition |  |
-| Steps |  |
+| Actor | Nurses, System Administrator |
+| Pre-condition | The User looks for a patient/room that does not exist |
+|               | The User has already tried to look for the patient/room |
+|               | The System has already verified that the patient/room is not present |
+| Post-condition | The User is not able to find the Patient/Room|
+| Steps | The System returns an Error message |
+|       | The System asks the User to retry or go back |
+|       | In case of Retry: |
+|       | - Repeat the Triggering Scenario until the search is performed again
+|       | - In case of success: |
+|       | --  return a success message to the User |
+|       | - Otherwise: |
+|       | --  repeat Scenario E.2.2 |
+|       | Otherwise: |
+|       | - Cancel the operation |
 
-### Scenario 3: User registers a patient
-
-| Field | Description |
-| ------| ----------- |
-| Actor |  |
-| Pre-condition |  |
-| Post-condition |  |
-| Steps |  |
-
-### Scenario 3: User registers a patient
-
-| Field | Description |
-| ------| ----------- |
-| Actor |  |
-| Pre-condition |  |
-| Post-condition |  |
-| Steps |  |
-
-### Scenario 3: User registers a patient
+### Scenario E.3: User tries to register a duplicate patient
 
 | Field | Description |
 | ------| ----------- |
-| Actor |  |
-| Pre-condition |  |
-| Post-condition |  |
-| Steps |  |
+| Actor | Nurses, System Administrator |
+| Pre-condition | The User tries to register a patient that is already present in the catalog |
+|               | The System has already checked that the patient is already present |
+| Post-condition | The User is not able to register the patient |
+| Steps | The System returns an Error Message |
+|       | The System asks to Retry or go back |
+|       | In case of Retry: |
+|       | - Repeat the Triggering Scenario until the search is performed again
+|       | - In case of success: |
+|       | --  return a success message to the User |
+|       | - Otherwise: |
+|       | --  repeat Scenario E.3 |
+|       | Otherwise: |
+|       | - Cancel the operation |
 
-### Scenario X
+### Scenario E.4: User tries to register a patient with invalid input
 
 | Field | Description |
 | ------| ----------- |
-| Actor |  |
-| Pre-condition |  |
-| Post-condition |  |
-| Steps |  |
+| Actor | Nurses, System Administrator |
+| Pre-condition | The User tries to register a patient |
+|               | Input from the User is invalid |
+|               | The System has just received input from the User and checked whether it is valid |
+| Post-condition | The User is not able to register the patient |
+| Steps | The System returns an Error Message |
+|       | The System asks to Retry or go back |
+|       | In case of Retry: |
+|       | - Repeat the Triggering Scenario until the search is performed again
+|       | - In case of success: |
+|       | --  return a success message to the User |
+|       | - Otherwise: |
+|       | --  repeat Scenario E.4 |
+|       | Otherwise: |
+|       | - Cancel the operation |
+
+### Scenario E.5.1: User tries to remove a patient that does not exist
+
+| Field | Description |
+| ------| ----------- |
+| Actor | Nurses, System Administrator |
+| Pre-condition | The User wants to remove a patient |
+|               | The Patient is not present in the Catalog |
+|               | The System has already verified that the Patient does not exist |
+| Post-condition | The User is not able to remove the Patient |
+| Steps | The System returns an Error Message |
+|       | The System asks to Retry or go back |
+|       | In case of Retry: |
+|       | - Repeat the Triggering Scenario until the search is performed again
+|       | - In case of success: |
+|       | --  return a success message to the User |
+|       | - Otherwise: |
+|       | --  repeat Scenario E.5.1 |
+|       | Otherwise: |
+|       | - Cancel the operation |
+
+### Scenario E.5.2: User tries to remove a patient, but they are not correctly defined by the User
+
+| Field | Description |
+| ------| ----------- |
+| Actor | Nurses, System Administrator |
+| Pre-condition | The User wants to remove a patient |
+|               | The Patient is present in the Catalog |
+|               | The System has already verified that the Patient does not exist (ill-defined) |
+| Post-condition | The User is able to remove the Patient |
+| Steps | The System returns an Error Message |
+|       | The System asks to Retry or go back |
+|       | In case of Retry: |
+|       | - Repeat the Triggering Scenario until the search is performed again
+|       | - In case of success: |
+|       | --  return a success message to the User |
+|       | - Otherwise: |
+|       | --  repeat Scenario E.5.2 |
+|       | Otherwise: |
+|       | - Cancel the operation |
+
+### Scenario E.6.1: User tries to edit a patient that does not exist
+
+| Field | Description |
+| ------| ----------- |
+| Actor | Nurses, System Administrator |
+| Pre-condition | The User tries to edit a patient |
+|               | The Patient is not present in the Catalog |
+|               | The System has already verified that the Patient does not exist (ill-defined) |
+| Post-condition | The User is not able to edit the Patient |
+| Steps | The System returns an Error Message |
+|       | The System asks to Retry or go back |
+|       | In case of Retry: |
+|       | - Repeat the Triggering Scenario until the search is performed again
+|       | - In case of success: |
+|       | --  return a success message to the User |
+|       | - Otherwise: |
+|       | --  repeat Scenario E.6.1 |
+|       | Otherwise: |
+|       | - Cancel the operation |
+
+### Scenario E.6.2: User tries to edit a patient, but they are not correctly defined by the User
+
+| Field | Description |
+| ------| ----------- |
+| Actor | Nurses, System Administrator |
+| Pre-condition | The User wants to edit a patient |
+|               | The Patient is present in the Catalog |
+|               | The System has already verified that the Patient does not exist (ill-defined) |
+| Post-condition | The User is able to remove the Patient |
+| Steps | The System returns an Error Message |
+|       | The System asks to Retry or go back |
+|       | In case of Retry: |
+|       | - Repeat the Triggering Scenario until the search is performed again
+|       | - In case of success: |
+|       | --  return a success message to the User |
+|       | - Otherwise: |
+|       | --  repeat Scenario E.5.2 |
+|       | Otherwise: |
+|       | - Cancel the operation |
+
+### Scenario E.7: The Bot tries to warn the staff, but the message is lost
+
+| Field | Description |
+| ------| ----------- |
+| Actor | Nurses |
+| Pre-condition | There is a medical emergency to report the medical staff |
+|               | The message is lost |
+| Post-condition | The medical emergency is correctly reported to the medical staff |
+| Steps | Wait for 5 seconds |
+|       | Try to report the emergency again |
+|       | If no acknowledge: |
+|       | - Retry |
+
+### Scenario E.8: User tries to manage a Room that does not exist
+
+| Field | Description |
+| ------| ----------- |
+| Actor | Nurses, System Administrator |
+| Pre-condition | The User tries to manage a Room |
+|               | The Room is not present in the Catalog |
+|               | The System has already verified that the Room does not exist (ill-defined) |
+| Post-condition | The User is not able to manage the Room |
+| Steps | The System returns an Error Message |
+|       | The System asks to Retry or go back |
+|       | In case of Retry: |
+|       | - Repeat the Triggering Scenario until the search is performed again
+|       | - In case of success: |
+|       | --  return a success message to the User |
+|       | - Otherwise: |
+|       | --  repeat Scenario E.8 |
+|       | Otherwise: |
+|       | - Cancel the operation |
+
+### Scenario E.9: System Administrator tries to register a duplicate Room
+
+| Field | Description |
+| ------| ----------- |
+| Actor | System Administrator |
+| Pre-condition | The User tries to register a Room |
+|               | The Room is already present in the Catalog |
+|               | The System has already verified that the Room already exists (ill-defined) |
+| Post-condition | The User is not able to register the Room |
+| Steps | The System returns an Error Message |
+|       | The System asks to Retry or go back |
+|       | In case of Retry: |
+|       | - Repeat the Triggering Scenario until the search is performed again
+|       | - In case of success: |
+|       | --  return a success message to the User |
+|       | - Otherwise: |
+|       | --  repeat Scenario E.9 |
+|       | Otherwise: |
+|       | - Cancel the operation |
 
 ## USE CASE DIAGRAM
+
+```plantuml
+@startuml
+actor Customer
+@enduml
+```
 
 ## DEPLOYMENT DIAGRAM
 
 - On Mobile Phones (users): Telegram
-- On the Raspberry: the Telegram Bot (which must communicate with the rest of the system via MQTT) (?) - see below
+- On the Cloud: the Telegram Bot (it should be registered)
 
 ## SYSTEM DIAGRAM
 
-- Raspberry: Where the Bot resides (?) - The bot is unique, and we could have more than one Raspberry. So, where should it reside?
+- Cloud: Where the Bot resides
 - Mobile phones and PCs: Where the Users can access the Bot
