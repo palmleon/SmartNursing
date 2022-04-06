@@ -1,5 +1,6 @@
 from MyMQTT import *
-from channelManager import *        
+from channelManager import *  
+from timeChecker import hasAdayPassed, isNightTime      
 
 class thingSpeakAdaptor():
     """Class dedit to the interaction with ThingSpeak from MQTT messages"""
@@ -22,10 +23,13 @@ class thingSpeakAdaptor():
         json_received = json_received[2:-1]
         json_received = json.loads(json_received)
         if topic == 'dapis/test1':
-           c.cManager(json_received)
+            if isNightTime(json_received['bt']):
+                c.cManager(json_received)
+
     def thingSpeakAdaptorSetUp(self):
         self.start()
         self.subscribe(self.topic)
+
             
 
 if __name__ == '__main__':
