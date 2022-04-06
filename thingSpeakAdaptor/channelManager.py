@@ -108,17 +108,20 @@ class channelManager():
         write_api = channelToUpdate['api_keys'][0]['api_key']
         read_api = channelToUpdate['api_keys'][1]['api_key']
         channelID = channelToUpdate['id']
+        counter = 0
         print('Upload in progress')
         for i in range(len(cJson['e'])):
             update_value = cJson['e'][i]
             field_number = self.channelFeed(channelID,read_api,update_value['n'],len(cJson['e']))
             if type(update_value['v']) == list:
-                for i in range(0,len(update_value['v'])):
-                    print('...')
-                    requests.get('https://api.thingspeak.com/update?api_key={}&field{}={}'.format(write_api,field_number,update_value['v'][i]))
+                perc = (100/(len(update_value['v'])*len(cJson['e'])))
+                for j in range(0,len(update_value['v'])):
+                    print('{}%...'.format(perc*(i+counter)))
+                    requests.get('https://api.thingspeak.com/update?api_key={}&field{}={}'.format(write_api,field_number,update_value['v'][j]))
+                    counter = counter +1
                     time.sleep(16)
             else:
-                print('...')
+                print('{}%...'.format(i*(100/len(cJson['e']))))
                 requests.get('https://api.thingspeak.com/update?api_key={}&field{}={}'.format(write_api,field_number,update_value['v']))
                 time.sleep(16)
         print('Upload concluded')
