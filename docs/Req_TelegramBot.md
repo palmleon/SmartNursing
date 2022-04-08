@@ -8,6 +8,7 @@ Specification document for the Bot.
 - Nurses
 - Dashboard
 - System Administrator
+- Rest of the System
 
 ## ACTORS
 
@@ -26,6 +27,7 @@ Specification document for the Bot.
 | 2       | Manage alerts |
 | 2.1     | Receive alerts |
 | 2.2     | Send warning messages to the medical staff |
+| 2.2.1   | Define a minimum interval (about 1 min) between two consecutive identical warnings |
 | 3       | Manage patients |
 | 3.1     | Register patients |
 | 3.2     | Remove patients |
@@ -48,6 +50,7 @@ Specification document for the Bot.
 | Availability | The bot should be available 99% of the time |
 | Scalability | Every metric of the bot should not depend on the n. users involved |
 | Security    | Authenticate User (Nurse, System Admin) |
+| Security    | Only authorized Users should know about the bot and be able to interact with it |
 
 ## USE CASE SCENARIO
 
@@ -247,10 +250,16 @@ Specification document for the Bot.
 | Pre-condition | A patient in the clinic has a medical emergency |
 |               | The patient is already present in the catalog |
 |               | Users are authenticated and always logged in |
+|               | Min. interval between two identical warnings: dt |
 | Post-condition | Users are informed of the emergency and can handle it |
 | Steps | The system receives a warning from monitoring modules |
-|       | The system reads the list of all Users that are currently working in the clinic |
-|       | The system forwards the warning to those Users |
+|       | The system verifies if the warning has already been sent > dt time before |
+|       | If that is the case: |
+|       | - The system reads the list of all Users that are currently working in the clinic |
+|       | - The system forwards the warning to those Users |
+|       | - The system notifies that the warning has been forwarded at the current time t (and must not be forwarded before t + dt) |
+|       | Otherwise: |
+|       | - The warning is not forwarded |
 
 ### Scenario 7: Setting Room Temperature/Lighting
 
