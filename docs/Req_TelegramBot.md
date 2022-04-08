@@ -648,10 +648,10 @@ UC5.1 ..> UC5.2 : include
 
 ## DEPLOYMENT DIAGRAM
 
-- On Mobile Phones (users): Telegram
-- On the Cloud: the Telegram Bot (it should be registered)
+- Mobile Phones and PCs(users): Telegram
+- Raspberry PI: the Telegram Bot (it should be registered)
 
 ## SYSTEM DIAGRAM
 
 - Mobile phones and PCs: Where the Users can access the Bot
-- Cloud: Where the Bot resides
+- Raspberry PI: Where the Bot resides
