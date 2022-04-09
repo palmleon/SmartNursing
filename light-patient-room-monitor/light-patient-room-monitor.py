@@ -1,3 +1,4 @@
+from pydoc import doc
 import time
 from MyMQTT import *
 import json
@@ -8,11 +9,14 @@ class light_patient_room_monitor() :
     def __init__(self) :
 
         self.conf_file = json.load(open('config.json'))
+        
 
         r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
             'serviceID' : 1,
             'name' : 'light-patient-room-monitor'
         }))
+        if r.ok == False :
+            print('Error adding the service')
         r = requests.get(self.conf_file['host']+"/city")
         c = r.json()
         r = requests.get(self.conf_file['host']+"/api-weather")
@@ -29,7 +33,6 @@ class light_patient_room_monitor() :
         self.commandTopic = c
         self.mqttClient.start()
         self.mqttClient.mySubscribe(self.subscribeTopic)
-        print('starta')
 
     def updateService(self) :
         while True :

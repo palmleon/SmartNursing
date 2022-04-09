@@ -8,7 +8,7 @@ import datetime
 class Catalog(object) :
     exposed = True
     def __init__(self) :
-        self.fp = open("./catalog.json","r")
+        self.fp = open("catalog.json","r")
         self.catalogList = json.load(self.fp)
         self.fp.close()
         
@@ -22,7 +22,8 @@ class Catalog(object) :
     def refreshList(self) :
         while True :
             time.sleep(60*20) # Tempo di attesa prima di partire a refreshare
-            print('parto a refreshare')
+            #print('parto a refreshare')
+            #Elimino device e servizi che non sono aggiornati da più di 2 minuti
             self.catalogList['devices'] = list(filter(lambda dev : self.computeDifference(datetime.datetime.today(),dev['timestamp']) < 2,self.catalogList['devices']))
             self.catalogList['services'] = list(filter(lambda dev : self.computeDifference(datetime.datetime.today(),dev['timestamp']) < 2,self.catalogList['services']))
             self.fp = open("catalog.json","w")
@@ -32,7 +33,7 @@ class Catalog(object) :
 
     def GET(self,*uri,**path):
         if len(uri) != 1 :
-            raise cherrypy.HTTPError(500,'Wrong parameters number')
+            raise cherrypy.HTTPError(400,'Wrong parameters number')
 
         if uri[0] == 'message-broker' :
             return json.dumps(self.catalogList["message-broker"])
@@ -82,6 +83,8 @@ class Catalog(object) :
             return json.dumps(self.catalogList["devices"])
 
         elif uri[0] == 'device' :
+            if len(uri) != 2 :
+                raise cherrypy.HTTPError(400,'deviceID missing')
             for device in self.catalogList['devices'] :
                 if device['deviceID'] == int(uri[1]) :
                     return json.dumps(device)
@@ -90,8 +93,10 @@ class Catalog(object) :
         elif uri[0] == 'services' :
             return json.dumps(self.catalogList["services"])
         elif uri[0] == 'service' :
+            if len(uri) != 2 :
+                raise cherrypy.HTTPError(400,'serviceID missing')
             for service in self.catalogList['services'] :
-                if device['serviceID'] == int(uri[1]) :
+                if service['serviceID'] == int(uri[1]) :
                     return json.dumps(device)
             raise cherrypy.HTTPError(404,'service not found')
 
@@ -99,6 +104,8 @@ class Catalog(object) :
             return json.dumps(self.catalogList["patients"])
 
         elif uri[0] == 'patient' :
+            if len(uri) != 2 :
+                raise cherrypy.HTTPError(400,'patientID missing')
             for patient in self.catalogList['patients'] :
                 if device['patientID'] == int(uri[1]) :
                     return json.dumps(patient)
@@ -107,28 +114,40 @@ class Catalog(object) :
             raise cherrypy.HTTPError(400,'operation not found')
 
     def POST(self,*uri,**path):
-        #aggiungere controllo di eliminazione duplicati
         if len(uri) != 1 :
             raise cherrypy.HTTPError(500,'Wrong parameters number')
 
         if uri[0] == 'add-device' :
+            
             newDevice = json.loads(cherrypy.request.body.read())
+            for device in self.catalogList['devices'] :
+                if device['deviceID'] == newDevice['deviceID'] :
+                    raise cherrypy.HTTPError(400,"device already exists")
             newDevice['timestamp'] = str(datetime.datetime.today())
             self.catalogList['devices'].append(newDevice)
             return
 
         elif uri[0] == 'add-patient' :
             newPatient = json.loads(cherrypy.request.body.read())
+            for patient in self.catalogList['patients'] :
+                if patient['patientID'] == newPatient['patientID'] :
+                    raise cherrypy.HTTPError(400,"patient already exists")
             self.catalogList['patients'].append(newPatient)
             return 
 
         elif uri[0] == 'add-telegram-chat-id' :
             newId = json.loads(cherrypy.request.body.read())
+            for id in self.catalogList['telegram-chat-id-list'] :
+                if id == newId :
+                    raise cherrypy.HTTPError(400,"id already exists")
             self.catalogList['telegram-chat-id-list'].append(newId)
             return 
 
         elif uri[0] == 'add-service' :
             newService = json.loads(cherrypy.request.body.read())
+            for service in self.catalogList['services'] :
+                if service['serviceID'] == newService['serviceID'] :
+                    raise cherrypy.HTTPError(400,"service already exists")
             newService['timestamp'] = str(datetime.datetime.today())
             self.catalogList['services'].append(newService)
             return 
@@ -139,7 +158,7 @@ class Catalog(object) :
 
     def PUT(self,*uri,**path):
         if len(uri) != 1 :
-            raise cherrypy.HTTPError(500,'Wrong parameters number')
+            raise cherrypy.HTTPError(400,'Wrong parameters number')
 
         if uri[0] == 'update-device' :
             newDevice = json.loads(cherrypy.request.body.read())
@@ -157,13 +176,7 @@ class Catalog(object) :
                 if self.catalogList['services'][i]['serviceID'] == id :
                     self.catalogList['services'][i]['timestamp'] = str(datetime.datetime.today())
             return 
-        if uri[0] == 'update-patient' :
-            newPatient = json.loads(cherrypy.request.body.read())
-            id = newPatient['patientID']
-            for i in range(len(self.catalogList['patients'])) :
-                if self.catalogList['patients'][i]['patientID'] == id :
-                    self.catalogList['patients'][i]['timestamp'] = str(datetime.datetime.today())
-            return 
+        
         else : 
             raise cherrypy.HTTPError(400,'operation not found')
 
@@ -178,6 +191,14 @@ class Catalog(object) :
                 if self.catalogList['patients'][i]['patientID'] == id :
                     del self.catalogList['patients'][i]
             raise cherrypy.HTTPError(404,'patient not found')
+        
+        #Is necessary?
+        elif uri[0] == 'delete-service' :
+            id = int(uri[1])
+            for i in range(len(self.catalogList['services'])) :
+                if self.catalogList['services'][i]['serviceID'] == id :
+                    del self.catalogList['services'][i]
+            raise cherrypy.HTTPError(404,'service not found')
 
         elif uri[0] == 'delete-telegram-chat-id' :
             id = int(uri[1])
@@ -185,14 +206,9 @@ class Catalog(object) :
                 if self.catalogList['telegram-chat-id-list'][i] == id :
                     del self.catalogList['telegram-chat-id-list'][i]
             raise cherrypy.HTTPError(404,'id  not found')
-
-        elif uri[0] == 'delete-service' :
-            id = int(uri[1])
-            for i in range(len(self.catalogList['services'])) :
-                if self.catalogList['services'][i]['serviceID'] == id :
-                    del self.catalogList['services'][i]
-            raise cherrypy.HTTPError(404,'service not found')
-        else : 
+        
+       
+        else :
             raise cherrypy.HTTPError(400,'operation not found')
 
 
