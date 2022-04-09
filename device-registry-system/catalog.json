@@ -46,9 +46,9 @@
     "patient-saturation-base-topic": "group01/IoTProject/Patient/Pulsation/",
     "patient-room-base-topic": "group01/IoTProject/PatientRoom/",
     "common-room-base-topic": "group01/IoTProject/CommonRoom/",
-    "alarm-base-topic": "group01/IoTProject/PatientAlarm",
-    "patient-room-command-base-topic": "group01/IoTProject/PatientRoomCommand",
-    "common-room-command-base-topic": "group01/IoTProject/CommonRoomCommand",
+    "alarm-base-topic": "group01/IoTProject/PatientAlarm/",
+    "patient-room-command-base-topic": "group01/IoTProject/PatientRoomCommand/",
+    "common-room-command-base-topic": "group01/IoTProject/CommonRoomCommand/",
     "devices": [],
     "patients": []
 }

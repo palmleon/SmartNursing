@@ -8,7 +8,7 @@ class temperature_patient_room_monitor() :
     def __init__(self) :
         self.conf_file = json.load(open('config.json'))
         r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps ({
-            'serviceID' : 2,
+            'serviceID' : 4,
             'name' : 'temperature-common-room-monitor'
         }))
         r = requests.get(self.conf_file['host']+"/message-broker")
