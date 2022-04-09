@@ -1,0 +1,5 @@
+#execute with : docker run  --name crei -it --link cdrsi:localhost --net smartclinic_default rei
+FROM python:3
+COPY . .
+RUN pip3 install -r requirements.txt
+CMD ["python3", "./raspberryEmulator.py"]
