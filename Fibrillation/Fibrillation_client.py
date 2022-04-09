@@ -10,7 +10,7 @@ class Fibrillation_Monitor_client():
     fp=open('Fibrillation_config.json')
     conf_file = json.load(fp)
     fp.close
-    #Acquisizione ID,nome e url registro
+    #Acquisizione ID, nome e url registro
     self.__clientID=conf_file["serviceID"]
     self.__name=conf_file["name"]
     self.__register=conf_file["host"]
@@ -27,12 +27,12 @@ class Fibrillation_Monitor_client():
     # Richiesta dei topic di subscribe e publish
     r = requests.get(self.__register+"/patient-saturation-base-topic")
     mb = r.json()
-    # Per ora, in mb abbiamo direttamente il topic, non coppia key/value
+    # In mb abbiamo il topic
     self.__topic_sub=mb+"+"
 
     r = requests.get(self.__register+"/alarm-base-topic")
     mb = r.json()
-    # Per ora, in mb abbiamo direttamente il topic, non coppia key/value
+    # In mb abbiamo il topic
     self.__base_topic_pub=mb
 
     # Creating analyzer
