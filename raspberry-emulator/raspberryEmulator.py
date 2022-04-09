@@ -73,7 +73,7 @@ class RaspberryEmulator :
                     
     def emulatePatientSaturationData(self) :
         while True :
-            time.sleep(10) #send data every minute
+            time.sleep(30) #send data every minute
             for room in list(self.rooms.keys()) :
                 for id in self.rooms[room] :
                     dataEmulated = self.patientOximeterSensor.emulate(id)
@@ -82,7 +82,7 @@ class RaspberryEmulator :
     
     def emulatePatientTemperatureData(self) :
         while True :
-            time.sleep(30) #send data every minute
+            time.sleep(10) #send data every minute
             for room in list(self.rooms.keys()) :
                 for id in self.rooms[room] :
                     dataEmulated = self.patientTemperatureSensor.emulate(id)
