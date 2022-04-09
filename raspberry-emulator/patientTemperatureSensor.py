@@ -3,7 +3,7 @@ import time
 
 class Temperature_sensor():
     def __init__(self):
-        self.__baseMessage={"bn" : "","bt":0,"e" : [{"n":"battery","u":"V","v":0}, {"n":"temperature","u":"cel","v":0}]}
+        self.__baseMessage={"bn" : "testTemperature","bt":0,"e" : [{"n":"battery","u":"V","v":0}, {"n":"temperature","u":"cel","v":0}]}
     
     def emulate(self,ID_P):
         # 1 dato di batteria e temperatura insieme ogni 30 secondi

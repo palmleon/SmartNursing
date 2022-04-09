@@ -55,8 +55,9 @@ class light_patient_room_monitor() :
     
     def notify(self,topic,payload) :
         message = dict(json.loads(payload))
-        room = message['roomID']
-        if message['light-value'] == 1 :
+        #prendere room id dal topic
+        room = topic.split("/")[-1]
+        if message['e'][0]['v'] == 1 :
             #fai la richiesta 
             # invoca funzione che ritorna  
             luminosity = self.setLuminosity()  

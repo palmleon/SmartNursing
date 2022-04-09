@@ -99,11 +99,11 @@ class temperature_patient_room_monitor() :
     def notify(self,topic,payload) :
         message = dict(json.loads(payload))
         #suppongo di ricevere nel messaggio id room sotto la chiave room ed sotto la chiave presence  l info se utente c'è o meno e sotto la chiave temperature la temperatue corrente
-        room = message['roomID']
+        room = topic.split("/")[-1]
         
         #fai la richiesta 
         # invoca funzione che ritorna  
-        command = self.setTemperature(message['presence-value'],message['temperature-value'])  
+        command = self.setTemperature(message['e'][1]['v'],message['e'][2]['v'])  
         #MyMQTT.myPublish(self.commandTopic,{'switch' : command, 'room' : room })     
         print("command "+str({'switch' : command, 'room' : room }))
     

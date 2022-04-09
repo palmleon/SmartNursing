@@ -59,6 +59,15 @@ services :
     stdin_open : true
     tty : true
 
+#thinkspeek adaptor
+  ctsai : 
+    image : tsai
+    links : 
+      - cdrsi
+    depends_on :
+      - cdrsi
+    stdin_open : true
+    tty : true
 
    
 

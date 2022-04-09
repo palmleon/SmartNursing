@@ -107,7 +107,7 @@ class Catalog(object) :
             if len(uri) != 2 :
                 raise cherrypy.HTTPError(400,'patientID missing')
             for patient in self.catalogList['patients'] :
-                if device['patientID'] == int(uri[1]) :
+                if patient['patientID'] == int(uri[1]) :
                     return json.dumps(patient)
             raise cherrypy.HTTPError(404,'patient not found')
         else : 

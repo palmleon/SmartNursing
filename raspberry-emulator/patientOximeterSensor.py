@@ -3,7 +3,7 @@ import time
 
 class Oximeter_sensor():
     def __init__(self):
-        self.__baseMessage={"bn" :"","bt":0,"e":[{"n":"battery","u":"V","v":0},{"n":"perfusion index","u":"perc","v":0},{"n":"saturation","u":"perc","v":0}, {"n":"pulse rate","u":"bpm","v":0}]}
+        self.__baseMessage={"bn" :"testTemeperature","bt":0,"e":[{"n":"battery","u":"V","v":0},{"n":"perfusion index","u":"perc","v":0},{"n":"saturation","u":"perc","v":0}, {"n":"pulse rate","u":"bpm","v":0}]}
     
     def emulate(self,ID_P):
         # Una  lista di 10 valori ogni 10 secondi di PI, saturazione e battiti (associati ad un solo valore di batteria)
