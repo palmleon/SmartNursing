@@ -44,7 +44,7 @@ class Patient_Monitor_client():
     self.analyzer=Patient_Monitor()
 
     # Creating client
-    self.client = MyMQTT("patient-monitor-client-service", self.__broker, self.__port, self)
+    self.client = MyMQTT(self.__name, self.__broker, self.__port, self)
 
     # Starting client
     self.client.start()

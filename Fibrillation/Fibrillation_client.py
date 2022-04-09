@@ -39,7 +39,7 @@ class Fibrillation_Monitor_client():
     self.analyzer=Fibrillation_Monitor()
 
     # Creating client
-    self.client = MyMQTT("fibrillation-client-service", self.__broker, self.__port, self)
+    self.client = MyMQTT(self.__name, self.__broker, self.__port, self)
 
     # Starting client
     self.client.start()
