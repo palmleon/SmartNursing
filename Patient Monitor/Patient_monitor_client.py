@@ -44,7 +44,7 @@ class Patient_Monitor_client():
     self.analyzer=Patient_Monitor()
 
     # Creating client
-    self.client = MyMQTT(self.__clientID, self.__broker, self.__port, self)
+    self.client = MyMQTT(str(self.__clientID), self.__broker, self.__port, self)
 
     # Starting client
     self.client.start()
@@ -61,6 +61,7 @@ class Patient_Monitor_client():
 
 
   def notify(self,topic,msg): # Metodo che analizza i dati arrivati utilizzando i metodi dell'analyzer e, in caso, pubblica i warning
+    print("arriva in pm")
     msg=json.loads(msg)
     ID_P=topic.split("/")[-1] # Prendo l'ID del PZ alla fine del topic
 
