@@ -205,8 +205,13 @@ class channelManager():
     def updateList(self,patientList):
         channelID = []
         for i in range (0,len(self.channelList)):
+            found = False
             for j in range(0,len(patientList)):
                 if patientList[j]['patientID'] == self.channelList[i]['name']:
-                    channelID.append(self.channelList[i]['name'])
+                    found = True
+            if found == False :
+                channelID.append(self.channelList[i]['name'])
+        
         for i in range(0,len(channelID)):
             self.deleteChannel(channelID[i])
+        
