@@ -22,7 +22,7 @@ class light_patient_room_monitor() :
         self.urlApi = a+c
         r = requests.get(self.conf_file['host']+"/message-broker")
         mb = r.json()
-        self.mqttClient = MyMQTT('light-patient-room-monitor',mb['name'],mb['port'],self)
+        self.mqttClient = MyMQTT('light-patient-room-monitor-service1',mb['name'],mb['port'],self)
         r = requests.get(self.conf_file['host']+"/patient-room-base-topic")
         t = r.json()
         self.subscribeTopic = t+"+"

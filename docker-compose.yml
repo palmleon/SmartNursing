@@ -1,75 +1,73 @@
-version :  "2"
-services :
+version: "2"
+services:
   #device registry system
   cdrsi:
-    image: drsi 
-    ports :
+    image: drsi
+    ports:
       - 8080:8080
-    expose : 
+    expose:
       - 8080
-    container_name : cdrsi
+    container_name: cdrsi
 
-#light patient room monitor
-  clprmi: 
+  #Patient monitor
+  cpm:
+    image: pmi
+    links:
+      - cdrsi
+    depends_on:
+      - cdrsi
+    stdin_open: true
+    tty: true
+
+  #temperature patient room
+  ctpri:
+    image: tpri
+    links:
+      - cdrsi
+    depends_on:
+      - cdrsi
+    stdin_open: true
+    tty: true
+
+  #light patient room monitor
+  clprmi:
     image: lprmi
     stdin_open: true
     tty: true
-    links : 
+    links:
       - cdrsi
-    depends_on :
+    depends_on:
       - cdrsi
-      
-#temperature common room
-  ctcri : 
-    image : tcri
-    links : 
-      - cdrsi
-    depends_on :
-      - cdrsi
-    stdin_open : true
-    tty : true
 
-#fibbrilation
-  cf :
-    image : fi 
-    links : 
+  #temperature common room
+  ctcri:
+    image: tcri
+    links:
       - cdrsi
-    depends_on :
+    depends_on:
       - cdrsi
-    stdin_open : true
-    tty : true
+    stdin_open: true
+    tty: true
 
-#Patient monitor
-  cpm :
-    image : pmi 
-    links : 
+  #fibbrilation
+  cf:
+    image: fi
+    links:
       - cdrsi
-    depends_on :
+    depends_on:
       - cdrsi
-    stdin_open : true
-    tty : true
+    stdin_open: true
+    tty: true
 
-#temperature patient room
-  ctpri : 
-    image : tpri
-    links : 
+  #thinkspeek adaptor
+  ctsai:
+    image: tsai
+    links:
       - cdrsi
-    depends_on :
+    depends_on:
       - cdrsi
-    stdin_open : true
-    tty : true
-
-#thinkspeek adaptor
-  ctsai : 
-    image : tsai
-    links : 
-      - cdrsi
-    depends_on :
-      - cdrsi
-    stdin_open : true
-    tty : true
-
-   
+    stdin_open: true
+    tty: true
 
 # raspberry emulator
 #  crei : 

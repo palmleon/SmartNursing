@@ -39,7 +39,7 @@ class Fibrillation_Monitor_client():
     self.analyzer=Fibrillation_Monitor()
 
     # Creating client
-    self.client = MyMQTT(str(self.__clientID), self.__broker, self.__port, self)
+    self.client = MyMQTT("fibrillation-client-service", self.__broker, self.__port, self)
 
     # Starting client
     self.client.start()
@@ -51,7 +51,7 @@ class Fibrillation_Monitor_client():
   def updateService(self) :
     while True :
       time.sleep(100)
-      r = requests.put(self.__register+"/add-service",data = json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
+      r = requests.put(self.__register+"/update-service",data = json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
 
   def notify(self,topic,msg): # Metodo che analizza i dati arrivati utilizzando i metodi dell'analyzer e, in caso, pubblica i warning
     msg=json.loads(msg)

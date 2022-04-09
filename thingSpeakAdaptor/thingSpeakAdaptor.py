@@ -40,7 +40,7 @@ class thingSpeakAdaptor():
         json_received = json_received[2:-1]
         json_received = json.loads(json_received)
         #if isNightTime(json_received['bt']):
-        self.c.cManager(json_received)
+        self.c.cManager(json_received,topic)
     def updateService(self) :
         while True :
             time.sleep(100)

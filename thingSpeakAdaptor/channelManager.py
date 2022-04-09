@@ -38,7 +38,7 @@ class channelManager():
                     return self.channelList[i]
         return 0
     
-    def createChannel(self,cJson):
+    def createChannel(self,cJson,topic):
         """Creates a new ThingSpeak channel with rest API\n
         If no paramater is given it will create a channel with the default configuration\n
         Parameters
@@ -51,7 +51,7 @@ class channelManager():
             print('Adding new channel with default configuration')
             requests.post('https://api.thingspeak.com/channels.json', json=cData)
         else:
-            cData['name'] = cJson['bn']
+            cData['name'] = topic
             print('Adding {} as a new channel'.format(cData['name']))
             if self.isChannelinList(cData['name']) == 0:
                 requests.post('https://api.thingspeak.com/channels.json', json=cData)
@@ -59,16 +59,16 @@ class channelManager():
             else:
                 print('This channel already exists!')
 
-    def cManager(self,cJson):
+    def cManager(self,cJson,topic):
         """Channel creations and updates manager\n
         Parameters
         ----------
         cJson: dict
             dict containing data"""
         self.listChannels()
-        if self.isChannelinList(cJson['bn']) == 0:
-            self.createChannel(cJson)
-        self.channelUpdater(cJson)
+        if self.isChannelinList(topic.split("/")[-1]) == 0:
+            self.createChannel(cJson,topic.split("/")[-1])
+        self.channelUpdater(cJson,topic.split("/")[-1])
 
     def channelFeed(self,channelID,read_api,field_name,len):
         """Retrive a chosen field number based on contents\n
@@ -99,12 +99,12 @@ class channelManager():
                     elif len == 4:
                         return 1
 
-    def channelUpdater(self,cJson):
+    def channelUpdater(self,cJson,topic):
         """Updates channel with new data\n
         Parameters
         ----------
         cJson: dict"""
-        channelToUpdate = self.isChannelinList(cJson['bn'])
+        channelToUpdate = self.isChannelinList(topic)
         write_api = channelToUpdate['api_keys'][0]['api_key']
         read_api = channelToUpdate['api_keys'][1]['api_key']
         channelID = channelToUpdate['id']
