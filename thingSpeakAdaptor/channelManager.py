@@ -134,7 +134,7 @@ class channelManager():
         channelID: str"""
         if channelID!=None:
             print('Deleting channel {}'.format(channelID))
-            if self.checkChannel(channelID) != 0:
+            if self.isChannelinList(channelID) != 0:
                 cID = self.retriveChannelID(channelID)
                 print(cID)
                 if cID != -1:
@@ -161,7 +161,7 @@ class channelManager():
         channelID: str"""
         if channelID!=None:
             print('Clearing {} data'.format(channelID))
-            if self.checkChannel(channelID) != 0:
+            if self.isChannelinList(channelID) != 0:
                 cID = self.retriveChannelID(channelID)
                 if cID != -1:
                     cData = self.channelData
@@ -192,3 +192,21 @@ class channelManager():
             if self.channelList[i]['name'] == channelName:
                 return self.channelList[i]['id']
         return -1
+    
+    def newDay(self):
+        """Switch day_flag from 0 to 1"""
+        print('Passing day')
+        for channels in range(0,len(self.listChannels)):
+            write_api = channels['api_keys'][0]['api_key']
+            print('{}%...'.format(channels*(100/len(self.channelList))))
+            requests.get('https://api.thingspeak.com/update?api_key={}&field{}={}'.format(write_api,7,1))
+            time.sleep(16)
+
+    def updateList(self,patientList):
+        channelID = []
+        for i in range (0,len(self.channelList)):
+            for j in range(0,len(patientList)):
+                if patientList[j]['patientID'] == self.channelList[i]['name']:
+                    channelID.append(self.channelList[i]['name'])
+        for i in range(0,len(channelID)):
+            self.deleteChannel(channelID[i])
