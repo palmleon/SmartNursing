@@ -1,10 +1,17 @@
-- Bisogna allertare lo staff anche in caso di temperatura/illuminazione anomala? [Secondo me sì]
+- Bisogna effettivamente allertare lo staff in caso di temperatura anomala:
+	- Definire "troppo caldo/freddo"
+	- Definire un minimo intervallo tra due messaggi identici (il servizio che genera i messaggi
+		si occupa di non spammarli)
+	- Definire topic per temperatura anomala (a cui il Bot fa subscribe)
 - Cosa succede se nella clinica vengono ricavate nuove stanze? [Andrebbe considerata l'idea di aggiungerle]
   Chi si occupa di aggiungerle? [Admin]
-  E' possibile aggiungerle e come? [Bot]
-- E' possibile impostare anche l'illuminazione di una stanza (magari permettendo sia una configurazione automatica che manuale)?
-- Gli utenti (staff medico e amministratori) sono autenticati una volta per tutte, al primo accesso al bot? (Questo permette di ricevere notifiche senza dover effettuare il login)
-- Gli infermieri sono registrati nel sistema e sono registrati con il loro turno di lavoro (in questo modo, le notifiche sono inoltrate solo a chi sta lavorando)
+  E' possibile aggiungerle e come? [Raspberry Emulator]
+- Gli utenti (staff medico e amministratori) sono autenticati una volta per tutte, al primo accesso al bot? [Telegram dovrebbe farlo in automatico, va definito il meccanismo di autenticazione (comando con nome speciale, password, ...)]
+- Gli infermieri sono registrati nel sistema e sono registrati con il loro turno di lavoro
+  [Definiamo due comandi (StartWork, StopWork) che definiscono quando un infermiere è al lavoro]
 - Da definire: 
-  - come "il sistema rimuove/edita/registra" un paziente o una stanza
-  - come "il sistema setta la temperatura/illuminazione" di una stanza
+  - come "il sistema rimuove/edita/registra" un paziente o una stanza [Raspberry Emulator]
+  - come "il sistema setta la temperatura" di una stanza [Comando Telegram]
+  
+Punto 3 è da attribuire al Raspberry Emulator (da vedere se lasciarlo anche su Telegram)
+Punti 1, 4.2, 4.4 da rimuovere
