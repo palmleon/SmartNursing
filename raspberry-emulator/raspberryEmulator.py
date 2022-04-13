@@ -8,17 +8,13 @@ from patientOximeterSensor import *
 import json
 class RaspberryEmulator :
 
-    patientMonitorEmulatorIntervalMinute = 0.5
-    patientTemperatureEmulatorIntervalMinute = 1
-    patientRoomEmulatorIntervalMinute = 2
-    commonRoomEmulatorIntervalMinute = 1
-    updateIntervalMinute = 3
+  
 
     def __init__(self) :
-        self.patientMonitorEmulatorIntervalMinute = 0.5
-        self.patientTemperatureEmulatorIntervalMinute = 1
-        self.patientRoomEmulatorIntervalMinute = 2
-        self.commonRoomEmulatorIntervalMinute = 1
+        self.patientMonitorEmulatorIntervalMinute = 5
+        self.patientTemperatureEmulatorIntervalMinute = 5
+        self.patientRoomEmulatorIntervalMinute = 0.5
+        self.commonRoomEmulatorIntervalMinute = 0.3
         self.updateIntervalMinute = 3
         self.rooms = {}
         self.roomSensor = RoomSensor()
@@ -64,7 +60,7 @@ class RaspberryEmulator :
         self.fp = open("actuation_command.json","a")
         json.dump(command,self.fp)
         self.fp.close()
-        print('ricevuto comando')#rimuovere 
+        print('ricevuto comando '+str(command))#rimuovere 
 
     def emulateCommonRoomData(self) :
         while True :

@@ -65,7 +65,7 @@ class light_patient_room_monitor() :
             self.__baseMessage['bt'] = time.time()
             self.__baseMessage['r'] = room
             self.__baseMessage['c']['v'] = luminosity
-            MyMQTT.myPublish(self.commandTopic,self.__baseMessage)     
+            self.mqttClient.myPublish(self.commandTopic,self.__baseMessage)     
             print("command "+str({'switch' : luminosity, 'room' : room }))#rimuovere
     
         

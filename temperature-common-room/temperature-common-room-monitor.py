@@ -61,9 +61,9 @@ class temperature_patient_room_monitor() :
 
     def defineCommand(self,desiredTemperature,currentTemperature,season) :
         command = 0
-        if season == 'hot' and  currentTemperature > self.desiredTemperature :
+        if season == 'hot' and  currentTemperature > desiredTemperature :
                 command = 1
-        if season == 'cold' and currentTemperature < self.desiredTemperature : 
+        if season == 'cold' and currentTemperature < desiredTemperature : 
                 command = 1
         return command
 
@@ -111,7 +111,8 @@ class temperature_patient_room_monitor() :
         self.__baseMessage['bt'] = time.time()
         self.__baseMessage['r'] = room
         self.__baseMessage['c']['v'] = command
-        MyMQTT.myPublish(self.commandTopic,self.__baseMessage)
+        self.mqttClient.myPublish(self.commandTopic,self.__baseMessage)     
+
         print("command "+str({'switch' : command, 'room' : room }))   #rimuoevere
         
 if __name__ == "__main__" :

@@ -108,7 +108,7 @@ class temperature_patient_room_monitor() :
         self.__baseMessage['bt'] = time.time()
         self.__baseMessage['r'] = room
         self.__baseMessage['c']['v'] = command
-        MyMQTT.myPublish(self.commandTopic,self.__baseMessage)     
+        self.mqttClient.myPublish(self.commandTopic,self.__baseMessage)     
         print("command "+str({'switch' : command, 'room' : room }))#rimuoevere
     
         
