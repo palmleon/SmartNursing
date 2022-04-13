@@ -8,6 +8,7 @@ import datetime
 class Catalog(object) :
     exposed = True
     def __init__(self) :
+        self.refreshCatalogIntervalMinute = 2
         self.fp = open("catalog.json","r")
         self.catalogList = json.load(self.fp)
         self.fp.close()
@@ -21,8 +22,7 @@ class Catalog(object) :
 
     def refreshList(self) :
         while True :
-            time.sleep(60*20) # Tempo di attesa prima di partire a refreshare
-            #print('parto a refreshare')
+            time.sleep(60*self.refreshCatalogIntervalMinute)
             #Elimino device e servizi che non sono aggiornati da più di 2 minuti
             self.catalogList['devices'] = list(filter(lambda dev : self.computeDifference(datetime.datetime.today(),dev['timestamp']) < 2,self.catalogList['devices']))
             self.catalogList['services'] = list(filter(lambda dev : self.computeDifference(datetime.datetime.today(),dev['timestamp']) < 2,self.catalogList['services']))

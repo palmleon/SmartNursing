@@ -28,6 +28,8 @@ class temperature_patient_room_monitor() :
         r = requests.get(self.conf_file['host']+"/patient-room-command-base-topic")
         c = r.json()
         self.commandTopic = c
+        self.__baseMessage={"bn" : "temperature-common-room-monitor","bt":0,"r":0,"c" : {"n":"switch","u":"/","v":0}}
+
         self.mqttClient.start()
         self.mqttClient.mySubscribe(self.subscribeTopic)
         print('starta')
@@ -101,11 +103,13 @@ class temperature_patient_room_monitor() :
         #suppongo di ricevere nel messaggio id room sotto la chiave room ed sotto la chiave presence  l info se utente c'è o meno e sotto la chiave temperature la temperatue corrente
         room = topic.split("/")[-1]
         
-        #fai la richiesta 
-        # invoca funzione che ritorna  
+        
         command = self.setTemperature(message['e'][1]['v'],message['e'][2]['v'])  
-        #MyMQTT.myPublish(self.commandTopic,{'switch' : command, 'room' : room })     
-        print("command "+str({'switch' : command, 'room' : room }))
+        self.__baseMessage['bt'] = time.time()
+        self.__baseMessage['r'] = room
+        self.__baseMessage['c']['v'] = command
+        MyMQTT.myPublish(self.commandTopic,self.__baseMessage)     
+        print("command "+str({'switch' : command, 'room' : room }))#rimuoevere
     
         
 

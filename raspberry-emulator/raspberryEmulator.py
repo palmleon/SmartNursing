@@ -7,7 +7,19 @@ from patientTemperatureSensor import *
 from patientOximeterSensor import *
 import json
 class RaspberryEmulator :
+
+    patientMonitorEmulatorIntervalMinute = 0.5
+    patientTemperatureEmulatorIntervalMinute = 1
+    patientRoomEmulatorIntervalMinute = 2
+    commonRoomEmulatorIntervalMinute = 1
+    updateIntervalMinute = 3
+
     def __init__(self) :
+        self.patientMonitorEmulatorIntervalMinute = 0.5
+        self.patientTemperatureEmulatorIntervalMinute = 1
+        self.patientRoomEmulatorIntervalMinute = 2
+        self.commonRoomEmulatorIntervalMinute = 1
+        self.updateIntervalMinute = 3
         self.rooms = {}
         self.roomSensor = RoomSensor()
         self.patientOximeterSensor = Oximeter_sensor()
@@ -48,11 +60,15 @@ class RaspberryEmulator :
         }))
 
     def notify(self,topic,payload) :
-        print('ricevuto comando')
+        command = dict(json.loads(payload))
+        self.fp = open("actuation_command.json","a")
+        json.dump(command,self.fp)
+        self.fp.close()
+        print('ricevuto comando')#rimuovere 
 
     def emulateCommonRoomData(self) :
         while True :
-            time.sleep(30) #send data every hour
+            time.sleep(self.commonRoomEmulatorIntervalMinute*60)
             for room in self.commonRoomList :
                 dataEmulated = self.roomSensor.emulateData(room)
                 self.mqttClient.myPublish(self.commonRoomTopic+str(room),dataEmulated)
@@ -61,7 +77,7 @@ class RaspberryEmulator :
 
     def emulatePatientRoomData(self) :
         while True :
-            time.sleep(20) #send data every hour
+            time.sleep(self.patientRoomEmulatorIntervalMinute*60)
             print("simulo per le seguenti stanze ",str(list(self.rooms.keys())))
             for room in list(self.rooms.keys()) :
                 if len(self.rooms[room]) != 0 :
@@ -73,7 +89,7 @@ class RaspberryEmulator :
                     
     def emulatePatientSaturationData(self) :
         while True :
-            time.sleep(30) #send data every minute
+            time.sleep(self.patientMonitorEmulatorIntervalMinute*60) 
             for room in list(self.rooms.keys()) :
                 for id in self.rooms[room] :
                     dataEmulated = self.patientOximeterSensor.emulate(id)
@@ -82,7 +98,7 @@ class RaspberryEmulator :
     
     def emulatePatientTemperatureData(self) :
         while True :
-            time.sleep(10) #send data every minute
+            time.sleep(self.patientTemperatureEmulatorIntervalMinute)
             for room in list(self.rooms.keys()) :
                 for id in self.rooms[room] :
                     dataEmulated = self.patientTemperatureSensor.emulate(id)
@@ -91,7 +107,7 @@ class RaspberryEmulator :
             
     def updateServices(self) :
         while True :
-            time.sleep(19*60) #update every 19 minutes
+            time.sleep(self.updateIntervalMinute*60)
             for commonRoom in self.commonRoomList :
                 r = requests.put(self.conf_file['host']+"/update-device",data = json.dumps({
                             'deviceID' : commonRoom,
