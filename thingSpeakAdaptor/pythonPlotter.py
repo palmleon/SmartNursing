@@ -12,7 +12,7 @@ class pythonPlotter():
         self.pulseRate = []
         self.perfusionIndex = []
         self.label_map = ["battery oximeter", "perfusion index", "saturation","pulse rate", "battery termometer", "temperature", "day_flag"]
-        self.labelOfInterests = ['temperature','saturation','pulse rate']
+        self.labelOfInterests = ['temperature', 'saturation', 'pulse rate']
 
     def retriveLatestData(self, channelList):
         today = datetime.fromtimestamp(time.time()).day
@@ -39,46 +39,52 @@ class pythonPlotter():
             dataList.append(dic)
         return dataList
 
-    def getPatientsData(self,dic,patientID,measure,date):
+    def getPatientsData(self, dic, patientID, measure, date):
         chosenDataList = []
-        for i in range(0,len(dic)):
+        for i in range(0, len(dic)):
             if dic[i]['channelID'] == patientID:
                 if len(dic[i][measure]) > 0:
-                    for j in range(0,len(dic[i][measure])):
+                    for j in range(0, len(dic[i][measure])):
                         if date in dic[i][measure][j].keys():
                             chosenDataList.append(dic[i][measure][j][date])
         return chosenDataList
 
-    def getValuesFromKey(self,dic,key,measure):
-        for items in range(0,len(dic)):
-            if len(dic[items][measure]) > 0:
-                for i in range(0,len(dic[items][measure])):
-                    print(dic[items][measure][i])
-                    if key in dic[items][measure][i].keys():
-                        print(dic[items][measure][i][key])
-                        print(dic[items]['channelID'])
-
-    def calculateAverage(self,l):
+    def tempAverage(self, temperatureList):
         sum = 0
-        if l is not None:
-            if len(l) > 0:
-                for i in range(0,len(l)):
-                    if float(l[i]) > 35:
-                        sum  = sum + float(l[i])
-                avg = sum/len(l)
-                return avg
-    
-    def dataOfInterest(self,dic):
-        pass
+        counter = 0
+        if temperatureList is not None:
+            if len(temperatureList) > 0:
+                for i in range(0, len(temperatureList)):
+                    if float(temperatureList[i]) > 35:
+                        sum = sum + float(temperatureList[i])
+                        counter = counter + 1
+                if counter != 0:
+                    avg = sum/counter
+                    return avg
 
-    def saveToJson(self,dic):
-        json.dump(dic,open('test.json','w'))
-    def plotter(self,dic):
-        for keys in dic.keys():
-            if dic[keys]:
-                pyplot.scatter(datetime.fromtimestamp(time.time()).day,dic[keys])
+    def piAverage(self, perfusionIndex, saturation, pulseRate):
+        sumSat = 0
+        sumPulse = 0
+        counter = 0
+        if saturation is not None and perfusionIndex is not None and pulseRate is not None:
+            if len(perfusionIndex) > 0 and len(saturation) > 0 and len(pulseRate) > 0:
+                for i in range(0, len(perfusionIndex)):
+                    if float(perfusionIndex[i]) > 4:
+                        if i < len(saturation) and i < len(pulseRate):
+                            sumSat = sumSat + float(saturation[i])
+                            sumPulse = sumPulse + float(pulseRate[i])
+                            counter = counter + 1
+                avgSaturation = sumSat/counter
+                avgPulse = sumPulse/counter
+                return avgSaturation,avgPulse
+
+
+    def saveToJson(self, dic):
+        json.dump(dic, open('test.json', 'w'))
+
+    def plotter(self, measure, time):
+        pyplot.scatter(time,measure)
         pyplot.show()
-        self.saveToJson(dic)
 
 
 if __name__ == '__main__':
@@ -88,9 +94,18 @@ if __name__ == '__main__':
     v = plot.retriveLatestData(c.channelList)
     plot.saveToJson(v)
     d = datetime.fromtimestamp(time.time())
-    d = d.replace(d.year,d.month,13)#d.day - 1)
+    d = d.replace(d.year, d.month, 13)  # d.day - 1)
     d = str(d).split(' ')[0]
-    l = plot.getPatientsData(v,'5','temperature',d)
-    print(l)
-    print(plot.calculateAverage(l))
-    #plot.calculateAverage(v,'temperature')
+    temperature = plot.getPatientsData(v, '5', 'temperature', d)
+    #print('temperature{}'.format(temperature))
+    saturation = plot.getPatientsData(v, '5', 'saturation', d)
+    #print('saturation{}'.format(saturation))
+    pulseRate = plot.getPatientsData(v,'5','pulse rate',d)
+    #print('pulse rate {}'.format(pulseRate))
+    pi = plot.getPatientsData(v,'5','perfusion index',d)
+    #print(pi)
+    avgSaturation,avgPulseRate = plot.piAverage(pi,saturation,pulseRate)
+    #print('sat:{} pulse:{}'.format(avgSaturation,avgPulseRate))
+    # plot.calculateAverage(v,'temperature')
+    plot.plotter(avgSaturation,d)
+    plot.plotter(avgPulseRate,d)
