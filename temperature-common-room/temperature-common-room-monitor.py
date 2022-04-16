@@ -26,6 +26,8 @@ class temperature_patient_room_monitor() :
         r = requests.get(self.conf_file['host']+"/common-room-command-base-topic")
         c = r.json()
         self.commandTopic = c
+        self.__baseMessage={"bn" : "temperature-common-room-monitor","bt":0,"r":0,"c" : {"n":"switch","u":"/","v":0}}
+
         self.mqttClient.start()
         self.mqttClient.mySubscribe(self.subscribeTopic)
         print('starta')
@@ -58,11 +60,11 @@ class temperature_patient_room_monitor() :
         return season
 
     def defineCommand(self,desiredTemperature,currentTemperature,season) :
-        command = 'off'
-        if season == 'hot' and  currentTemperature > self.desiredTemperature :
-                command = 'on'
-        if season == 'cold' and currentTemperature < self.desiredTemperature : 
-                command = 'on'
+        command = 0
+        if season == 'hot' and  currentTemperature > desiredTemperature :
+                command = 1
+        if season == 'cold' and currentTemperature < desiredTemperature : 
+                command = 1
         return command
 
     def expectedPresence(self,currentHour) :
@@ -100,17 +102,18 @@ class temperature_patient_room_monitor() :
     
     def notify(self,topic,payload) :
         message = dict(json.loads(payload))
-        #print('ricevurto '+str(message))
-        #suppongo di ricevere nel messaggio id room sotto la chiave room ed sotto la chiave presence  l info se utente c'è o meno e sotto la chiave temperature la temperatue corrente
         
-        #prendere id dal topic
 
         room = topic.split("/")[-1]
         #fai la richiesta 
         # invoca funzione che ritorna  
         command = self.setTemperature(message['e'][1]['v'],message['e'][2]['v'])  
-        #MyMQTT.myPublish(self.commandTopic,{'switch' : command, 'room' : room })  ù
-        print("command "+str({'switch' : command, 'room' : room }))   
+        self.__baseMessage['bt'] = time.time()
+        self.__baseMessage['r'] = room
+        self.__baseMessage['c']['v'] = command
+        self.mqttClient.myPublish(self.commandTopic,self.__baseMessage)     
+
+        print("command "+str({'switch' : command, 'room' : room }))   #rimuoevere
         
 if __name__ == "__main__" :
     temperature_patient_room_monitor_istnace = temperature_patient_room_monitor()

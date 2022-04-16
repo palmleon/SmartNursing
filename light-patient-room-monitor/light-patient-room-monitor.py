@@ -29,6 +29,7 @@ class light_patient_room_monitor() :
         r = requests.get(self.conf_file['host']+"/patient-room-command-base-topic")
         c = r.json()
         self.commandTopic = c
+        self.__baseMessage={"bn" : "light-patient-room-monitor","bt":0,"r":0,"c" : {"n":"luminosity","u":"/","v":0}}
         self.mqttClient.start()
         self.mqttClient.mySubscribe(self.subscribeTopic)
 
@@ -61,8 +62,11 @@ class light_patient_room_monitor() :
             #fai la richiesta 
             # invoca funzione che ritorna  
             luminosity = self.setLuminosity()  
-            #MyMQTT.myPublish(self.commandTopic,{'l' : luminosity, 'room' : room })     
-            print("command "+str({'switch' : luminosity, 'room' : room }))
+            self.__baseMessage['bt'] = time.time()
+            self.__baseMessage['r'] = room
+            self.__baseMessage['c']['v'] = luminosity
+            self.mqttClient.myPublish(self.commandTopic,self.__baseMessage)     
+            print("command "+str({'switch' : luminosity, 'room' : room }))#rimuovere
     
         
 
