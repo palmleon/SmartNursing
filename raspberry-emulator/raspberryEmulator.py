@@ -51,8 +51,8 @@ class RaspberryEmulator :
         self.mqttClient.mySubscribe(self.patientRoomCommandTopic)
         for room in self.commonRoomList :
              r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
-                                                                    'deviceID' : room,
-                                                                    'name' : 'light-patient-room-monitor'
+                                                                    'deviceID' : str(room)+'tc',
+                                                                    'name' : 'common-room-temperature'
         }))
 
     def notify(self,topic,payload) :
@@ -106,20 +106,33 @@ class RaspberryEmulator :
             time.sleep(self.updateIntervalMinute*60)
             for commonRoom in self.commonRoomList :
                 r = requests.put(self.conf_file['host']+"/update-device",data = json.dumps({
-                            'deviceID' : commonRoom,
-                            'name' : 'patient-room-device-'+id
+                            'deviceID' : str(commonRoom)+'tc',
+                            'name' : 'common-room-temperature'
                         }))
 
             for room in list(self.rooms.keys()) :
                 if len(self.rooms[room]) != 0:
                     r = requests.put(self.conf_file['host']+"/update-device",data = json.dumps({
-                            'deviceID' : id,
-                            'name' : 'patient-room-device-'+id
+                            'deviceID' : str(room)+'p',
+                            'name' : 'room-presence-sensor'
+                        }))
+                    r = requests.put(self.conf_file['host']+"/update-device",data = json.dumps({
+                            'deviceID' : str(room)+'t',
+                            'name' : 'room-temperature-sensor'
+                        }))
+                    r = requests.put(self.conf_file['host']+"/update-device",data = json.dumps({
+                            'deviceID' : str(room)+'l',
+                            'name' : 'room-light-sensor'
                         }))
                     for id in self.rooms[room] :
+
                         r = requests.put(self.conf_file['host']+"/update-device",data = json.dumps({
-                            'deviceID' : id,
-                            'name' : 'patient-device-'+id
+                            'deviceID' : str(id)+'tp',
+                            'name' : 'patient-temperature-sensor'
+                        }))
+                        r = requests.put(self.conf_file['host']+"/update-device",data = json.dumps({
+                            'deviceID' : str(id)+'o',
+                            'name' : 'patient-oximeter-sensor'
                         }))
             
     def listenUserCommand(self) :
@@ -137,18 +150,35 @@ class RaspberryEmulator :
                     if patientId not in self.rooms[roomId] :
                         self.rooms[roomId].append(patientId)
                         r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
-                                                                            'deviceID' : patientId,
-                                                                            'name' : 'light-patient-room-monitor'
+                                                                            'deviceID' : str(patientId)+'t',
+                                                                            'name' : 'patient-temperature-sensor'
+        }))
+                        r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
+                                                                                            'deviceID' : str(patientId)+'o',
+                                                                                            'name' : 'patient-oximeter-sensor'
         }))
                 else :
                     self.rooms[roomId] = [patientId]
                     r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
-                                                                        'deviceID' : roomId,
-                                                                        'name' : 'light-patient-room-monitor'
+                                                                        'deviceID' : str(roomId)+'p',
+                                                                        'name' : 'room-presence-sensor'
                                                                     }))
                     r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
-                                                                    'deviceID' : patientId,
-                                                                    'name' : 'light-patient-room-monitor'
+                                                                        'deviceID' : str(roomId)+'l',
+                                                                        'name' : 'room-light-sensor'
+                                                                    }))
+                    r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
+                                                                        'deviceID' : str(roomId)+'t',
+                                                                        'name' : 'room-temperature-sensor'
+                                                                    }))
+                    
+                    r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
+                                                                            'deviceID' : str(patientId)+'tp',
+                                                                            'name' : 'patient-temperature-sensor'
+        }))
+                    r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
+                                                                                            'deviceID' : str(patientId)+'o',
+                                                                                            'name' : 'patient-oximeter-sensor'
         }))
             if choice == 0 :
                 patientId = int(input("Inserisci id paziente da rimuvere "))

@@ -86,7 +86,7 @@ class Catalog(object) :
             if len(uri) != 2 :
                 raise cherrypy.HTTPError(400,'deviceID missing')
             for device in self.catalogList['devices'] :
-                if device['deviceID'] == int(uri[1]) :
+                if device['deviceID'] == str(uri[1]) :
                     return json.dumps(device)
             raise cherrypy.HTTPError(404,'device not found')
         
