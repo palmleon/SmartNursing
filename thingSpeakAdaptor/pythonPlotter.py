@@ -1,4 +1,5 @@
 from datetime import datetime
+from os import times
 from matplotlib import pyplot
 import json
 from channelManager import *
@@ -11,7 +12,8 @@ class pythonPlotter():
         self.saturation = []
         self.pulseRate = []
         self.perfusionIndex = []
-        self.label_map = ["battery oximeter", "perfusion index", "saturation","pulse rate", "battery termometer", "temperature", "day_flag"]
+        self.label_map = ["battery oximeter", "perfusion index", "saturation",
+                          "pulse rate", "battery termometer", "temperature", "day_flag"]
         self.labelOfInterests = ['temperature', 'saturation', 'pulse rate']
 
     def retriveLatestData(self, channelList):
@@ -37,6 +39,16 @@ class pythonPlotter():
                         newDict[date] = feed.get('field'+str(i))
                         dic[self.label_map[i-1]].append(newDict)
             dataList.append(dic)
+        return dataList
+
+    def retriveDatesData(self, dic, patientID, measure):
+        dataList = []
+        for i in range(0, len(dic)):
+            if dic[i]['channelID'] == patientID:
+                if len(dic[i][measure]) > 0:
+                    for j in range(0, len(dic[i][measure])):
+                        for key in dic[i][measure][j].keys():
+                            dataList.append(key)
         return dataList
 
     def getPatientsData(self, dic, patientID, measure, date):
@@ -76,14 +88,72 @@ class pythonPlotter():
                             counter = counter + 1
                 avgSaturation = sumSat/counter
                 avgPulse = sumPulse/counter
-                return avgSaturation,avgPulse
+                return avgSaturation, avgPulse
 
+    def removeDuplicates(self, duplicatedlist):
+        notDuplicatedList = []
+        for i in range(len(duplicatedlist)):
+            if duplicatedlist[i] not in notDuplicatedList:
+                notDuplicatedList.append(duplicatedlist[i])
+        return notDuplicatedList
 
+    def performForAllMeasures(self,dic):
+        avgTempDic = dict()
+        avgSaturationDic = dict()
+        avgPulseDic = dict()
+        tempDates = dict()
+        satDates = dict()
+        pulseDates = dict()
+        for i in range(0,len(dic)):
+            temperatureDates = plot.retriveDatesData(dic, dic[i]['channelID'], 'temperature')
+            temperatureDates = plot.removeDuplicates(temperatureDates)
+            saturationDates = plot.retriveDatesData(dic, dic[i]['channelID'], 'saturation')
+            saturationDates = plot.removeDuplicates(saturationDates)
+            pulseRateDates = plot.retriveDatesData(dic, dic[i]['channelID'], 'pulse rate')
+            pulseRateDates = plot.removeDuplicates(pulseRateDates)
+            piDates = plot.retriveDatesData(dic, dic[i]['channelID'], 'perfusion index')
+            piDates = plot.removeDuplicates(piDates)
+            tempDates[dic[i]['channelID']] = temperatureDates
+            satDates[dic[i]['channelID']] = saturationDates
+            pulseDates[dic[i]['channelID']] = pulseRateDates
+            avgTemp = []
+            for j in range(0, len(temperatureDates)):
+                temperature = plot.getPatientsData(dic, dic[i]['channelID'], 'temperature', temperatureDates[j])
+                avgTemp.append(plot.tempAverage(temperature))
+            avgTempDic[dic[i]['channelID']] = avgTemp
+            avgSat = []
+            avgPulse = []
+            for j in range(0,len(piDates)):
+                saturation = plot.getPatientsData(dic, dic[i]['channelID'], 'saturation', piDates[j])
+                pulseRate = plot.getPatientsData(dic, dic[i]['channelID'], 'pulse rate', piDates[j])
+                pi = plot.getPatientsData(dic, dic[i]['channelID'], 'perfusion index', piDates[j])
+                if pulseRate is not None and saturation is not None and pi is not None:
+                    if len(pulseRate) > 0 and len(saturation) > 0 and len(pi)>0 :
+                        avgSaturation,avgPulseRate = plot.piAverage(pi,saturation,pulseRate)
+                        avgSat.append(avgSaturation)
+                        avgPulse.append(avgPulseRate)
+            if avgSat is not None and avgPulse is not None:
+                avgSaturationDic[dic[i]['channelID']] = avgSat
+                avgPulseDic[dic[i]['channelID']] = avgPulse
+        self.plotter(avgTempDic,avgSaturationDic,avgPulseDic,tempDates,satDates,pulseDates,len(dic))
+    
     def saveToJson(self, dic):
         json.dump(dic, open('test.json', 'w'))
+    
 
-    def plotter(self, measure, time):
-        pyplot.scatter(time,measure)
+    def plotter(self, temperature, saturation, pulseRate, timeTemp, timeSat, timePulse, patientNumber):
+        j = 0
+        for i in range(0,patientNumber):
+            keyT = list(timeTemp.keys())
+            keyS = list(timeSat.keys())
+            keyP = list(timePulse.keys())
+            pyplot.subplot(patientNumber, 3, j+1)
+            pyplot.scatter(timeTemp[keyT[i]], temperature[keyT[i]])
+            pyplot.subplot(patientNumber, 3, j+2)
+            pyplot.scatter(timeSat[keyS[i]], saturation[keyS[i]])
+            pyplot.subplot(patientNumber, 3, j+3)
+            pyplot.scatter(timePulse[keyP[i]], pulseRate[keyP[i]])
+            j = j + 1
         pyplot.show()
 
 
@@ -96,16 +166,4 @@ if __name__ == '__main__':
     d = datetime.fromtimestamp(time.time())
     d = d.replace(d.year, d.month, 13)  # d.day - 1)
     d = str(d).split(' ')[0]
-    temperature = plot.getPatientsData(v, '5', 'temperature', d)
-    #print('temperature{}'.format(temperature))
-    saturation = plot.getPatientsData(v, '5', 'saturation', d)
-    #print('saturation{}'.format(saturation))
-    pulseRate = plot.getPatientsData(v,'5','pulse rate',d)
-    #print('pulse rate {}'.format(pulseRate))
-    pi = plot.getPatientsData(v,'5','perfusion index',d)
-    #print(pi)
-    avgSaturation,avgPulseRate = plot.piAverage(pi,saturation,pulseRate)
-    #print('sat:{} pulse:{}'.format(avgSaturation,avgPulseRate))
-    # plot.calculateAverage(v,'temperature')
-    plot.plotter(avgSaturation,d)
-    plot.plotter(avgPulseRate,d)
+    plot.performForAllMeasures(v)
