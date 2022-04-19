@@ -12,6 +12,3 @@
 - Da definire: 
   - come "il sistema rimuove/edita/registra" un paziente o una stanza [Raspberry Emulator]
   - come "il sistema setta la temperatura" di una stanza [Comando Telegram]
-  
-Punto 3 è da attribuire al Raspberry Emulator (da vedere se lasciarlo anche su Telegram)
-Punti 1, 4.2, 4.4 da rimuovere
