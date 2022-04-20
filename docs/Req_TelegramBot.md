@@ -66,8 +66,9 @@ Telegram GUI + commands to interact with the Bot
 | Actor | Nurse, Doctor, System Admin |
 | Pre-condition | User is not authenticated |
 | Post-condition | User is authenticated |
-| Steps | User is asked to insert its ID and password |
-| | The system checks whether the user exists and the password is correct |
+| Steps | User tries to contact the Bot |
+| | The system retrieves the Chat ID List, containing all the authenticated Users|
+| | The system checks whether the user exists (its chat ID is in the list of authenticated users) |
 | | The system informs the user that he/she has been authenticated |
 
 ### Scenario 1.1: Authorizing User
@@ -213,7 +214,7 @@ Telegram GUI + commands to interact with the Bot
 |       | The User selects the Room to set |
 |       | The system verifies whether the Room is registered |
 |       | The User selects the parameter to read |
-|       | The system forwards the request to the Room Temperature/Lighting manager, asking for the searched value |
+|       | The system forwards the request to the Room Temperature manager, asking for the searched value |
 |       | The User reads the value for the parameter |
 
 ### Scenario 9: Defining Start/End of a work shift
