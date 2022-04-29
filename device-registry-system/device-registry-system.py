@@ -32,8 +32,7 @@ class Catalog(object) :
             
 
     def GET(self,*uri,**path):
-        if len(uri) != 1 :
-            raise cherrypy.HTTPError(400,'Wrong parameters number')
+        
 
         if uri[0] == 'message-broker' :
             return json.dumps(self.catalogList["message-broker"])
@@ -42,11 +41,20 @@ class Catalog(object) :
             return json.dumps(self.catalogList['city'])
         elif uri[0] == 'api-weather' :
             return json.dumps(self.catalogList['api-weather'])
-        elif uri[0] == 'desired-temperature' :
-            return json.dumps(self.catalogList['desired-temperature'])
         
         elif uri[0] == 'telegram-chat-id-list' :
             return json.dumps(self.catalogList['telegram-chat-id-list'])
+
+        elif uri[0] == 'room-temperature' :
+            if len(uri) != 2 :
+                raise cherrypy.HTTPError(400,'roomID missing')
+            for room in self.catalogList['room-list'] :
+                if room['roomID'] == int(uri[1]) :
+                    return json.dumps({"desired-temperature" : room['desired-temperature']})
+            raise cherrypy.HTTPError(404,'room not found')
+
+        
+
         
         elif uri[0] == 'room-list' :
             return json.dumps(self.catalogList['room-list'])
@@ -127,6 +135,15 @@ class Catalog(object) :
             self.catalogList['devices'].append(newDevice)
             return
 
+        if uri[0] == 'add-room' :
+            
+            newRoom = json.loads(cherrypy.request.body.read())
+            for room in self.catalogList['room-list'] :
+                if room['roomID'] == newRoom['roomID'] :
+                    raise cherrypy.HTTPError(400,"room already exists")
+            self.catalogList['room-list'].append(newRoom)
+            return
+
         elif uri[0] == 'add-patient' :
             newPatient = json.loads(cherrypy.request.body.read())
             for patient in self.catalogList['patients'] :
@@ -168,6 +185,15 @@ class Catalog(object) :
                 if self.catalogList['devices'][i]['deviceID'] == id :
                     self.catalogList['devices'][i]['timestamp'] = str(datetime.datetime.today())
             return 
+        if uri[0] == 'update-room' :
+            newRoom = json.loads(cherrypy.request.body.read())
+            #print(newDevice)
+            id = newRoom['roomID']
+            for i in range(len(self.catalogList['room-list'])) :
+                if self.catalogList['room-list'][i]['roomID'] == id :
+                    self.catalogList['room-list'][i]  = newRoom
+                    return 
+
         if uri[0] == 'update-service' :
             newService = json.loads(cherrypy.request.body.read())
             newService['timestamp'] = str(datetime.datetime.today())
@@ -182,7 +208,7 @@ class Catalog(object) :
 
     
     def DELETE(self,*uri,**path) :
-        if len(uri) != 1 :
+        if len(uri) != 2 :
             raise cherrypy.HTTPError(500,'Wrong parameters number')
 
         if uri[0] == 'delete-patient' :
@@ -191,6 +217,14 @@ class Catalog(object) :
                 if self.catalogList['patients'][i]['patientID'] == id :
                     del self.catalogList['patients'][i]
             raise cherrypy.HTTPError(404,'patient not found')
+        
+        if uri[0] == 'delete-room' :
+            id = int(uri[1])
+            for i in range(len(self.catalogList['room-list'])) :
+                if self.catalogList['room-list'][i]['roomID'] == id :
+                    del self.catalogList['room-list'][i]
+                    return
+            raise cherrypy.HTTPError(404,'room not found')
         
         #Is necessary?
         elif uri[0] == 'delete-service' :

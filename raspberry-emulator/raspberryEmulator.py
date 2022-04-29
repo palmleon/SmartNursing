@@ -57,9 +57,9 @@ class RaspberryEmulator :
 
     def notify(self,topic,payload) :
         command = dict(json.loads(payload))
-        self.fp = open("actuation_command.json","a")
-        json.dump(command,self.fp)
-        self.fp.close()
+        #self.fp = open("actuation_command.json","a")
+        #json.dump(command,self.fp)
+        #self.fp.close()
         print('ricevuto comando '+str(command))#rimuovere 
 
     def emulateCommonRoomData(self) :
