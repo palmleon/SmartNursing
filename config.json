@@ -1,0 +1,6 @@
+{
+    "host" : "http://cdrsi:8080/catalog",
+    "serviceID" : 7,
+    "name": "Smart-Clinic-Telegram-Bot",
+    "botToken":"5346738235:AAHs012PGIuY-340hX1Wf1qat_o7u3s3Zhk"
+}
