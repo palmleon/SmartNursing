@@ -67,8 +67,8 @@ Telegram GUI + commands to interact with the Bot
 | Pre-condition | User is not authenticated |
 | Post-condition | User is authenticated |
 | Steps | User tries to contact the Bot |
-| | The system retrieves the Chat ID List, containing all the authenticated Users|
-| | The system checks whether the user exists (its chat ID is in the list of authenticated users) |
+| | The system retrieves the User ID List, containing all the authenticated Users |
+| | The system checks whether the user exists (its user ID is in the list of authenticated users) |
 | | The system informs the user that he/she has been authenticated |
 
 ### Scenario 1.1: Authorizing User
@@ -83,7 +83,7 @@ Telegram GUI + commands to interact with the Bot
 | Post-condition | User is authorized |
 | Steps | User tries to perform the desired operation |
 |   | The system looks for the required rights to perform an operation in the Configuration Catalog of the Bot|
-|   | The system checks whether the user has the required rights in the Chat-ID Catalog|
+|   | The system checks whether the user has the required rights in the User-ID Catalog|
 |   | The system informs the user that he/she has been authorized to continue |
 
 ### Scenario 2: Registering a Patient
