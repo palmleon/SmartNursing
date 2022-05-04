@@ -78,7 +78,7 @@ Telegram GUI + commands to interact with the Bot
 | Actor | Nurse, Doctor, System Admin |
 | Pre-condition | User is authenticated and logged in |
 |               | User wants to perform a given operation |
-|               | The operation can be performed only by a given set of users |
+|               | The operation can be performed only by a given set of users, which is known |
 |               | The User has the required rights to perform the operation |
 | Post-condition | User is authorized |
 | Steps | User tries to perform the desired operation |
@@ -499,16 +499,17 @@ usecase (Warning message lost - Room Temperature Anomaly) as (UCE.10)
 usecase (Defining duplicate Start/End of a Work Shift) as (UCE.11)
 
 UCE.1 .> UC1 : extends
-UC2 .> UC1.1: extends
-UC3 .> UC1.1: extends
-UC4 .> UC1.1: extends
-UC5 .> UC1.1: extends
-UC6 .> UC1.1: extends
-UC7 .> UC1.1: extends
-UC8 .> UC1.1: extends
-UC9 .> UC1.1: extends
-UC10 .> UC1.1: extends
-UCE.1.1 .> UC1.1: extends
+UC1.1 .> UC1 : includes
+UC2 .> UC1.1: includes
+UC3 .> UC1.1: includes
+UC4 .> UC1.1: includes
+UC5 .> UC1.1: includes
+UC6 .> UC1.1: includes
+UC7 .> UC1.1: includes
+UC8 .> UC1.1: includes
+UC9 .> UC1.1: includes
+UC10 .> UC1.1: includes
+UCE.1.1 .> UC1.1: includes
 UC3 <. UCE.2 : extends
 UC4 <. UCE.2 : extends
 UC7 <. UCE.2 : extends

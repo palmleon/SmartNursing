@@ -2,5 +2,43 @@
     "host" : "http://cdrsi:8080/catalog",
     "serviceID" : 7,
     "name": "Smart-Clinic-Telegram-Bot",
-    "botToken":"5346738235:AAHs012PGIuY-340hX1Wf1qat_o7u3s3Zhk"
+    "botToken":"5346738235:AAHs012PGIuY-340hX1Wf1qat_o7u3s3Zhk",
+    "tasks": 
+        [{
+            "command": "start",
+            "roles": ["Nurse", "Doctor", "SuperUser"]
+        },
+        {
+            "command": "add_patient",
+            "roles": ["Doctor", "SuperUser"]
+        },
+        {
+            "command": "edit_patient",
+            "roles": ["Doctor", "SuperUser"]
+        },
+        {
+            "command": "delete_patient",
+            "roles": ["Doctor", "SuperUser"]
+        },
+        {
+            "command": "set_room_temperature",
+            "roles": ["Nurse", "Doctor", "SuperUser"]
+        },
+        {
+            "command": "get_room_temperature",
+            "roles": ["Nurse", "Doctor", "SuperUser"]
+        },
+        {
+            "command": "start_work",
+            "roles": ["Nurse", "SuperUser"]
+        },
+        {
+            "command": "end_work",
+            "roles": ["Nurse", "SuperUser"]
+        },
+        {
+            "command": "get_sensor_battery",
+            "roles": ["Nurse", "Doctor", "SuperUser"]
+        }
+    ]
 }
