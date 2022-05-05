@@ -1,3 +1,4 @@
+from click import edit
 from telegram.ext import Updater, CallbackContext, CommandHandler, ConversationHandler, MessageHandler, Filters
 from telegram import Update
 import MyMQTT
@@ -6,7 +7,7 @@ import requests
 import json
 
 users = {190657895: "SuperUser"}
-patient_catalog = []
+patientCatalog = { 'patientCatalog':[] }
 
 def singleton(cls):
     instances = {}
@@ -19,8 +20,9 @@ def singleton(cls):
 #@singleton
 class SmartClinicBot(object):
 
-    ADD_PATIENT = 2
-    EDIT_PATIENT = 3
+    ADD_PATIENT = 1
+    EDIT_PATIENT_1 = 2
+    EDIT_PATIENT_2 = 3
     DELETE_PATIENT = 4
     SET_ROOM_TEMPERATURE = 5
     GET_ROOM_TEMPERATURE = 6
@@ -54,7 +56,7 @@ class SmartClinicBot(object):
         # Add Handlers to the Conversation Handler and then to the Dispatcher
         start_handler = CommandHandler('start', self.__start)
         dispatcher.add_handler(start_handler)
-        conversation_handler = ConversationHandler(
+        add_patient_handler = ConversationHandler(
             entry_points=[
                 CommandHandler('add_patient', self.__add_patient)  #,
         #            CommandHandler('edit_patient', self.__edit_patient),
@@ -66,7 +68,7 @@ class SmartClinicBot(object):
         #            CommandHandler('get_sensor_battery', self.__get_sensor_battery)
             ],
             states={ 
-                SmartClinicBot.ADD_PATIENT: [MessageHandler(Filters.text, self.__insert_patient)]  #, 
+                SmartClinicBot.ADD_PATIENT: [MessageHandler(Filters.text & ~(Filters.command), self.__add_request_handle)]  #, 
         #            SmartClinicBot.EDIT_PATIENT: [], 
         #            SmartClinicBot.DELETE_PATIENT: [],
         #            SmartClinicBot.SET_ROOM_TEMPERATURE: [], 
@@ -77,7 +79,18 @@ class SmartClinicBot(object):
             },
             fallbacks=[CommandHandler('cancel', self.__cancel)]
         )
-        dispatcher.add_handler(conversation_handler)
+        dispatcher.add_handler(add_patient_handler)
+
+        edit_patient_handler = ConversationHandler(
+            entry_points=[
+                CommandHandler('edit_patient', self.__edit_patient)
+            ],
+            states={ 
+                SmartClinicBot.EDIT_PATIENT_1: [MessageHandler(Filters.text & ~(Filters.command), self.__edit_patient_search)],
+                SmartClinicBot.EDIT_PATIENT_2: [MessageHandler(Filters.text & ~(Filters.command), self.__edit_patient_update)]
+            },
+            fallbacks=[CommandHandler('cancel', self.__cancel)])
+        dispatcher.add_handler(edit_patient_handler)
         
         # Register the Bot to the Service Registry System TODO INTEGRATE
         #r = requests.post(self.__config_settings['host'] + "/add-service",data = json.dumps({
@@ -146,48 +159,230 @@ class SmartClinicBot(object):
             update.message.reply_text("Congratulations! You're in!")
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
-        
-    
+
+    @staticmethod    
+    def __parse_patient(text):
+        text_entries = text.split("\n")
+        patient = {}
+        for entry in text_entries:
+            entry_list = entry.split("-")
+            if len(entry_list) != 2:
+                raise Exception("A key does not have a corresponding value or viceversa")
+            entry_key = entry_list[0].strip()
+            entry_value = entry_list[1].strip()         
+            patient[entry_key] = entry_value
+        return patient
+
     def __add_patient(self, update: Update, context: CallbackContext):
         userID = update.message.from_user.id
         if self.__check_authZ_authN(update, 'start', userID):
             update.message.reply_text(
-                "To insert a new Patient, insert the following data in the following format:\n" \
-                "name - <insert_name>\n" \
-                "surname - <insert_surname>\n" \
-                "age - <insert_age>\n" \
+                "To insert a new Patient, insert the following data in the following format:\n"
+                "patientID - <insert_patientID>\n" 
+                "name - <insert_name>\n"
+                "surname - <insert_surname>\n"
+                "age - <insert_age>\n"
                 "description - <insert_description>")
-            return self.ADD_PATIENT
+            return SmartClinicBot.ADD_PATIENT
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
             return ConversationHandler.END
 
-    def __insert_patient(self, update: Update, context: CallbackContext):
+    def __add_request_handle(self, update: Update, context: CallbackContext):
         # Define a Patient from the User Data
-        text_entries = (update.message.text.split("\n"))
         try:
-            patient = {}
-            #for entry in text_entries:
-            #    entry_list = entry.split("-")
-            #    entry_key = entry_list[0].strip()
-            #    entry_value = entry_list[1].strip()
-            #    patient[entry_key] = entry_value
-            #print(patient.len())
-            #if patient.len() != 4:
-            #    raise Exception
-        except:
-            update.message.reply_text("Sorry, this Patient description is invalid.\nCommand aborted")
-            return ConversationHandler.END
+            new_patient = SmartClinicBot.__parse_patient(update.message.text)
+            # Check if you have fetched the correct number of elements
+            if len(new_patient.keys()) != 5:
+                raise Exception("Incorrect number of elements")
+            # Check if all the excepted keys are present
+            if 'name' not in new_patient.keys() or 'patientID'   not in new_patient.keys() or 'surname' not in new_patient.keys() or \
+                'age' not in new_patient.keys() or 'description' not in new_patient.keys():
+                raise Exception("Missing key")
+            # Treat the patientID as a number
+            new_patient['patientID'] = int(new_patient['patientID'])
+            # Check that both the name and the surname contain alphabetic chars only
+            if not new_patient['name'].isalpha() or not new_patient['surname'].isalpha():
+                raise Exception("Patient Name/Surname is not alphabetic")
+            # Treat the age as a number
+            new_patient['age'] = int(new_patient['age'])
+        except Exception as e:
+            update.message.reply_text(
+                "Sorry, this Patient description is invalid.\n"
+                "Please, use the following syntax:\n"
+                "patientID - <insert_patientID>\n" 
+                "name - <insert_name>\n"
+                "surname - <insert_surname>\n"
+                "age - <insert_age>\n"
+                "description - <insert_description>")
+            print(e)
+            return SmartClinicBot.ADD_PATIENT
 
-        # Take the current Patient Catalog and check whether the Patient is already present
+        # Take the current Patient Catalog and check whether the Patient is already present TODO INTEGRATE WITH DEVICE AND REGISTRY SYSTEM
+        patient_catalog = patientCatalog['patientCatalog']
         #print(patient_catalog)
-        
-        # If the Patient is already present, abort the operation; otherwise, insert it in the Patient Catalog
+        try:
+            # Check if the Patient is already present
+            patient_duplicate = False
+            for patient in patient_catalog:
+                if  patient['patientID'] == new_patient['patientID']:
+                    patient_duplicate = True
+            # If the Patient is already present, abort the operation; otherwise, insert it in the Patient Catalog
+            if patient_duplicate:
+                raise Exception("Duplicate Patient")
+            else:
+                patient_catalog.append(new_patient)
+                update.message.reply_text("Patient added successfully!")
+                # TODO INTEGRATE WITH DEVICE AND REGISTRY SYSTEM (use a POST call)
+        except Exception as e: #Assumption: all patients in the Patient Catalog are well formatted
+            update.message.reply_text("There is already another patient with the same ID. Aborting.")
+            print(e)
+            return ConversationHandler.END
+        print(patient_catalog)
         return ConversationHandler.END
 
     def __edit_patient(self, update: Update, context: CallbackContext):
-        pass
-        return SmartClinicBot.EDIT_PATIENT
+        userID = update.message.from_user.id
+        if self.__check_authZ_authN(update, 'start', userID):
+            update.message.reply_text(
+                "To edit a Patient, insert their patient ID or their name using the following format:\n"
+                "patientID - <insert_patientID>\n" 
+                "OR\n"
+                "name - <insert_name>\n"
+                "surname - <insert_surname>\n"
+                )
+            return SmartClinicBot.EDIT_PATIENT_1
+        else:
+            update.message.reply_text("Sorry, you cannot interact with the Bot!")
+            return ConversationHandler.END
+
+    def __edit_patient_search(self, update: Update, context: CallbackContext):
+        try:
+            # Define a Patient from the User Data
+            req_patient = SmartClinicBot.__parse_patient(update.message.text)
+            # Check if you have fetched the correct number of elements
+            # Take the current Patient Catalog and check whether the Patient is already present TODO INTEGRATE WITH DEVICE AND REGISTRY SYSTEM
+            patient_catalog = patientCatalog['patientCatalog']    
+            if len(req_patient) == 1: # Case in which the User provides the PatientID
+                if 'patientID' not in req_patient.keys():
+                    raise Exception("Missing key")
+                patient_present = False
+                req_patientID = int(req_patient['patientID'])
+                found_patient = None
+                for patient in patient_catalog:
+                    if patient['patientID'] == req_patientID:
+                        patient_present = True
+                        # Store this infomation for when the new Patient description will be provided and the current one will be discarded
+                        context.chat_data['patientID_to_edit'] =  req_patientID
+                        found_patient = patient
+                # If the Patient is not present, abort the operation; otherwise, display its data and ask for a new Patient description
+                if patient_present:
+                    update.message.reply_text(
+                        "Patient found:\n" +
+                        "patientID - {patientID}\n"   .format(patientID=      found_patient['patientID']) +
+                        "name - {patientName}\n"      .format(patientName=    found_patient['name']) +
+                        "surname - {patientSurname}\n".format(patientSurname= found_patient['surname']) +
+                        "age - {patientAge}\n"        .format(patientAge=     found_patient['age']) +
+                        "description - {patientDescription}\n\n".format(patientDescription=found_patient['description']) +
+                        # TODO Correggere stampa finale (ha un doppio \n)
+                        "Redefine the Patient using the same format, without the patientID")
+                else:
+                    raise Exception("Patient not present")                
+            # Case in which the User provides the Name and Surname of the patient
+            elif len(req_patient) == 2:
+                if 'name' not in req_patient.keys() or 'surname' not in req_patient.keys():
+                    raise Exception("Missing key")
+                # Check that both the name and the surname contain alphabetic chars only
+                if not req_patient['name'].isalpha() or not req_patient['surname'].isalpha():
+                    raise Exception("Patient Name/Surname is not alphabetic")
+                patient_present = False
+                found_patients = []
+                for patient in patient_catalog:
+                    if patient['name'] == req_patient['name'] and patient['surname'] == req_patient['surname']:
+                        patient_present = True
+                        found_patients.append(patient)
+                # If the Patient is not present, abort the operation; otherwise, display its data and ask for a new Patient description
+                if patient_present:
+                    if len(found_patients) == 1:
+                        found_patient = found_patients.pop()
+                        context.chat_data['patientID_to_edit'] = found_patient['patientID']
+                        update.message.reply_text(
+                            "Patient found:\n" +
+                            "patientID - {patientID}\n".format(patientID=found_patient['patientID']) +
+                            "name - {patientName}\n".format(patientName=found_patient['name']) +
+                            "surname - {patientSurname}\n".format(patientSurname=found_patient['surname']) +
+                            "age - {patientAge}\n".format(patientAge=found_patient['age']) +
+                            "description - {patientDescription}\n\n".format(patientDescription=found_patient['description']) +
+                            # TODO Correggere stampa finale (ha un doppio \n)
+                            "Redefine the Patient using the same format, without the patientID")
+                    else:
+                        msg = "Multiple Patients found!\n"
+                        for found_patient in found_patients:
+                            msg += "patientID - {patientID}\n".format(patientID=found_patient['patientID']) + \
+                                "name - {patientName}\n".format(patientName=found_patient['name']) + \
+                                "surname - {patientSurname}\n".format(patientSurname=found_patient['surname']) + \
+                                "age - {patientAge}\n".format(patientAge=found_patient['age']) + \
+                                "description - {patientDescription}\n".format(patientDescription=found_patient['description']) + \
+                                "-"*40 + "\n"
+                        msg += "Choose the patient by using their ID with the following format:\n" "patientID - <insert_patientID>" 
+                        update.message.reply_text(msg)
+                        return SmartClinicBot.EDIT_PATIENT_1                        
+                else:
+                    raise Exception("Patient not present")    
+            else:
+                raise Exception("Incorrect number of parameters")
+            
+        except Exception as e:
+            update.message.reply_text(
+                "Something went wrong: {exception}\nAborting".format(exception=e))
+            print(e)
+            return ConversationHandler.END
+
+        return SmartClinicBot.EDIT_PATIENT_2
+
+    def __edit_patient_update(self, update: Update, context: CallbackContext):
+        #update.message.reply_text(context.chat_data['patientID_to_edit'])
+        try:
+            edited_patient = SmartClinicBot.__parse_patient(update.message.text)
+            keys = edited_patient.keys()
+            print(edited_patient)
+            # Check if you have fetched the correct number of elements
+            if len(edited_patient) != 4:
+                raise Exception("Incorrect number of elements")
+            # Check if all the excepted keys are present
+            if 'name' not in keys or 'surname' not in keys or \
+                'age' not in keys or 'description' not in keys:
+                raise Exception("Missing key")
+            # Check that both the name and the surname contain alphabetic chars only
+            if not edited_patient['name'].isalpha() or not edited_patient['surname'].isalpha():
+                raise Exception("Patient Name/Surname is not alphabetic")
+            # Treat the age as a number
+            edited_patient['age'] = int(edited_patient['age'])
+
+        except Exception as e:
+            update.message.reply_text(
+                "Sorry, this Patient description is invalid.\n"
+                "Please, use the following syntax:\n"
+                "name - <insert_name>\n"
+                "surname - <insert_surname>\n"
+                "age - <insert_age>\n"
+                "description - <insert_description>\n")
+            print(e)
+            # Retry until success
+            return SmartClinicBot.EDIT_PATIENT_2
+ 
+        # Insert the PatientID in the edited Patient
+        edited_patient['patientID'] = context.chat_data['patientID_to_edit']
+        # Take the Patient Catalog TODO INTEGRATE WITH DEVICE AND REGISTRY SYSTEM
+        patient_catalog = patientCatalog['patientCatalog']
+        for patient in patient_catalog:
+            if patient['patientID'] == edited_patient['patientID']:
+                patient_catalog.remove(patient)
+                patient_catalog.append(edited_patient)
+                update.message.reply_text("Patient updated successfully!")
+                # TODO INTEGRATE WITH DEVICE AND REGISTRY SYSTEM (USE POST METHOD)
+                return ConversationHandler.END # terminate asap for better availability
+        return ConversationHandler.END
 
     def __delete_patient(self, update: Update, context: CallbackContext):
         pass
@@ -205,15 +400,15 @@ class SmartClinicBot(object):
         pass
         return SmartClinicBot.START_WORK
 
-    def __end_work(update: Update, context: CallbackContext):
+    def __end_work(self, update: Update, context: CallbackContext):
         pass
         return SmartClinicBot.END_WORK
 
-    def __get_sensor_battery(update: Update, context: CallbackContext):
+    def __get_sensor_battery(self, update: Update, context: CallbackContext):
         pass
         return SmartClinicBot.GET_SENSOR_BATTERY
 
-    def __cancel(update: Update, context: CallbackContext):
+    def __cancel(self, update: Update, context: CallbackContext):
         update.message.reply_text("Command aborted!")
         return ConversationHandler.END
 
@@ -223,3 +418,8 @@ if __name__ == '__main__':
     bot.launch()
 
     
+# Prendi il PatientID
+# Cerca il paziente
+# Se
+
+# Prendi il Patient

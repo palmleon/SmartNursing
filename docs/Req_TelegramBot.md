@@ -59,7 +59,7 @@ Telegram GUI + commands to interact with the Bot
 
 ## USE CASE SCENARIO
 
-### Scenario 1: Authenticating User
+### Scenario 1: Authenticating User OK
 
 | Field | Description |
 | ------| ----------- |
@@ -71,7 +71,7 @@ Telegram GUI + commands to interact with the Bot
 | | The system checks whether the user exists (its user ID is in the list of authenticated users) |
 | | The system informs the user that he/she has been authenticated |
 
-### Scenario 1.1: Authorizing User
+### Scenario 1.1: Authorizing User OK
 
 | Field | Description |
 | ------| ----------- |
@@ -86,7 +86,7 @@ Telegram GUI + commands to interact with the Bot
 |   | The system checks whether the user has the required rights in the User-ID Catalog|
 |   | The system informs the user that he/she has been authorized to continue |
 
-### Scenario 2: Registering a Patient
+### Scenario 2: Registering a Patient OK
 
 | Field | Description |
 | ------| ----------- |
@@ -99,7 +99,7 @@ Telegram GUI + commands to interact with the Bot
 |       | The system verifies that the Patient Data are not already present (i.e. there is no other Patient with exactly the same data) |
 |       | The system registers the Patient |
 
-### Scenario 3: Editing a Patient
+### Scenario 3: Editing a Patient OK
 
 | Field | Description |
 | ------| ----------- |
@@ -245,7 +245,7 @@ Telegram GUI + commands to interact with the Bot
 |       | The system looks for the Battery Charge of the Sensor by forwarding the request to the Room/Patient manager, asking for the searched value |
 |       | The system displays the desired value |
 
-### Scenario E.1: Failed Authentication
+### Scenario E.1: Failed Authentication OK
 
 | Field | Description |
 | ------| ----------- |
@@ -260,7 +260,7 @@ Telegram GUI + commands to interact with the Bot
 |       | Otherwise: |
 |       | - The System asks to retry to go back |
 
-### Scenario E.1.1: Failed Authorization
+### Scenario E.1.1: Failed Authorization OK
 
 | Field | Description |
 | ------| ----------- |
@@ -275,7 +275,7 @@ Telegram GUI + commands to interact with the Bot
 |   | The system checks whether the user has the required rights |
 |   | The system informs the user that he/she has not been authorized to continue and displays the kind of rights required|
 
-### Scenario E.1.2: Trying to perform an operation while logged-out
+### Scenario E.1.2: Trying to perform an operation while logged-out OK
 
 | Field | Description |
 | ------| ----------- |
@@ -286,7 +286,7 @@ Telegram GUI + commands to interact with the Bot
 | Steps | The system verifies whether the User is logged in |
 |       | The system asks the User to login before performing any operation |
 
-### Scenario E.2: Searching a non-existing Patient/Room
+### Scenario E.2: Searching a non-existing Patient/Room OK
 
 | Field | Description |
 | ------| ----------- |
@@ -306,7 +306,7 @@ Telegram GUI + commands to interact with the Bot
 |       | Otherwise: |
 |       | - Cancel the operation |
 
-### Scenario E.3: Registering a duplicate Patient
+### Scenario E.3: Registering a duplicate Patient OK
 
 | Field | Description |
 | ------| ----------- |
@@ -325,7 +325,7 @@ Telegram GUI + commands to interact with the Bot
 |       | Otherwise: |
 |       | - Cancel the operation |
 
-### Scenario E.4: Register an incorrectly defined Patient
+### Scenario E.4: Register an incorrectly defined Patient OK
 
 | Field | Description |
 | ------| ----------- |
