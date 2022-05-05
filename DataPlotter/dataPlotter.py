@@ -1,9 +1,10 @@
 from collections import defaultdict
 from datetime import datetime
-from matplotlib import pyplot
 import json
-import cherrypy
 from channelManager import *
+import requests
+import cherrypy
+
 
 
 class dataPlotter():
@@ -158,10 +159,28 @@ def perform():
     print(d)
     plot.saveToJson(d)
 
+class rest():
+    exposed = True
+    def __init__(self) -> None:
+        pass
+    def GET(self,**uri):
+        f = open('averageData.json')
+        d = json.load(f)
+        print(d)
+        return json.dumps(d)
 
 
 if __name__ == '__main__':
-    perform()
+    conf = {
+        '/': {
+                'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+                'tool.session.on': True
+        }
+    }
+    cherrypy.tree.mount(rest(), '/', conf)
+    cherrypy.engine.start()
+    cherrypy.engine.block()
+
 
 
 
