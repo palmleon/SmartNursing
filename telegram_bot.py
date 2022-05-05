@@ -439,10 +439,7 @@ class SmartClinicBot(object):
                 raise Exception("Undefined Answer")
 
         except Exception as e:
-            update.message.reply_text(
-                "Sorry, this Patient description is invalid.\n"
-                "Please, use the following syntax:\n"
-                "patientID - <insert_patientID>\n")
+            update.message.reply_text("Sorry, Reply with [Y/N]\n")
             print(e)
             # Retry until success
             return SmartClinicBot.DELETE_PATIENT_2
