@@ -1,5 +1,4 @@
 from collections import defaultdict
-from datetime import datetime
 import json
 from channelManager import *
 import requests
@@ -67,9 +66,6 @@ class dataPlotter():
                 for j in range(0,len(list[i][m])):
                     for k in list[i][m][j].keys():
                         l.append(k)
-                    # for key in len(list[i][m][j].keys()):
-                    #     if key not in l:
-                    #         l.append(key)
         l = self.removeDuplicates(l)
         return l
     
@@ -143,6 +139,18 @@ class dataPlotter():
 
     def saveToJson(self, dic):
         json.dump(dic, open('averageData.json', 'w'))
+    def retriveID(self,list):
+        ids = []
+        for i in range(0,len(list)):
+            ids.append(list[i]['id'])
+        return ids
+
+def performID():
+    plot = dataPlotter()
+    c = channelManager()
+    c.listChannels()
+    ids = plot.retriveID(c.channelList)
+    return ids
 
 def perform():
     plot = dataPlotter()
@@ -156,17 +164,22 @@ def perform():
     d['temperature'] = avgTemp
     d['pulse rate'] = avgPulse
     d['saturation'] = avgSat
-    print(d)
     plot.saveToJson(d)
 
 class rest():
     exposed = True
     def __init__(self) -> None:
         pass
-    def GET(self,**uri):
+    def GET(self,*uri):
+        perform()
+        if len(uri) > 0:
+            s = str(uri)
+            s = s.replace('(','').replace(',','').replace(')','').replace("'",'')
+            if s == 'id':
+                return json.dumps(performID())
+        perform()
         f = open('averageData.json')
         d = json.load(f)
-        print(d)
         return json.dumps(d)
 
 
