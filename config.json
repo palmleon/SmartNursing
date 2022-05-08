@@ -21,6 +21,10 @@
             "roles": ["Doctor", "SuperUser"]
         },
         {
+            "command": "search_patient",
+            "roles": ["Doctor", "SuperUser"]
+        },
+        {
             "command": "set_room_temperature",
             "roles": ["Nurse", "Doctor", "SuperUser"]
         },

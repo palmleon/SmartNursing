@@ -25,11 +25,12 @@ class SmartClinicBot(object):
     EDIT_PATIENT_2 = 3
     DELETE_PATIENT_1 = 4
     DELETE_PATIENT_2 = 5
-    SET_ROOM_TEMPERATURE = 6
-    GET_ROOM_TEMPERATURE = 7
-    START_WORK = 8
-    END_WORK = 9
-    GET_SENSOR_BATTERY = 10
+    SEARCH_PATIENT = 6
+    SET_ROOM_TEMPERATURE = 7
+    GET_ROOM_TEMPERATURE = 8
+    START_WORK = 9
+    END_WORK = 10
+    GET_SENSOR_BATTERY = 11
 
     def __init__(self):
 
@@ -102,6 +103,16 @@ class SmartClinicBot(object):
             },
             fallbacks=[CommandHandler('cancel', self.__cancel)])
         dispatcher.add_handler(delete_patient_handler)
+
+        search_patient_handler = ConversationHandler(
+            entry_points=[
+                CommandHandler('search_patient', self.__search_patient)
+            ],
+            states={ 
+                SmartClinicBot.SEARCH_PATIENT: [MessageHandler(Filters.text & ~(Filters.command), self.__patient_search)],
+            },
+            fallbacks=[CommandHandler('cancel', self.__cancel)])
+        dispatcher.add_handler(search_patient_handler)
         
         # Register the Bot to the Service Registry System TODO INTEGRATE
         #r = requests.post(self.__config_settings['host'] + "/add-service",data = json.dumps({
@@ -186,7 +197,7 @@ class SmartClinicBot(object):
 
     def __add_patient(self, update: Update, context: CallbackContext):
         userID = update.message.from_user.id
-        if self.__check_authZ_authN(update, 'start', userID):
+        if self.__check_authZ_authN(update, 'add_patient', userID):
             update.message.reply_text(
                 "To insert a new Patient, insert the following data in the following format:\n"
                 "patientID - <insert_patientID>\n" 
@@ -255,7 +266,7 @@ class SmartClinicBot(object):
 
     def __edit_patient(self, update: Update, context: CallbackContext):
         userID = update.message.from_user.id
-        if self.__check_authZ_authN(update, 'start', userID):
+        if self.__check_authZ_authN(update, 'edit_patient', userID):
             update.message.reply_text(
                 "To edit a Patient, insert their patient ID or their name using the following format:\n"
                 "patientID - <insert_patientID>\n" 
@@ -263,7 +274,7 @@ class SmartClinicBot(object):
                 "name - <insert_name>\n"
                 "surname - <insert_surname>\n"
                 )
-            context.chat_data['command'] = 'edit'
+            context.chat_data['command'] = 'edit_patient'
             return SmartClinicBot.EDIT_PATIENT_1
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
@@ -307,9 +318,9 @@ class SmartClinicBot(object):
                 if len(found_patients) == 1:
                     found_patient = found_patients.pop()
                     # Store this infomation for when the new Patient description will be provided and the current one will be discarded
-                    if curr_command == 'delete':
+                    if curr_command == 'delete_patient':
                         context.chat_data['patientID_to_delete'] = req_patientID
-                    elif curr_command == 'edit':
+                    elif curr_command == 'edit_patient':
                         context.chat_data['patientID_to_edit'] = req_patientID
                     msg = ("Patient found:\n" +
                         "patientID - {patientID}\n"   .format(patientID=      found_patient['patientID']) +
@@ -318,10 +329,12 @@ class SmartClinicBot(object):
                         "age - {patientAge}\n"        .format(patientAge=     found_patient['age']) +
                         "description - {patientDescription}\n".format(patientDescription=found_patient['description']) +
                         "-"*40 + "\n")
-                    if curr_command == 'delete':
+                    if curr_command == 'delete_patient':
                         msg += "Are you sure you want to delete them? [Y/N]"
-                    elif curr_command == 'edit':
+                    elif curr_command == 'edit_patient':
                         msg += "Redefine the Patient using the same format without patientID"
+                    elif curr_command == 'search_patient':
+                        msg += "If you have not found the Patient you were looking for, relaunch the command"
                     update.message.reply_text(msg) 
                 else:
                     msg = "Multiple Patients found!\n"
@@ -332,11 +345,14 @@ class SmartClinicBot(object):
                             "age - {patientAge}\n".format(patientAge=found_patient['age']) + \
                             "description - {patientDescription}\n".format(patientDescription=found_patient['description']) + \
                             "-"*40 + "\n"
-                    msg += "Choose the patient by using their ID with the following format:\n" "patientID - <insert_patientID>" 
+                    if curr_command == 'delete_patient' or curr_command == 'edit_patient':
+                        msg += "Choose the patient by using their ID with the following format:\n" "patientID - <insert_patientID>" 
+                    elif curr_command == 'search_patient':
+                        msg += "If you have not found the Patient you were looking for, relaunch the command"
                     update.message.reply_text(msg)
-                    if curr_command == 'delete':
+                    if curr_command == 'delete_patient':
                         return SmartClinicBot.DELETE_PATIENT_1
-                    elif curr_command == 'edit':
+                    elif curr_command == 'edit_patient':
                         return SmartClinicBot.EDIT_PATIENT_1             
             else:
                 raise Exception("Patient not present")    
@@ -349,15 +365,18 @@ class SmartClinicBot(object):
                 "name - <insert_name>\n"
                 "surname - <insert_surname>\n")
             print(e)
-            if curr_command == 'delete':
+            if curr_command == 'delete_patient':
                 return SmartClinicBot.DELETE_PATIENT_1
-            elif curr_command == 'edit':
+            elif curr_command == 'edit_patient':
                 return SmartClinicBot.EDIT_PATIENT_1 
+            elif curr_command == 'search_patient':
+                return SmartClinicBot.SEARCH_PATIENT
 
-        if curr_command == 'delete':
+        if curr_command == 'delete_patient':
             return SmartClinicBot.DELETE_PATIENT_2
-        elif curr_command == 'edit':
+        elif curr_command == 'edit_patient':
             return SmartClinicBot.EDIT_PATIENT_2
+        return ConversationHandler.END #default bhv (also expected behavior for search_patient)
 
     def __edit_patient_update(self, update: Update, context: CallbackContext):
         try:
@@ -404,7 +423,7 @@ class SmartClinicBot(object):
 
     def __delete_patient(self, update: Update, context: CallbackContext):
         userID = update.message.from_user.id
-        if self.__check_authZ_authN(update, 'start', userID):
+        if self.__check_authZ_authN(update, 'delete_patient', userID):
             update.message.reply_text(
                 "To delete a Patient, insert their patient ID or their name using the following format:\n"
                 "patientID - <insert_patientID>\n" 
@@ -412,7 +431,7 @@ class SmartClinicBot(object):
                 "name - <insert_name>\n"
                 "surname - <insert_surname>\n"
                 )
-            context.chat_data['command'] = 'delete'
+            context.chat_data['command'] = 'delete_patient'
             return SmartClinicBot.DELETE_PATIENT_1
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
@@ -439,12 +458,28 @@ class SmartClinicBot(object):
                 raise Exception("Undefined Answer")
 
         except Exception as e:
-            update.message.reply_text("Sorry, Reply with [Y/N]\n")
+            update.message.reply_text("Sorry, Reply with [Y/N]")
             print(e)
             # Retry until success
             return SmartClinicBot.DELETE_PATIENT_2
  
         return ConversationHandler.END
+
+    def __search_patient(self, update: Update, context: CallbackContext):
+        userID = update.message.from_user.id
+        if self.__check_authZ_authN(update, 'search_patient', userID):
+            update.message.reply_text(
+                "To search a Patient, insert their patient ID or their name using the following format:\n"
+                "patientID - <insert_patientID>\n" 
+                "OR\n"
+                "name - <insert_name>\n"
+                "surname - <insert_surname>\n"
+                )
+            context.chat_data['command'] = 'search_patient'
+            return SmartClinicBot.SEARCH_PATIENT
+        else:
+            update.message.reply_text("Sorry, you cannot interact with the Bot!")
+            return ConversationHandler.END
  
     def __set_room_temperature(self, update: Update, context: CallbackContext):
         context.chat_data['command'] = 'set_room_temperature'
