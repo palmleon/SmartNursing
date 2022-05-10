@@ -31,9 +31,7 @@ class SmartClinicBot(object):
     SEARCH_PATIENT = 6
     SET_ROOM_TEMPERATURE = 7
     GET_ROOM_TEMPERATURE = 8
-    START_WORK = 9
-    END_WORK = 10
-    GET_SENSOR_BATTERY = 11
+    GET_SENSOR_BATTERY = 9
 
     def __init__(self):
 
@@ -50,7 +48,7 @@ class SmartClinicBot(object):
         }
 
         # Define Working Staff List
-        self.__working_staff = [190657895]
+        self.__working_staff = {}
 
         # Create the Updater and the Dispatcher
         self.__updater = Updater(token=bot_token, use_context=True)
@@ -119,6 +117,12 @@ class SmartClinicBot(object):
             },
             fallbacks=[CommandHandler('cancel', self.__cancel)])
         dispatcher.add_handler(get_room_temperature_handler)
+
+        start_work_handler = CommandHandler('start_work', self.__start_work)
+        dispatcher.add_handler(start_work_handler)
+
+        end_work_handler = CommandHandler('end_work', self.__end_work)
+        dispatcher.add_handler(end_work_handler)
 
         # Extract info about the MQTT Broker from the Device and Registry System TODO UNCOMMENT WHEN INTEGRATING WITH DEVICE AND REGISTRY SYSTEM
         #r = requests.get(self.__config_settings['host'] + "/message-broker")
@@ -211,7 +215,7 @@ class SmartClinicBot(object):
                     found = True
                     if new_alarm['timestamp'] - alarm['timestamp'] < 60:
                         already_sent = True
-                        print("Alarm already sent " + str(new_alarm['timestamp'] - alarm['timestamp']) + "s ago!")
+                        #print("Alarm already sent " + str(new_alarm['timestamp'] - alarm['timestamp']) + "s ago!")
                     else: # Remove the alarm since it will be reuploaded
                         alarm_index = alarm_black_list.index(alarm)
             if found and not already_sent:
@@ -221,12 +225,12 @@ class SmartClinicBot(object):
             # otherwise, forward the alarm to all the staff that is currently working and update the Black List about this alarm
             if not already_sent:                
                 
-                for chat_id in self.__working_staff:
+                for chatID in self.__working_staff.values():
                     # TODO ADD WARNING SIGNS
                     text = "\u26a0 " + new_alarm['alarm_type'] + " ALARM" + " \u26a0\n" + \
                         new_alarm['alarm_type'] + " " + str(new_alarm['id']) + ": " + new_alarm['msg']
                     #NOTE: protect_content is True for privacy reasons (no information leakage outside of the actors involved)
-                    self.__updater.bot.send_message(chat_id=chat_id, text=text, protect_content=True)
+                    self.__updater.bot.send_message(chat_id=chatID, text=text, protect_content=True)
                 
                 # Update the Black List
                 alarm_black_list.append(new_alarm)
@@ -243,8 +247,8 @@ class SmartClinicBot(object):
                 self.__alarm_black_list['last_update'] = curr_time
 
             self.__alarm_black_list['alarms'] = alarm_black_list
-            print(self.__alarm_black_list['alarms'])
-            print(self.__alarm_black_list['last_update'])
+            #print(self.__alarm_black_list['alarms'])
+            #print(self.__alarm_black_list['last_update'])
 
         except Exception as e:
             print("Exception found")
@@ -430,33 +434,30 @@ class SmartClinicBot(object):
                         context.chat_data['patientID_to_delete'] = req_patientID
                     elif curr_command == 'edit_patient':
                         context.chat_data['patientID_to_edit'] = req_patientID
-                    msg = ("Patient found:\n" +
+                    msg = ("Patient found:\n" + "-"*40 + "\n" +
                         "patientID - {patientID}\n"   .format(patientID=      found_patient['patientID']) +
                         "name - {patientName}\n"      .format(patientName=    found_patient['name']) +
                         "surname - {patientSurname}\n".format(patientSurname= found_patient['surname']) + 
                         "age - {patientAge}\n"        .format(patientAge=     found_patient['age']) +
-                        "description - {patientDescription}\n".format(patientDescription=found_patient['description']) +
-                        "-"*40 + "\n")
+                        "description - {patientDescription}\n".format(patientDescription=found_patient['description']))
                     if curr_command == 'delete_patient':
+                        msg += "-"*40
                         msg += "Are you sure you want to delete them? [Y/N]"
                     elif curr_command == 'edit_patient':
+                        msg += "-"*40
                         msg += "Redefine the Patient using the same format without patientID"
-                    elif curr_command == 'search_patient':
-                        msg += "If you have not found the Patient you were looking for, sorry!"
                     update.message.reply_text(msg) 
                 else:
-                    msg = "Multiple Patients found!\n"
+                    msg = "Multiple Patients found!\n" + "-"*40 + "\n"
                     for found_patient in sorted(found_patients, key=lambda p: p['patientID']):
                         msg += "patientID - {patientID}\n".format(patientID=found_patient['patientID']) + \
                             "name - {patientName}\n".format(patientName=found_patient['name']) + \
                             "surname - {patientSurname}\n".format(patientSurname=found_patient['surname']) + \
                             "age - {patientAge}\n".format(patientAge=found_patient['age']) + \
-                            "description - {patientDescription}\n".format(patientDescription=found_patient['description']) + \
-                            "-"*40 + "\n"
+                            "description - {patientDescription}\n".format(patientDescription=found_patient['description'])
                     if curr_command == 'delete_patient' or curr_command == 'edit_patient':
+                        msg += "-"*40
                         msg += "Choose the patient by using their ID with the following format:\n" "patientID - <insert_patientID>" 
-                    elif curr_command == 'search_patient':
-                        msg += "If you have not found the Patient you were looking for, relaunch the command"
                     update.message.reply_text(msg)
                     if curr_command == 'delete_patient':
                         return SmartClinicBot.DELETE_PATIENT_1
@@ -654,14 +655,51 @@ class SmartClinicBot(object):
         return ConversationHandler.END
 
     def __start_work(self, update: Update, context: CallbackContext):
-        context.chat_data['command'] = 'start_work'        
-        pass
-        return SmartClinicBot.START_WORK
+        
+        try:
+            userID = update.message.from_user.id   
+            chatID = update.effective_chat.id
+
+            # Authentication and Authorization
+            if self.__check_authZ_authN(update, 'start_work', userID):
+                context.chat_data['command'] = 'start_work' 
+
+                # Check if the user has already launched a /start_work command, i.e. they're in the working staff
+                if userID not in self.__working_staff:
+                    self.__working_staff[userID] = chatID
+                    update.message.reply_text("You have been added to the Working Staff!")
+                else:
+                    raise Exception("You have already started to work!")
+
+            else:
+                raise Exception("Authentication/Authorization failed.")
+
+        except Exception as e:
+            update.message.reply_text("Something went wrong. Retry")
+            print(e)
 
     def __end_work(self, update: Update, context: CallbackContext):
-        context.chat_data['command'] = 'end_work'        
-        pass
-        return SmartClinicBot.END_WORK
+             
+        try:
+            userID = update.message.from_user.id   
+            
+            # Authentication and Authorization
+            if self.__check_authZ_authN(update, 'end_work', userID):
+                context.chat_data['command'] = 'end_work' 
+
+                # Check if the user has already launched an /end_work command, i.e. they're not in the working staff
+                if userID in self.__working_staff:
+                    del self.__working_staff[userID]
+                    update.message.reply_text("You have been removed from the Working Staff!")
+                else:
+                    raise Exception("You have already finished to work!")
+                    
+            else:
+                raise Exception("Authentication/Authorization failed.")
+
+        except Exception as e:
+            update.message.reply_text("Something went wrong. Retry")
+            print(e)
 
     def __get_sensor_battery(self, update: Update, context: CallbackContext):
         context.chat_data['command'] = 'get_sensor_battery'        
