@@ -1,13 +1,15 @@
-from setuptools import Command
 from telegram.ext import Updater, CallbackContext, CommandHandler, ConversationHandler, MessageHandler, Filters
 from telegram import Update
-import MyMQTT
+from MyMQTT import MyMQTT
 import logging
 import requests
 import json
 
 users = {190657895: "SuperUser"}
 patientCatalog = { 'patientCatalog':[] }
+rooms = {1: {"desired-temperature": 23},
+         2: {"desired-temperature": 9},
+         3: {"desired-temperature": 24}}
 
 def singleton(cls):
     instances = {}
@@ -54,29 +56,16 @@ class SmartClinicBot(object):
         logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             level=logging.INFO)
  
-        # Add Handlers to the Conversation Handler and then to the Dispatcher
+        # Define Handlers and add them to the Dispatcher
         start_handler = CommandHandler('start', self.__start)
         dispatcher.add_handler(start_handler)
+
         add_patient_handler = ConversationHandler(
             entry_points=[
-                CommandHandler('add_patient', self.__add_patient_entry)  #,
-        #            CommandHandler('edit_patient', self.__edit_patient),
-        #            CommandHandler('delete_patient', self.__delete_patient),
-        #            CommandHandler('set_room_temperature', self.__set_room_temperature),
-        #            CommandHandler('get_room_temperature', self.__get_room_temperature),
-        #            CommandHandler('start_work', self.__start_work),
-        #            CommandHandler('end_work', self.__end_work),
-        #            CommandHandler('get_sensor_battery', self.__get_sensor_battery)
+                CommandHandler('add_patient', self.__add_patient_entry)
             ],
             states={ 
-                SmartClinicBot.ADD_PATIENT: [MessageHandler(Filters.text & ~(Filters.command), self.__add_patient_update)]  #, 
-        #            SmartClinicBot.EDIT_PATIENT: [], 
-        #            SmartClinicBot.DELETE_PATIENT: [],
-        #            SmartClinicBot.SET_ROOM_TEMPERATURE: [], 
-        #            SmartClinicBot.GET_ROOM_TEMPERATURE: [], 
-        #            SmartClinicBot.START_WORK: [],
-        #            SmartClinicBot.END_WORK: [], 
-        #            SmartClinicBot.GET_SENSOR_BATTERY: []
+                SmartClinicBot.ADD_PATIENT: [MessageHandler(Filters.text & ~(Filters.command), self.__add_patient_update)]
             },
             fallbacks=[CommandHandler('cancel', self.__cancel)]
         )
@@ -116,6 +105,53 @@ class SmartClinicBot(object):
 
         show_patients_handler = CommandHandler('show_patients', self.__show_patients)
         dispatcher.add_handler(show_patients_handler)
+
+        get_room_temperature_handler = ConversationHandler(
+            entry_points=[
+                CommandHandler('get_room_temperature', self.__get_room_temperature_entry)
+            ],
+            states={ 
+                SmartClinicBot.GET_ROOM_TEMPERATURE: [MessageHandler(Filters.text & ~(Filters.command), self.__get_room_temperature)]
+            },
+            fallbacks=[CommandHandler('cancel', self.__cancel)])
+        dispatcher.add_handler(get_room_temperature_handler)
+
+        # Extract info about the MQTT Broker from the Device and Registry System TODO UNCOMMENT WHEN INTEGRATING WITH DEVICE AND REGISTRY SYSTEM
+        #r = requests.get(self.__config_settings['host'] + "/message-broker")
+        #while r.status_code != requests.codes.ok:
+        #    r = requests.get(self.__config_settings['host'] + "/message-broker")
+        #message_broker = r.json()
+        message_broker = {}
+        message_broker['name'] = 'localhost'
+        message_broker['port'] = 1883
+
+        # Initialize the MQTT Client for Patient Alarm TODO INTEGRATE
+        self.__mqttPatientClient = MyMQTT(self.__config_settings['mqttClientName-Patient'], message_broker['name'], message_broker['port'], self)
+        
+        # Initialize the MQTT Client for Room Alarm TODO INTEGRATE
+        self.__mqttRoomClient = MyMQTT(self.__config_settings['mqttClientName-Room'], message_broker['name'], message_broker['port'], self)
+        
+    # Start the Bot
+    def launch(self):
+
+        # Extract info about the MQTT Topics for Patient Alarms and Room Alarms TODO UNCOMMENT WHEN INTEGRATING WITH DEVICE AND REGISTRY SYSTEM
+        #r = requests.get(self.__config_settings['host'] + "/alarm-base-topic")
+        #while r.status_code != requests.codes.ok:
+        #    r = requests.get(self.__config_settings['host'] + "/alarm-base-topic")
+        #patient_topic = r.json()
+        patient_topic = 'group01/IoTProject/PatientAlarm/'
+
+        #r = requests.get(self.__config_settings['host'] + "/alarm-room-topic")
+        #while r.status_code != requests.codes.ok:
+        #    r = requests.get(self.__config_settings['host'] + "/alarm-room-topic")
+        #room_topic = r.json()
+        room_topic = 'group01/IoTProject/RoomAlarm/'
+
+        self.__updater.start_polling()
+        self.__mqttPatientClient.start()
+        self.__mqttPatientClient.mySubscribe(patient_topic)
+        self.__mqttRoomClient.start()
+        self.__mqttRoomClient.mySubscribe(room_topic)
         
         # Register the Bot to the Service Registry System TODO INTEGRATE
         #r = requests.post(self.__config_settings['host'] + "/add-service",data = json.dumps({
@@ -128,23 +164,17 @@ class SmartClinicBot(object):
         #    'name' : self.__config_settings['name']
         #    }))
 
-        # Initialize the MQTT Client TODO INTEGRATE
-        #r = requests.get(self.__config_settings['host'] + "/message-broker")
-        #while r.status_code != requests.codes.ok:
-        #    r = requests.get(self.__config_settings['host'] + "/message-broker")
-        #message_broker = r.json()
-        #self.mqttClient = MyMQTT(self.__config_settings['name'], message_broker['name'], message_broker['port'], self)
-
-    # Start the Bot
-    def launch(self):
-        self.__updater.start_polling()
-
     # Receive Notifications from the MQTT Client (i.e. Alarms)
     def notify(self, topic, payload):
-        pass
+        payload = json.loads(payload)
+        print('Hello from MQTT! Topic: ' + topic + ", Payload: " + payload['msg'])
 
     # Stop the Bot
     def stop(self):
+        self.__mqttRoomClient.unsubscribe()
+        self.__mqttRoomClient.stop()
+        self.__mqttPatientClient.unsubscribe()
+        self.__mqttPatientClient.stop()
         self.__updater.stop()
 
     # Method for Authentication and Authorization
@@ -186,7 +216,7 @@ class SmartClinicBot(object):
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
 
     @staticmethod
-    def __parse_patient(text):
+    def __parse_input(text):
         text_entries = text.split("\n")
         patient = {}
         for entry in text_entries:
@@ -201,6 +231,7 @@ class SmartClinicBot(object):
     def __add_patient_entry(self, update: Update, context: CallbackContext):
         userID = update.message.from_user.id
         if self.__check_authZ_authN(update, 'add_patient', userID):
+            context.chat_data['command'] = 'add_patients'
             update.message.reply_text(
                 "To insert a new Patient, insert the following data in the following format:\n"
                 "patientID - <insert_patientID>\n" 
@@ -208,7 +239,6 @@ class SmartClinicBot(object):
                 "surname - <insert_surname>\n"
                 "age - <insert_age>\n"
                 "description - <insert_description>")
-            context.chat_data['command'] = 'add_patients'
             return SmartClinicBot.ADD_PATIENT
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
@@ -217,13 +247,14 @@ class SmartClinicBot(object):
     def __add_patient_update(self, update: Update, context: CallbackContext):
         # Define a Patient from the User Data
         try:
-            new_patient = SmartClinicBot.__parse_patient(update.message.text)
+            new_patient = SmartClinicBot.__parse_input(update.message.text)
             # Check if you have fetched the correct number of elements
-            if len(new_patient.keys()) != 5:
+            keys = new_patient.keys()
+            if len(keys) != 5:
                 raise Exception("Incorrect number of elements")
             # Check if all the excepted keys are present
-            if 'name' not in new_patient.keys() or 'patientID'   not in new_patient.keys() or 'surname' not in new_patient.keys() or \
-                'age' not in new_patient.keys() or 'description' not in new_patient.keys():
+            if 'name' not in keys or 'patientID'   not in keys or 'surname' not in keys or \
+                'age' not in keys or 'description' not in keys:
                 raise Exception("Missing key")
             # Treat the patientID as a number
             new_patient['patientID'] = int(new_patient['patientID'])
@@ -288,7 +319,7 @@ class SmartClinicBot(object):
             # Understand which is the current command
             curr_command = context.chat_data['command']
             # Define a Patient from the User Data
-            req_patient = SmartClinicBot.__parse_patient(update.message.text)
+            req_patient = SmartClinicBot.__parse_input(update.message.text)
             # Check if you have fetched the correct number of elements
             # Take the current Patient Catalog and check whether the Patient is already present TODO INTEGRATE WITH DEVICE AND REGISTRY SYSTEM
             patient_catalog = patientCatalog['patientCatalog']
@@ -359,7 +390,6 @@ class SmartClinicBot(object):
                         return SmartClinicBot.EDIT_PATIENT_1             
             else:
                 raise Exception("Patient not present")    
-            
         except Exception as e:
             update.message.reply_text(
                 "Something went wrong. Please use the following format:\n"
@@ -367,7 +397,6 @@ class SmartClinicBot(object):
                 "OR\n"
                 "name - <insert_name>\n"
                 "surname - <insert_surname>\n")
-            print(e)
             if curr_command == 'delete_patient':
                 return SmartClinicBot.DELETE_PATIENT_1
             elif curr_command == 'edit_patient':
@@ -383,7 +412,7 @@ class SmartClinicBot(object):
 
     def __edit_patient_update(self, update: Update, context: CallbackContext):
         try:
-            edited_patient = SmartClinicBot.__parse_patient(update.message.text)
+            edited_patient = SmartClinicBot.__parse_input(update.message.text)
             keys = edited_patient.keys()
             print(edited_patient)
             # Check if you have fetched the correct number of elements
@@ -407,7 +436,7 @@ class SmartClinicBot(object):
                 "surname - <insert_surname>\n"
                 "age - <insert_age>\n"
                 "description - <insert_description>\n")
-            print(e)
+            #print(e)
             # Retry until success
             return SmartClinicBot.EDIT_PATIENT_2
  
@@ -503,17 +532,54 @@ class SmartClinicBot(object):
             update.message.reply_text(msg)
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
-
  
     def __set_room_temperature(self, update: Update, context: CallbackContext):
         context.chat_data['command'] = 'set_room_temperature'
         pass
         return SmartClinicBot.SET_ROOM_TEMPERATURE
 
+    def __get_room_temperature_entry(self, update: Update, context: CallbackContext):
+        userID = update.message.from_user.id
+        if self.__check_authZ_authN(update, 'search_patient', userID):
+            update.message.reply_text(
+                "To read the temperature of a room, insert its number using the following format:\n"
+                "roomNumber - <insert_roomNumber>"
+                )
+            context.chat_data['command'] = 'get_room_temperature'
+            return SmartClinicBot.GET_ROOM_TEMPERATURE
+        else:
+            update.message.reply_text("Sorry, you cannot interact with the Bot!")
+            return ConversationHandler.END
+
     def __get_room_temperature(self, update: Update, context: CallbackContext):
-        context.chat_data['command'] = 'get_room_temperature'
-        pass
-        return SmartClinicBot.GET_ROOM_TEMPERATURE
+        try:
+            room = SmartClinicBot.__parse_input(update.message.text)
+            keys = room.keys()
+            # Check if you have fetched the correct number of elements
+            if len(room) != 1:
+                raise Exception("Incorrect number of elements")
+            # Check if all the excepted keys are present
+            if 'roomNumber' not in keys:
+                raise Exception("Missing key")
+            # Treat the Room Number as an integer
+            roomNumber = int(room['roomNumber'])
+            # Get the Room info TODO INTEGRATE WITH DEVICE AND REGISTRY SYSTEM
+            fetched_room = rooms[roomNumber]
+            fetched_room_temp = fetched_room['desired-temperature']
+            update.message.reply_text(
+                "Room Temperature for Room" + str(roomNumber) + ": " + str(fetched_room_temp)
+            )
+
+        except Exception as e:
+            update.message.reply_text(
+                "Something went wrong. "
+                "Please, use the following format:\n"
+                "roomNumber - <insert_roomNumber>")
+            print(e)
+            # Retry until success
+            return SmartClinicBot.GET_ROOM_TEMPERATURE
+
+        return ConversationHandler.END
 
     def __start_work(self, update: Update, context: CallbackContext):
         context.chat_data['command'] = 'start_work'        

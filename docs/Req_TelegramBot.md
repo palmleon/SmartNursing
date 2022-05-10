@@ -126,7 +126,7 @@ Telegram GUI + commands to interact with the Bot
 |       | - The system updates its information |
 |       | - The system returns a success message to the User |
 
-### Scenario 4: Removing a Patient
+### Scenario 4: Removing a Patient OK
 
 | Field | Description |
 | ------| ----------- |
@@ -202,7 +202,7 @@ Telegram GUI + commands to interact with the Bot
 |       | The User sets the new desired value for the Room Temperature |
 |       | The system forwards the request to the Room Temperature manager |
 
-### Scenario 8: Monitoring Room Temperature
+### Scenario 8: Monitoring Room Temperature OK
 
 | Field | Description |
 | ------| ----------- |
@@ -345,7 +345,7 @@ Telegram GUI + commands to interact with the Bot
 |       | Otherwise: |
 |       | - Cancel the operation |
 
-### Scenario E.5: Removing a non-existing Patient
+### Scenario E.5: Removing a non-existing Patient OK
 
 | Field | Description |
 | ------| ----------- |
@@ -365,7 +365,7 @@ Telegram GUI + commands to interact with the Bot
 |       | Otherwise: |
 |       | - Cancel the operation |
 
-### Scenario E.6: Editing a non-existing Patient
+### Scenario E.6: Editing a non-existing Patient OK
 
 | Field | Description |
 | ------| ----------- |
@@ -400,7 +400,7 @@ Telegram GUI + commands to interact with the Bot
 |       | If no acknowledge: |
 |       | - Retry |
 
-### Scenario E.8: Managing a non-existent Room
+### Scenario E.8: Managing a non-existent Room OK
 
 | Field | Description |
 | ------| ----------- |
