@@ -2,7 +2,7 @@
     "host" : "http://cdrsi:8080/catalog",
     "serviceID" : 7,
     "name": "Smart-Clinic-Telegram-Bot",
-    "botToken":"5346738235:AAHs012PGIuY-340hX1Wf1qat_o7u3s3Zhk",
+    "botToken":"5346738235:AAF3fCrHaRBpiRJaT4IFtEbeF1Rp25MPdTA",
     "tasks": 
         [{
             "command": "start",
@@ -22,6 +22,10 @@
         },
         {
             "command": "search_patient",
+            "roles": ["Doctor", "SuperUser"]
+        },
+        {
+            "command": "show_patients",
             "roles": ["Doctor", "SuperUser"]
         },
         {

@@ -1,4 +1,4 @@
-from click import edit
+from setuptools import Command
 from telegram.ext import Updater, CallbackContext, CommandHandler, ConversationHandler, MessageHandler, Filters
 from telegram import Update
 import MyMQTT
@@ -59,7 +59,7 @@ class SmartClinicBot(object):
         dispatcher.add_handler(start_handler)
         add_patient_handler = ConversationHandler(
             entry_points=[
-                CommandHandler('add_patient', self.__add_patient)  #,
+                CommandHandler('add_patient', self.__add_patient_entry)  #,
         #            CommandHandler('edit_patient', self.__edit_patient),
         #            CommandHandler('delete_patient', self.__delete_patient),
         #            CommandHandler('set_room_temperature', self.__set_room_temperature),
@@ -69,7 +69,7 @@ class SmartClinicBot(object):
         #            CommandHandler('get_sensor_battery', self.__get_sensor_battery)
             ],
             states={ 
-                SmartClinicBot.ADD_PATIENT: [MessageHandler(Filters.text & ~(Filters.command), self.__add_request_handle)]  #, 
+                SmartClinicBot.ADD_PATIENT: [MessageHandler(Filters.text & ~(Filters.command), self.__add_patient_update)]  #, 
         #            SmartClinicBot.EDIT_PATIENT: [], 
         #            SmartClinicBot.DELETE_PATIENT: [],
         #            SmartClinicBot.SET_ROOM_TEMPERATURE: [], 
@@ -84,10 +84,10 @@ class SmartClinicBot(object):
 
         edit_patient_handler = ConversationHandler(
             entry_points=[
-                CommandHandler('edit_patient', self.__edit_patient)
+                CommandHandler('edit_patient', self.__edit_patient_entry)
             ],
             states={ 
-                SmartClinicBot.EDIT_PATIENT_1: [MessageHandler(Filters.text & ~(Filters.command), self.__patient_search)],
+                SmartClinicBot.EDIT_PATIENT_1: [MessageHandler(Filters.text & ~(Filters.command), self.__search_patient)],
                 SmartClinicBot.EDIT_PATIENT_2: [MessageHandler(Filters.text & ~(Filters.command), self.__edit_patient_update)]
             },
             fallbacks=[CommandHandler('cancel', self.__cancel)])
@@ -95,10 +95,10 @@ class SmartClinicBot(object):
 
         delete_patient_handler = ConversationHandler(
             entry_points=[
-                CommandHandler('delete_patient', self.__delete_patient)
+                CommandHandler('delete_patient', self.__delete_patient_entry)
             ],
             states={ 
-                SmartClinicBot.DELETE_PATIENT_1: [MessageHandler(Filters.text & ~(Filters.command), self.__patient_search)],
+                SmartClinicBot.DELETE_PATIENT_1: [MessageHandler(Filters.text & ~(Filters.command), self.__search_patient)],
                 SmartClinicBot.DELETE_PATIENT_2: [MessageHandler(Filters.text & ~(Filters.command), self.__delete_patient_update)]
             },
             fallbacks=[CommandHandler('cancel', self.__cancel)])
@@ -106,13 +106,16 @@ class SmartClinicBot(object):
 
         search_patient_handler = ConversationHandler(
             entry_points=[
-                CommandHandler('search_patient', self.__search_patient)
+                CommandHandler('search_patient', self.__search_patient_entry)
             ],
             states={ 
-                SmartClinicBot.SEARCH_PATIENT: [MessageHandler(Filters.text & ~(Filters.command), self.__patient_search)],
+                SmartClinicBot.SEARCH_PATIENT: [MessageHandler(Filters.text & ~(Filters.command), self.__search_patient)],
             },
             fallbacks=[CommandHandler('cancel', self.__cancel)])
         dispatcher.add_handler(search_patient_handler)
+
+        show_patients_handler = CommandHandler('show_patients', self.__show_patients)
+        dispatcher.add_handler(show_patients_handler)
         
         # Register the Bot to the Service Registry System TODO INTEGRATE
         #r = requests.post(self.__config_settings['host'] + "/add-service",data = json.dumps({
@@ -195,7 +198,7 @@ class SmartClinicBot(object):
             patient[entry_key] = entry_value
         return patient
 
-    def __add_patient(self, update: Update, context: CallbackContext):
+    def __add_patient_entry(self, update: Update, context: CallbackContext):
         userID = update.message.from_user.id
         if self.__check_authZ_authN(update, 'add_patient', userID):
             update.message.reply_text(
@@ -205,13 +208,13 @@ class SmartClinicBot(object):
                 "surname - <insert_surname>\n"
                 "age - <insert_age>\n"
                 "description - <insert_description>")
-            context.chat_data['command'] = 'add'
+            context.chat_data['command'] = 'add_patients'
             return SmartClinicBot.ADD_PATIENT
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
             return ConversationHandler.END
 
-    def __add_request_handle(self, update: Update, context: CallbackContext):
+    def __add_patient_update(self, update: Update, context: CallbackContext):
         # Define a Patient from the User Data
         try:
             new_patient = SmartClinicBot.__parse_patient(update.message.text)
@@ -264,7 +267,7 @@ class SmartClinicBot(object):
         print(patient_catalog)
         return ConversationHandler.END
 
-    def __edit_patient(self, update: Update, context: CallbackContext):
+    def __edit_patient_entry(self, update: Update, context: CallbackContext):
         userID = update.message.from_user.id
         if self.__check_authZ_authN(update, 'edit_patient', userID):
             update.message.reply_text(
@@ -280,7 +283,7 @@ class SmartClinicBot(object):
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
             return ConversationHandler.END
 
-    def __patient_search(self, update: Update, context: CallbackContext):
+    def __search_patient(self, update: Update, context: CallbackContext):
         try:
             # Understand which is the current command
             curr_command = context.chat_data['command']
@@ -334,7 +337,7 @@ class SmartClinicBot(object):
                     elif curr_command == 'edit_patient':
                         msg += "Redefine the Patient using the same format without patientID"
                     elif curr_command == 'search_patient':
-                        msg += "If you have not found the Patient you were looking for, relaunch the command"
+                        msg += "If you have not found the Patient you were looking for, sorry!"
                     update.message.reply_text(msg) 
                 else:
                     msg = "Multiple Patients found!\n"
@@ -421,7 +424,7 @@ class SmartClinicBot(object):
                 return ConversationHandler.END # terminate asap for better availability
         return ConversationHandler.END
 
-    def __delete_patient(self, update: Update, context: CallbackContext):
+    def __delete_patient_entry(self, update: Update, context: CallbackContext):
         userID = update.message.from_user.id
         if self.__check_authZ_authN(update, 'delete_patient', userID):
             update.message.reply_text(
@@ -465,7 +468,7 @@ class SmartClinicBot(object):
  
         return ConversationHandler.END
 
-    def __search_patient(self, update: Update, context: CallbackContext):
+    def __search_patient_entry(self, update: Update, context: CallbackContext):
         userID = update.message.from_user.id
         if self.__check_authZ_authN(update, 'search_patient', userID):
             update.message.reply_text(
@@ -480,6 +483,27 @@ class SmartClinicBot(object):
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
             return ConversationHandler.END
+
+    def __show_patients(self, update: Update, context: CallbackContext):
+        userID = update.message.from_user.id
+        if self.__check_authZ_authN(update, 'add_patient', userID):
+            context.chat_data['command'] = 'show_patients'
+            patient_catalog = patientCatalog['patientCatalog']
+            if len(patient_catalog) == 0:
+                msg = "No patient found"
+            else:
+                msg = "Currently registered patients:\n"
+                for found_patient in sorted(patient_catalog, key=lambda p: p['patientID']):
+                    msg +=  "-"*40 + "\n" + \
+                            "patientID - {patientID}\n".format(patientID=found_patient['patientID']) + \
+                            "name - {patientName}\n".format(patientName=found_patient['name']) + \
+                            "surname - {patientSurname}\n".format(patientSurname=found_patient['surname']) + \
+                            "age - {patientAge}\n".format(patientAge=found_patient['age']) + \
+                            "description - {patientDescription}\n".format(patientDescription=found_patient['description']) 
+            update.message.reply_text(msg)
+        else:
+            update.message.reply_text("Sorry, you cannot interact with the Bot!")
+
  
     def __set_room_temperature(self, update: Update, context: CallbackContext):
         context.chat_data['command'] = 'set_room_temperature'
