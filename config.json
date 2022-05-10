@@ -3,7 +3,7 @@
     "serviceID" : 7,
     "mqttClientName-Patient": "Smart-Clinic-Telegram-Bot-Patient",
     "mqttClientName-Room": "Smart-Clinic-Telegram-Bot-Room",
-    "botToken":"5346738235:AAF3fCrHaRBpiRJaT4IFtEbeF1Rp25MPdTA",
+    "botToken":"5346738235:AAHv_Z9LEp-E3wZkow5JiYhPX1PuG-_AS0Y",
     "tasks": 
         [{
             "command": "start",

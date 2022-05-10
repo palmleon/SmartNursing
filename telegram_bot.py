@@ -4,6 +4,7 @@ from MyMQTT import MyMQTT
 import logging
 import requests
 import json
+from time import time
 
 users = {190657895: "SuperUser"}
 patientCatalog = { 'patientCatalog':[] }
@@ -43,10 +44,13 @@ class SmartClinicBot(object):
         bot_token = self.__config_settings['botToken']
         
         # Define Alarm Black List
-        self.alarm_black_list = []
+        self.__alarm_black_list = {
+            'alarms': [],
+            'last_update': int(time())
+        }
 
         # Define Working Staff List
-        self.working_staff = []
+        self.__working_staff = [190657895]
 
         # Create the Updater and the Dispatcher
         self.__updater = Updater(token=bot_token, use_context=True)
@@ -139,13 +143,13 @@ class SmartClinicBot(object):
         #while r.status_code != requests.codes.ok:
         #    r = requests.get(self.__config_settings['host'] + "/alarm-base-topic")
         #patient_topic = r.json()
-        patient_topic = 'group01/IoTProject/PatientAlarm/'
+        patient_topic = 'group01/IoTProject/PatientAlarm/+'
 
         #r = requests.get(self.__config_settings['host'] + "/alarm-room-topic")
         #while r.status_code != requests.codes.ok:
         #    r = requests.get(self.__config_settings['host'] + "/alarm-room-topic")
         #room_topic = r.json()
-        room_topic = 'group01/IoTProject/RoomAlarm/'
+        room_topic = 'group01/IoTProject/RoomAlarm/+'
 
         self.__updater.start_polling()
         self.__mqttPatientClient.start()
@@ -164,18 +168,88 @@ class SmartClinicBot(object):
         #    'name' : self.__config_settings['name']
         #    }))
 
-    # Receive Notifications from the MQTT Client (i.e. Alarms)
-    def notify(self, topic, payload):
-        payload = json.loads(payload)
-        print('Hello from MQTT! Topic: ' + topic + ", Payload: " + payload['msg'])
-
-    # Stop the Bot
+   # Stop the Bot
     def stop(self):
         self.__mqttRoomClient.unsubscribe()
         self.__mqttRoomClient.stop()
         self.__mqttPatientClient.unsubscribe()
         self.__mqttPatientClient.stop()
         self.__updater.stop()
+
+    # Receive Notifications from the MQTT Client (i.e. Alarms)
+    # The topic contains the ID of the Patient/Room
+    # The Payload is a raw string, encoded in utf-8
+    def notify(self, topic, payload):
+        
+        try:
+            # Extract the kind of topic and the ID
+            topics = topic.split('/')
+            if topics[-2] == 'PatientAlarm':
+                alarm_type = 'PATIENT'
+            elif topics[-2] == 'RoomAlarm':
+                alarm_type = 'ROOM'
+            id = int(topics[-1]) # POSSIBLE ERROR
+
+            # Extract the payload
+            msg = payload.decode('utf-8') # POSSIBLE ERROR
+            #print('Hello from MQTT! Topic: ' + topic + ", Payload: " + msg)
+
+            # Construct an Alarm object
+            new_alarm = {}
+            new_alarm['alarm_type'] = alarm_type
+            new_alarm['msg'] = msg
+            new_alarm['id'] = id
+            new_alarm['timestamp'] = int(time())
+            #print(new_alarm['timestamp'])
+
+            # Check if the current message is in the Black List and the message has been sent < 1 minutes before
+            alarm_black_list = self.__alarm_black_list['alarms']
+            already_sent = False
+            found = False
+            for alarm in alarm_black_list:
+                if alarm['alarm_type'] == new_alarm['alarm_type'] and alarm['id'] == new_alarm['id'] and alarm['msg'] == new_alarm['msg']:
+                    found = True
+                    if new_alarm['timestamp'] - alarm['timestamp'] < 60:
+                        already_sent = True
+                        print("Alarm already sent " + str(new_alarm['timestamp'] - alarm['timestamp']) + "s ago!")
+                    else: # Remove the alarm since it will be reuploaded
+                        alarm_index = alarm_black_list.index(alarm)
+            if found and not already_sent:
+                alarm_black_list.pop(alarm_index)
+
+            # If that is the case, do not forward it; 
+            # otherwise, forward the alarm to all the staff that is currently working and update the Black List about this alarm
+            if not already_sent:                
+                
+                for chat_id in self.__working_staff:
+                    # TODO ADD WARNING SIGNS
+                    text = "\u26a0 " + new_alarm['alarm_type'] + " ALARM" + " \u26a0\n" + \
+                        new_alarm['alarm_type'] + " " + str(new_alarm['id']) + ": " + new_alarm['msg']
+                    #NOTE: protect_content is True for privacy reasons (no information leakage outside of the actors involved)
+                    self.__updater.bot.send_message(chat_id=chat_id, text=text, protect_content=True)
+                
+                # Update the Black List
+                alarm_black_list.append(new_alarm)
+
+            # If more than 5 minutes have spent since the last update, update the Black List
+            curr_time = int(time())
+            last_update = self.__alarm_black_list['last_update']    
+
+            if curr_time - last_update > 300:
+
+                for alarm in alarm_black_list:
+                    alarm_black_list = [alarm for alarm in alarm_black_list if curr_time - alarm['timestamp'] < 60]
+
+                self.__alarm_black_list['last_update'] = curr_time
+
+            self.__alarm_black_list['alarms'] = alarm_black_list
+            print(self.__alarm_black_list['alarms'])
+            print(self.__alarm_black_list['last_update'])
+
+        except Exception as e:
+            print("Exception found")
+            print(e)
+
 
     # Method for Authentication and Authorization
     def __check_authZ_authN(self, update, command, userID):
@@ -185,7 +259,7 @@ class SmartClinicBot(object):
         #    request = requests.get(self.__config_settings['host'+ "/telegram-chat-id-list"])
         #users = request.json()['userIDs']
         # Check if the User is among those recognized
-        if userID not in users.keys():
+        if userID not in users:
             update.message.reply_text("Authentication failed!")
             return False
         # Check if the User has a suitable role for the task to perform
@@ -212,6 +286,7 @@ class SmartClinicBot(object):
         # Check if the User is among those recognized
         if self.__check_authZ_authN(update, 'start', userID):
             update.message.reply_text("Congratulations! You're in!")
+            update.message.reply_text("Your user ID: " + str(update.effective_chat.id))
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
 
@@ -249,12 +324,11 @@ class SmartClinicBot(object):
         try:
             new_patient = SmartClinicBot.__parse_input(update.message.text)
             # Check if you have fetched the correct number of elements
-            keys = new_patient.keys()
-            if len(keys) != 5:
+            if len(new_patient) != 5:
                 raise Exception("Incorrect number of elements")
             # Check if all the excepted keys are present
-            if 'name' not in keys or 'patientID'   not in keys or 'surname' not in keys or \
-                'age' not in keys or 'description' not in keys:
+            if 'name' not in new_patient or 'patientID'   not in new_patient or 'surname' not in new_patient or \
+                'age' not in new_patient or 'description' not in new_patient:
                 raise Exception("Missing key")
             # Treat the patientID as a number
             new_patient['patientID'] = int(new_patient['patientID'])
@@ -327,7 +401,7 @@ class SmartClinicBot(object):
             patient_present = False
             found_patients = [] 
             if len(req_patient) == 1: # Case in which the User provides the PatientID
-                if 'patientID' not in req_patient.keys():
+                if 'patientID' not in req_patient:
                     raise Exception("Missing key")
                 req_patientID = int(req_patient['patientID'])
                 for patient in patient_catalog:
@@ -336,7 +410,7 @@ class SmartClinicBot(object):
                         found_patients.append(patient)            
             # Case in which the User provides the Name and Surname of the patient
             elif len(req_patient) == 2:
-                if 'name' not in req_patient.keys() or 'surname' not in req_patient.keys():
+                if 'name' not in req_patient or 'surname' not in req_patient:
                     raise Exception("Missing key")
                 # Check that both the name and the surname contain alphabetic chars only
                 if not req_patient['name'].isalpha() or not req_patient['surname'].isalpha():
@@ -413,14 +487,13 @@ class SmartClinicBot(object):
     def __edit_patient_update(self, update: Update, context: CallbackContext):
         try:
             edited_patient = SmartClinicBot.__parse_input(update.message.text)
-            keys = edited_patient.keys()
-            print(edited_patient)
+            #print(edited_patient)
             # Check if you have fetched the correct number of elements
             if len(edited_patient) != 4:
                 raise Exception("Incorrect number of elements")
             # Check if all the excepted keys are present
-            if 'name' not in keys or 'surname' not in keys or \
-                'age' not in keys or 'description' not in keys:
+            if 'name' not in edited_patient or 'surname' not in edited_patient or \
+                'age' not in edited_patient or 'description' not in edited_patient:
                 raise Exception("Missing key")
             # Check that both the name and the surname contain alphabetic chars only
             if not edited_patient['name'].isalpha() or not edited_patient['surname'].isalpha():
@@ -515,7 +588,7 @@ class SmartClinicBot(object):
 
     def __show_patients(self, update: Update, context: CallbackContext):
         userID = update.message.from_user.id
-        if self.__check_authZ_authN(update, 'add_patient', userID):
+        if self.__check_authZ_authN(update, 'show_patients', userID):
             context.chat_data['command'] = 'show_patients'
             patient_catalog = patientCatalog['patientCatalog']
             if len(patient_catalog) == 0:
@@ -540,7 +613,7 @@ class SmartClinicBot(object):
 
     def __get_room_temperature_entry(self, update: Update, context: CallbackContext):
         userID = update.message.from_user.id
-        if self.__check_authZ_authN(update, 'search_patient', userID):
+        if self.__check_authZ_authN(update, 'get_room_temperature', userID):
             update.message.reply_text(
                 "To read the temperature of a room, insert its number using the following format:\n"
                 "roomNumber - <insert_roomNumber>"
@@ -554,12 +627,11 @@ class SmartClinicBot(object):
     def __get_room_temperature(self, update: Update, context: CallbackContext):
         try:
             room = SmartClinicBot.__parse_input(update.message.text)
-            keys = room.keys()
             # Check if you have fetched the correct number of elements
             if len(room) != 1:
                 raise Exception("Incorrect number of elements")
             # Check if all the excepted keys are present
-            if 'roomNumber' not in keys:
+            if 'roomNumber' not in room:
                 raise Exception("Missing key")
             # Treat the Room Number as an integer
             roomNumber = int(room['roomNumber'])
