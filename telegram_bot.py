@@ -227,7 +227,7 @@ class SmartClinicBot(object):
                 
                 for chatID in self.__working_staff.values():
                     # TODO ADD WARNING SIGNS
-                    text = "\u26a0 " + new_alarm['alarm_type'] + " ALARM" + " \u26a0\n" + \
+                    text = "\u26a0 " + new_alarm['alarm_type'] + " ALARM \u26a0\n" + \
                         new_alarm['alarm_type'] + " " + str(new_alarm['id']) + ": " + new_alarm['msg']
                     #NOTE: protect_content is True for privacy reasons (no information leakage outside of the actors involved)
                     self.__updater.bot.send_message(chat_id=chatID, text=text, protect_content=True)
@@ -240,10 +240,8 @@ class SmartClinicBot(object):
             last_update = self.__alarm_black_list['last_update']    
 
             if curr_time - last_update > 300:
-
-                for alarm in alarm_black_list:
-                    alarm_black_list = [alarm for alarm in alarm_black_list if curr_time - alarm['timestamp'] < 60]
-
+                  
+                alarm_black_list = [alarm for alarm in alarm_black_list if curr_time - alarm['timestamp'] < 60]
                 self.__alarm_black_list['last_update'] = curr_time
 
             self.__alarm_black_list['alarms'] = alarm_black_list
