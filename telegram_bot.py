@@ -108,6 +108,16 @@ class SmartClinicBot(object):
         show_patients_handler = CommandHandler('show_patients', self.__show_patients)
         dispatcher.add_handler(show_patients_handler)
 
+        set_room_temperature_handler = ConversationHandler(
+            entry_points=[
+                CommandHandler('set_room_temperature', self.__set_room_temperature_entry)
+            ],
+            states={ 
+                SmartClinicBot.SET_ROOM_TEMPERATURE: [MessageHandler(Filters.text & ~(Filters.command), self.__set_room_temperature)]
+            },
+            fallbacks=[CommandHandler('cancel', self.__cancel)])
+        dispatcher.add_handler(set_room_temperature_handler)
+
         get_room_temperature_handler = ConversationHandler(
             entry_points=[
                 CommandHandler('get_room_temperature', self.__get_room_temperature_entry)
@@ -605,10 +615,52 @@ class SmartClinicBot(object):
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
  
+    def __set_room_temperature_entry(self, update: Update, context: CallbackContext):
+        userID = update.message.from_user.id
+        if self.__check_authZ_authN(update, 'get_room_temperature', userID):
+            update.message.reply_text(
+                "To set the temperature of a room, use the following format:\n"
+                "roomNumber - <insert_roomNumber>\n"
+                "temp - <insert_temperature>"
+                )
+            context.chat_data['command'] = 'set_room_temperature'
+            return SmartClinicBot.SET_ROOM_TEMPERATURE
+        else:
+            update.message.reply_text("Sorry, you cannot interact with the Bot!")
+            return ConversationHandler.END
+
     def __set_room_temperature(self, update: Update, context: CallbackContext):
-        context.chat_data['command'] = 'set_room_temperature'
-        pass
-        return SmartClinicBot.SET_ROOM_TEMPERATURE
+        try:
+            room = SmartClinicBot.__parse_input(update.message.text)
+            # Check if you have fetched the correct number of elements
+            if len(room) != 2:
+                raise Exception("Incorrect number of elements")
+            # Check if all the excepted keys are present
+            if 'roomNumber' not in room and 'temp' not in room:
+                raise Exception("Missing key")
+            # Treat the Room Number as an integer
+            roomNumber = int(room['roomNumber'])
+            # Treat the Room Temperature as an integer
+            roomTemp = int(room['temp'])
+            # Set the Room info TODO INTEGRATE WITH DEVICE AND REGISTRY SYSTEM
+            if roomNumber in rooms:
+                rooms[roomNumber] = {"desired-temperature": roomTemp}
+                update.message.reply_text(
+                    "Room Temperature for Room " + str(roomNumber) + ": updated!"
+                )
+            else:
+                raise Exception("Missing Room!")
+
+        except Exception as e:
+            update.message.reply_text(
+                "Something went wrong. "
+                "Please, use the following format:\n"
+                "roomNumber - <insert_roomNumber>")
+            print(e)
+            # Retry until success
+            return SmartClinicBot.SET_ROOM_TEMPERATURE
+
+        return ConversationHandler.END
 
     def __get_room_temperature_entry(self, update: Update, context: CallbackContext):
         userID = update.message.from_user.id
@@ -638,7 +690,7 @@ class SmartClinicBot(object):
             fetched_room = rooms[roomNumber]
             fetched_room_temp = fetched_room['desired-temperature']
             update.message.reply_text(
-                "Room Temperature for Room" + str(roomNumber) + ": " + str(fetched_room_temp)
+                "Room Temperature for Room " + str(roomNumber) + ": " + str(fetched_room_temp)
             )
 
         except Exception as e:
