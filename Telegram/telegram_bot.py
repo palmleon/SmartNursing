@@ -39,7 +39,10 @@ class SmartClinicBot(object):
         config_file = open('config.json')
         self.__config_settings = json.load(config_file)
         config_file.close()
-        bot_token = self.__config_settings['botToken']
+
+        r = requests.get(self.__config_settings['host']+"/bot-token")
+        token  = r.json()
+        bot_token = token
         
         # Define Alarm Black List
         self.__alarm_black_list = {
@@ -135,13 +138,13 @@ class SmartClinicBot(object):
         dispatcher.add_handler(end_work_handler)
 
         # Extract info about the MQTT Broker from the Device and Registry System TODO UNCOMMENT WHEN INTEGRATING WITH DEVICE AND REGISTRY SYSTEM
-        #r = requests.get(self.__config_settings['host'] + "/message-broker")
-        #while r.status_code != requests.codes.ok:
-        #    r = requests.get(self.__config_settings['host'] + "/message-broker")
-        #message_broker = r.json()
+        #ADD CHECK ON RESPONSE STATUS
+        #----------------------------------------
+        r = requests.get(self.__config_settings['host']+"/message-broker")
+        mb = r.json()
         message_broker = {}
-        message_broker['name'] = 'localhost'
-        message_broker['port'] = 1883
+        message_broker['name'] = mb['name']
+        message_broker['port'] = mb['port']
 
         # Initialize the MQTT Client for Patient Alarm TODO INTEGRATE
         self.__mqttPatientClient = MyMQTT(self.__config_settings['mqttClientName-Patient'], message_broker['name'], message_broker['port'], self)
@@ -157,12 +160,17 @@ class SmartClinicBot(object):
         #while r.status_code != requests.codes.ok:
         #    r = requests.get(self.__config_settings['host'] + "/alarm-base-topic")
         #patient_topic = r.json()
-        patient_topic = 'group01/IoTProject/PatientAlarm/+'
+        #TODO CHECK RESPOSE STATUS
+        r = requests.get(self.conf_file['host']+"/alarm-base-topic")
+        t = r.json()
+        patient_topic = t+"+"
+        #patient_topic = 'group01/IoTProject/PatientAlarm/+'
 
         #r = requests.get(self.__config_settings['host'] + "/alarm-room-topic")
         #while r.status_code != requests.codes.ok:
         #    r = requests.get(self.__config_settings['host'] + "/alarm-room-topic")
         #room_topic = r.json()
+        #TODO Aggiungere nel catalog
         room_topic = 'group01/IoTProject/RoomAlarm/+'
 
         self.__updater.start_polling()
@@ -172,15 +180,16 @@ class SmartClinicBot(object):
         self.__mqttRoomClient.mySubscribe(room_topic)
         
         # Register the Bot to the Service Registry System TODO INTEGRATE
-        #r = requests.post(self.__config_settings['host'] + "/add-service",data = json.dumps({
-        #    'serviceID' : self.__config_settings['serviceID'],
-        #    'name' : self.__config_settings['name']
-        #}))
-        #while r.status_code != requests.codes.ok:
-        #    r = requests.post(self.__config_settings['host'] + "/add-service",data = json.dumps({
-        #    'serviceID' : self.__config_settings['serviceID'],
-        #    'name' : self.__config_settings['name']
-        #    }))
+        
+        r = requests.post(self.__config_settings['host'] + "/add-service",data = json.dumps({
+            'serviceID' : self.__config_settings['serviceID'],
+            'name' : self.__config_settings['name']
+        }))
+        while r.status_code != requests.codes.ok:
+            r = requests.post(self.__config_settings['host'] + "/add-service",data = json.dumps({
+            'serviceID' : self.__config_settings['serviceID'],
+            'name' : self.__config_settings['name']
+            }))
 
    # Stop the Bot
     def stop(self):
@@ -290,6 +299,7 @@ class SmartClinicBot(object):
     def __start(self, update: Update, context: CallbackContext):
         userID = update.message.from_user.id
         update.message.reply_text("Welcome to the SmartClinicBot!")
+        #-----------------------------------------
         # Retrieve the list of recognized Users TODO INTEGRATE WITH DEVICE REGISTRY SYSTEM
         #request = requests.get(self.__config_settings['host'+ "/telegram-chat-id-list"])
         #while request.status_code is not requests.codes.ok:
@@ -760,6 +770,15 @@ class SmartClinicBot(object):
         update.message.reply_text("Command aborted!")
         return ConversationHandler.END
 
+    def updateService(self) :
+        while True :
+            time.sleep(100)
+            r = requests.put(self.__config_settings['host'] + "/update-service",data = json.dumps({
+            'serviceID' : self.__config_settings['serviceID'],
+            'name' : self.__config_settings['name']
+            }))
+
 if __name__ == '__main__':
     bot = SmartClinicBot()
     bot.launch()
+    bot.updateService()
