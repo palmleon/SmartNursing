@@ -5,20 +5,16 @@ import time
 
 class channelManager():
     """Class containing all methods related to ThingSpeak channels"""
-
     def __init__(self,hostUrl):
         """Init\n
         channelData -> default ThingSpeak channel configuration\n
         mainApiKey -> ThingSpeak account API\n
         channelList -> local list of ThingSpeak channels"""
-
-
         r = requests.get(hostUrl+"/channel-data")
         channel_data = r.json()
         self.channelData = channel_data
         self.mainApiKey = self.channelData["api_key"]
         self.channelList = []
-
     def listChannels(self):
         """All ThingSpeak channels will be added to the local channel list with rest API"""
         thingSpeakList = requests.get(
@@ -26,7 +22,6 @@ class channelManager():
         thingSpeakList = json.loads(thingSpeakList.text)
         for i in range(len(thingSpeakList)):
             self.channelList.append(thingSpeakList[i])
-
     def isChannelinList(self, channelID):
         """ Checks if a channel is present in the ThingSpeak channels list\n
         Parameters
@@ -44,7 +39,6 @@ class channelManager():
                 if self.channelList[i]['name'] == channelID:
                     return self.channelList[i]
         return 0
-
     def createChannel(self, cJson, topic):
         """Creates a new ThingSpeak channel with rest API\n
         If no paramater is given it will create a channel with the default configuration\n
@@ -67,7 +61,6 @@ class channelManager():
                 self.listChannels()
             else:
                 print('This channel already exists!')
-
     def cManager(self, cJson, topic):
         """Channel creations and updates manager\n
         Parameters
@@ -78,7 +71,6 @@ class channelManager():
         if self.isChannelinList(topic.split("/")[-1]) == 0:
             self.createChannel(cJson, topic.split("/")[-1])
         self.channelUpdater(cJson, topic.split("/")[-1])
-
     def channelFeed(self, channelID, read_api, field_name, len):
         """Retrive a chosen field number based on contents\n
         Parameters
@@ -103,12 +95,11 @@ class channelManager():
             if 'field{}'.format(i) in feed.keys():
                 if feed['field{}'.format(i)] == field_name:
                     return i
-                if field_name == 'battery':
-                    if len == 2:
-                        return 5
-                    elif len == 4:
-                        return 1
-
+                # if field_name == 'battery':
+                #     if len == 2:
+                #         return 5
+                #     elif len == 4:
+                #         return 1
     def channelUpdater(self, cJson, topic):
         """Updates channel with new data\n
         Parameters
@@ -138,7 +129,6 @@ class channelManager():
                     write_api, field_number, update_value['v']))
                 time.sleep(16)
         print('Upload concluded')
-
     def deleteChannel(self, channelID=None):
         """Delete a channel\n
         if the channelID is not specified it will delete all channels\n
@@ -166,7 +156,6 @@ class channelManager():
                 requests.delete(
                     'https://api.thingspeak.com/channels/{}.json'.format(self.channelList[i]['id']), json=cData)
             print('Delete Complete')
-
     def clearChannel(self, channelID=None):
         """Clear channel all channel field\n
         if the channelID is not specified it will clear all channels fields\n
@@ -193,7 +182,6 @@ class channelManager():
                 requests.delete('https://api.thingspeak.com/channels/{}/feeds.json'.format(
                     self.channelList[i]['id']), json=cData)
             print('All channels fields cleared')
-
     def retriveChannelID(self, channelName):
         """From channel name retrive channel ID\n
         Parameters
@@ -208,7 +196,6 @@ class channelManager():
             if self.channelList[i]['name'] == channelName:
                 return self.channelList[i]['id']
         return -1
-
     def newDay(self):
         """Switch day_flag from 0 to 1"""
         print('Passing day')
@@ -218,7 +205,6 @@ class channelManager():
             requests.get(
                 'https://api.thingspeak.com/update?api_key={}&field{}={}'.format(write_api, 7, 1))
             time.sleep(16)
-
     def updateList(self, patientList):
         channelID = []
         for i in range(0, len(self.channelList)):
