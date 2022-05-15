@@ -4,7 +4,7 @@ from MyMQTT import MyMQTT
 import logging
 import requests
 import json
-from time import sleep, time
+from time import sleep, time, strftime
 
 users = {190657895: "SuperUser"}
 patientCatalog = { 'patientCatalog':[] }
@@ -214,13 +214,15 @@ class SmartClinicBot(object):
             id = int(topics[-1]) # POSSIBLE ERROR
 
             # Extract the payload
-            msg = payload.decode('utf-8') # POSSIBLE ERROR
+            msg = json.loads(payload) # POSSIBLE ERROR
+            print(msg)
             #print('Hello from MQTT! Topic: ' + topic + ", Payload: " + msg)
 
             # Construct an Alarm object
             new_alarm = {}
             new_alarm['alarm_type'] = alarm_type
-            new_alarm['msg'] = msg
+            new_alarm['msg'] = msg['alert']
+            new_alarm['localtime'] = msg['time']
             new_alarm['id'] = id
             new_alarm['timestamp'] = int(time())
             #print(new_alarm['timestamp'])
@@ -247,7 +249,7 @@ class SmartClinicBot(object):
                 for chatID in self.__working_staff.values():
                     # TODO ADD WARNING SIGNS
                     text = "\u26a0 " + new_alarm['alarm_type'] + " ALARM \u26a0\n" + \
-                        new_alarm['alarm_type'] + " " + str(new_alarm['id']) + ": " + new_alarm['msg']
+                        new_alarm['alarm_type'] + " " + str(new_alarm['id']) + "[" + new_alarm['localtime'] + "]: " + new_alarm['msg'] + 
                     #NOTE: protect_content is True for privacy reasons (no information leakage outside of the actors involved)
                     self.__updater.bot.send_message(chat_id=chatID, text=text, protect_content=True)
                 
