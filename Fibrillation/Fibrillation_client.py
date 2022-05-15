@@ -15,7 +15,7 @@ class Fibrillation_Monitor_client():
     self.__name=conf_file["name"]
     self.__register=conf_file["host"]
     # Generazione template alert
-    self.__alert=conf_file["template_allarm"]
+    self.__alert=conf_file["template__alarm"]
     # Iscrizione al registro
     r = requests.post(self.__register+"/add-service",data= json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
 

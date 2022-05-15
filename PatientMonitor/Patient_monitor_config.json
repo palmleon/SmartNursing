@@ -2,5 +2,5 @@
     "host" : "http://cdrsi:8080/catalog",
     "serviceID" : 2,
     "name": "Patient-monitor-service2",
-    "template_allarm": {"allert":"","time":null}
+    "template_alarm": {"allert":"","time":null}
 }
