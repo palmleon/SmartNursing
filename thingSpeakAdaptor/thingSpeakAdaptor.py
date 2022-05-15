@@ -22,7 +22,7 @@ class thingSpeakAdaptor():
         r = requests.get(self.conf_file['host']+"/patient-saturation-base-topic")
         self.topic.append(r.json() + '+')
         self.client=MyMQTT(self.clientID,mb['name'],mb['port'],self,600)
-        self.c = channelManager()
+        self.c = channelManager(self.conf_file['host'])
     def thingSpeakAdaptorSetUp(self):
         self.start()
         self.subscribe()

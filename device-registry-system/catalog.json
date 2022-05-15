@@ -12,7 +12,21 @@
             "desired-temperature": 23
         }
     ],
+    "channel-data" : {
+        "api_key" : "YTN43QRA4IWIEBIN",
+        "name" : "Patient",
+        "public_flag" : false,
+        "field1" : "battery oximeter",
+        "field2" : "perfusion index",
+        "field3" : "saturation",
+        "field4" : "pulse rate",
+        "field5" : "battery termometer",
+        "field6" : "temperature",
+        "field7" : "day_flag",
+        "field8" : null
+      },
     "api-weather": "http://api.weatherstack.com/current?access_key=36fcb02003026b9fae56e4c0a5a228fe&query=",
+    "bot-token" : "5346738235:AAHv_Z9LEp-E3wZkow5JiYhPX1PuG-_AS0Y",
     "common-room-list": [
         1,
         2,

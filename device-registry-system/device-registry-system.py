@@ -36,11 +36,14 @@ class Catalog(object) :
 
         if uri[0] == 'message-broker' :
             return json.dumps(self.catalogList["message-broker"])
-
+        if uri[0] == 'channel-data' :
+            return json.dumps(self.catalogList["channel-data"])
         elif uri[0] == 'city' :
             return json.dumps(self.catalogList['city'])
         elif uri[0] == 'api-weather' :
             return json.dumps(self.catalogList['api-weather'])
+        elif uri[0] == 'bot-token' :
+            return json.dumps(self.catalogList['bot-token'])
         
         elif uri[0] == 'telegram-chat-id-list' :
             return json.dumps(self.catalogList['telegram-chat-id-list'])

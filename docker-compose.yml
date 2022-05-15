@@ -1,4 +1,4 @@
-version: "2"
+version: "3"
 services:
   #device registry system
   cdrsi:
@@ -8,6 +8,14 @@ services:
     expose:
       - 8080
     container_name: cdrsi
+
+  #Telegram
+  ct:
+    image: ti
+    links:
+      - cdrsi
+    depends_on:
+      - cdrsi
 
   #Patient monitor
   cpm:

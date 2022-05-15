@@ -24,9 +24,9 @@ cd raspberry-emulator
 docker build -t  rei .
 cd ..
 
-#cd telegram
-#docker build -t  ti .
-#cd ..
+cd Telegram
+docker build -t  ti .
+cd ..
 
 docker compose up -d
 docker run  --name crei -it --link cdrsi:localhost --net smartclinic_default rei
