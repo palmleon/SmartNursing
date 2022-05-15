@@ -11,7 +11,7 @@ class RaspberryEmulator :
   
 
     def __init__(self) :
-        self.patientMonitorEmulatorIntervalMinute = 5
+        self.patientMonitorEmulatorIntervalMinute = 0.5
         self.patientTemperatureEmulatorIntervalMinute = 5
         self.patientRoomEmulatorIntervalMinute = 0.5
         self.commonRoomEmulatorIntervalMinute = 0.3

@@ -85,6 +85,7 @@ class Fibrillation_Monitor_client():
         to_pub["time"]=time.time()
         # Publish allert
         self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
+        print("DEBUG : pubblico allarme per fibrillation ")
         #print(f"Published: {to_pub}\nat topic: {self.__base_topic_pub}{ID_P}")
 
 if __name__=="__main__":

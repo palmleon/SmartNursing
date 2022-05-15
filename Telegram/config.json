@@ -1,6 +1,7 @@
 {
     "host" : "http://cdrsi:8080/catalog",
     "serviceID" : 7,
+    "name" : "telegram-bot",
     "mqttClientName-Patient": "Smart-Clinic-Telegram-Bot-Patient",
     "mqttClientName-Room": "Smart-Clinic-Telegram-Bot-Room",
     "botToken":"5346738235:AAHv_Z9LEp-E3wZkow5JiYhPX1PuG-_AS0Y",

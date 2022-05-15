@@ -65,6 +65,9 @@ class Patient_Monitor_client():
     msg=json.loads(msg)
     ID_P=topic.split("/")[-1] # Prendo l'ID del PZ alla fine del topic
 
+    #DEBUG : telegram receives alerts ? 
+    print("DEBUG : invio da patient monitor l'allarme")
+    self.client.myPublish(self.__base_topic_pub+ID_P,"messaggio di errore")
     evento=msg["e"] # Prendo la lista degli eventi
     
     # Inizializzazioni
@@ -96,6 +99,7 @@ class Patient_Monitor_client():
         to_pub["allert"]=r
         to_pub["time"]=time.time()
         # Publish allert
+        print("DEBUG : Invio allarme per temperature")
         self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
     
     if len(Pi)>1:

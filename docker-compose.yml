@@ -66,6 +66,16 @@ services:
       - cdrsi
     stdin_open: true
     tty: true
+  
+  #data analysis
+  cda:
+    image: dai
+    links:
+      - cdrsi
+    depends_on:
+      - cdrsi
+    stdin_open: true
+    tty: true
 
   #thinkspeek adaptor
   ctsai:

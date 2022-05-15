@@ -4,7 +4,7 @@ from MyMQTT import MyMQTT
 import logging
 import requests
 import json
-from time import time
+from time import sleep, time
 
 users = {190657895: "SuperUser"}
 patientCatalog = { 'patientCatalog':[] }
@@ -275,9 +275,9 @@ class SmartClinicBot(object):
     # Method for Authentication and Authorization
     def __check_authZ_authN(self, update, command, userID):
         # Retrieve the list of recognized Users TODO INTEGRATE WITH DEVICE REGISTRY SYSTEM
-        request = requests.get(self.__config_settings['host'+ "/telegram-chat-id-list"])
+        request = requests.get(self.__config_settings['host']+ "/telegram-chat-id-list")
         while request.status_code != requests.codes.ok:
-            request = requests.get(self.__config_settings['host'+ "/telegram-chat-id-list"])
+            request = requests.get(self.__config_settings['host']+ "/telegram-chat-id-list")
         users = request.json()
         found = False
         user_role = None
@@ -428,6 +428,7 @@ class SmartClinicBot(object):
                 r = requests.get(self.__config_settings['host']+"/patient/"+str(req_patientID))
                 if r.status_code == requests.codes.ok : 
                     patient_present = True
+                    found_patients.append(r.json())
 
                           
             # Case in which the User provides the Name and Surname of the patient
@@ -783,7 +784,7 @@ class SmartClinicBot(object):
 
     def updateService(self) :
         while True :
-            time.sleep(100)
+            sleep(100)
             r = requests.put(self.__config_settings['host'] + "/update-service",data = json.dumps({
             'serviceID' : self.__config_settings['serviceID'],
             'name' : self.__config_settings['name']
