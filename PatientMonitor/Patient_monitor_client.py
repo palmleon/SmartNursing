@@ -66,8 +66,6 @@ class Patient_Monitor_client():
     ID_P=topic.split("/")[-1] # Prendo l'ID del PZ alla fine del topic
 
     #DEBUG : telegram receives alerts ? 
-    print("DEBUG : invio da patient monitor l'allarme")
-    self.client.myPublish(self.__base_topic_pub+ID_P,"messaggio di errore")
     evento=msg["e"] # Prendo la lista degli eventi
     
     # Inizializzazioni
