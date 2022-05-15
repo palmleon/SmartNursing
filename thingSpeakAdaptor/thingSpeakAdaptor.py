@@ -1,3 +1,4 @@
+from calendar import c
 from MyMQTT import *
 from channelManager import *  
 from timeChecker import isNightTime 
@@ -35,7 +36,6 @@ class thingSpeakAdaptor():
         self.client.start()
     def notify(self,topic,msg):
         print('New data received')
-        
         json_received = str(msg).replace("'",'"')
         json_received = json_received[2:-1]
         json_received = json.loads(json_received)

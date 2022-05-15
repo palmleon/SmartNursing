@@ -6,12 +6,14 @@ import time
 class channelManager():
     """Class containing all methods related to ThingSpeak channels"""
 
-    def __init__(self):
+    def __init__(self,hostUrl):
         """Init\n
         channelData -> default ThingSpeak channel configuration\n
         mainApiKey -> ThingSpeak account API\n
         channelList -> local list of ThingSpeak channels"""
-        self.channelData = json.load(open('channelData.json'))
+        r = requests.get(hostUrl+"/channel-data")
+        channel_data = r.json()
+        self.channelData = channel_data
         self.mainApiKey = self.channelData["api_key"]
         self.channelList = []
 
@@ -71,6 +73,7 @@ class channelManager():
         cJson: dict
             dict containing data"""
         self.listChannels()
+        print(self.channelList)
         if self.isChannelinList(topic.split("/")[-1]) == 0:
             self.createChannel(cJson, topic.split("/")[-1])
         self.channelUpdater(cJson, topic.split("/")[-1])
