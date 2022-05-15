@@ -1,3 +1,4 @@
 paho_mqtt==1.6.1
 requests==2.27.1
+python_telegram_bot==13.11
 telegram==0.0.1

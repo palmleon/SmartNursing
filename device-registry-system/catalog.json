@@ -5,7 +5,7 @@
         "name": "test.mosquitto.org"
     },
     "city": "Turin",
-    "telegram-chat-id-list": [],
+    "telegram-chat-id-list": [{"user-id": 190657895, "role": "SuperUser"},{"user-id": 389414686, "role": "SuperUser"}],
     "room-list": [
         {
             "roomID": 2,

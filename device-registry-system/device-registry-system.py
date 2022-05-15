@@ -187,7 +187,16 @@ class Catalog(object) :
             for i in range(len(self.catalogList['devices'])) :
                 if self.catalogList['devices'][i]['deviceID'] == id :
                     self.catalogList['devices'][i]['timestamp'] = str(datetime.datetime.today())
-            return 
+            return
+
+        if uri[0] == 'update-patient' :
+            newPatient = json.loads(cherrypy.request.body.read())
+            #print(newDevice)
+            id = newPatient['patientID']
+            for i in range(len(self.catalogList['patients'])) :
+                if self.catalogList['patients'][i]['patientID'] == id :
+                    self.catalogList['patients'][i] = newPatient
+                    return 
         if uri[0] == 'update-room' :
             newRoom = json.loads(cherrypy.request.body.read())
             #print(newDevice)
@@ -196,6 +205,8 @@ class Catalog(object) :
                 if self.catalogList['room-list'][i]['roomID'] == id :
                     self.catalogList['room-list'][i]  = newRoom
                     return 
+            self.catalogList['room-list'].append(newRoom)
+            
 
         if uri[0] == 'update-service' :
             newService = json.loads(cherrypy.request.body.read())
