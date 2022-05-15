@@ -104,7 +104,7 @@ class Patient_Monitor_client():
       r=self.analyzer.Pulse(ID_P,Pi,pulse,sat,battery)
       if r!=None:
         to_pub=self.__allert
-        to_pub["ID_PZ"]=ID_P
+        #to_pub["ID_PZ"]=ID_P
         to_pub["allert"]=r
         to_pub["time"]=time.time()
         # Publish allert

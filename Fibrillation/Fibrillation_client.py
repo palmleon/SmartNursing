@@ -80,7 +80,7 @@ class Fibrillation_Monitor_client():
       r=self.analyzer.fibrillation(ID_P,Pi,pulse,battery)
       if r!=None:
         to_pub=self.__allert
-        to_pub["ID_PZ"]=ID_P
+        #to_pub["ID_PZ"]=ID_P
         to_pub["allert"]=r
         to_pub["time"]=time.time()
         # Publish allert
