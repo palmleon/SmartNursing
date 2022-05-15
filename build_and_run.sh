@@ -28,6 +28,10 @@ cd Telegram
 docker build -t  ti .
 cd ..
 
+cd PatientDeviceAnalyzer
+docker build -t  dai .
+cd ..
+
 cd DataAnalysis
 docker build -t dai .
 cd ..

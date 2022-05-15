@@ -8,7 +8,7 @@ import datetime
 class Catalog(object) :
     exposed = True
     def __init__(self) :
-        self.refreshCatalogIntervalMinute = 2
+        self.refreshCatalogIntervalMinute = 0.5
         self.fp = open("catalog.json","r")
         self.catalogList = json.load(self.fp)
         self.fp.close()

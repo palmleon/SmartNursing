@@ -72,6 +72,13 @@
     "alarm-base-topic": "group01/IoTProject/PatientAlarm/",
     "patient-room-command-base-topic": "group01/IoTProject/PatientRoomCommand/",
     "common-room-command-base-topic": "group01/IoTProject/CommonRoomCommand/",
-    "devices": [],
+    "devices": [{
+        "deviceID" : 1,
+        "timestamp" : "2022-05-15 22:53:40.844402"
+    },
+    {
+        "deviceID" : 2,
+        "timestamp" : "2022-05-15 22:53:40.844402"
+    }],
     "patients": []
 }

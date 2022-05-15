@@ -27,6 +27,16 @@ services:
     stdin_open: true
     tty: true
 
+  #Patient device analyzer
+  cpai:
+    image: pdai
+    links:
+      - cdrsi
+    depends_on:
+      - cdrsi
+    stdin_open: true
+    tty: true
+
   #temperature patient room
   ctpri:
     image: tpri
