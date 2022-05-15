@@ -14,8 +14,8 @@ class Patient_Monitor_client():
     self.__clientID=conf_file["serviceID"]
     self.__name=conf_file["name"]
     self.__register=conf_file["host"]
-    # Generazione template allert
-    self.__allert=conf_file["template_allarm"]
+    # Generazione template alert
+    self.__alert=conf_file["template_allarm"]
     # Iscrizione al registro
     r = requests.post(self.__register+"/add-service",data = json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
     
@@ -92,22 +92,22 @@ class Patient_Monitor_client():
     if temp>-1:
       r=self.analyzer.Temperature(ID_P,temp,battery)
       if r!=None:
-        to_pub=self.__allert
+        to_pub=self.__alert
         to_pub["ID_PZ"]=ID_P
-        to_pub["allert"]=r
+        to_pub["alert"]=r
         to_pub["time"]=time.time()
-        # Publish allert
+        # Publish alert
         print("DEBUG : Invio allarme per temperature")
         self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
     
     if len(Pi)>1:
       r=self.analyzer.Pulse(ID_P,Pi,pulse,sat,battery)
       if r!=None:
-        to_pub=self.__allert
+        to_pub=self.__alert
         #to_pub["ID_PZ"]=ID_P
-        to_pub["allert"]=r
+        to_pub["alert"]=r
         to_pub["time"]=time.time()
-        # Publish allert
+        # Publish alert
         self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
 
 if __name__=="__main__":
