@@ -29,7 +29,7 @@ docker build -t  ti .
 cd ..
 
 cd PatientDeviceAnalyzer
-docker build -t  dai .
+docker build -t  pdai .
 cd ..
 
 cd DataAnalysis
