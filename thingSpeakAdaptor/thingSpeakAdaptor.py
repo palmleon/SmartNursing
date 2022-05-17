@@ -1,7 +1,6 @@
 from calendar import c
 from MyMQTT import *
 from channelManager import *  
-from timeChecker import isNightTime 
 import threading
 
 class thingSpeakAdaptor():
@@ -39,7 +38,6 @@ class thingSpeakAdaptor():
         json_received = str(msg).replace("'",'"')
         json_received = json_received[2:-1]
         json_received = json.loads(json_received)
-        #if isNightTime(json_received['bt']):
         self.c.cManager(json_received,topic)
     def updateService(self) :
         while True :
