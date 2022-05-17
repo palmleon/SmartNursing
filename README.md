@@ -13,3 +13,5 @@
  • temperature-patient-room-monitor : 5<br>
  • thingspeek : 6<br>
  • telegram : 7<br>
+ • data-analysis : 8<br>
+
