@@ -2,6 +2,7 @@ import json
 from channelManager import *
 import requests
 from datetime import date
+from datetime import datetime
 
 
 class dataAnalysis():
@@ -28,6 +29,7 @@ class dataAnalysis():
         return dataDict
     def uploadAVG(self,channelID,channelList,avgdata,stringField):
         print('Upload in progress')
+        print('Uploading ' + stringField)
         for i in range(0,len(channelList)):
             if channelList[i]['name'] == channelID:
                 write_api = channelList[i]['api_keys'][0]['api_key']
@@ -57,26 +59,27 @@ class dataAnalysis():
         if dicData['year'] == str(today.year):
             if dicData['month'] == str(today.month):
                 if dicData['day'] == str(today.day - 1):
-                    if dicData['hour'] >= '21':
+                    if dicData['hour'] >= self.timeInterval[0]:
                         return True
                 elif dicData['day'] == str(today.day):
-                    if dicData['hour'] <= '10':
+                    if dicData['hour'] <= self.timeInterval[1]:
                         return True
         return False   
     def averageTemp(self,temperatureList):
+        print('Calculating Average Temperature')
         sum = 0
         count = 0
         for i in range(0,len(temperatureList)):
             if float(temperatureList[i]) >= 35:
                 sum = sum + float(temperatureList[i])
                 count = count + 1
-                print(temperatureList[i],sum,count)
         if count != 0:
             print(sum/count)
             return sum/count
         else:
             return 0
     def averagePi(self,pi,saturation,pulse):
+        print('Calculating Averate Pulse rate and Saturation')
         sumSat = 0
         countSat = 0
         countPulse = 0
@@ -107,33 +110,52 @@ def perform():
     conf_file = json.load(open('config.json'))
     c = channelManager(conf_file['host'])
     d = dataAnalysis()
-    c.listChannels()
-    latestDate = d.retriveData(c.channelList)
-    for keys in latestDate.keys():
-        tempList = []
-        piList = []
-        satList = []
-        pulseList = []
-        for i in range(0,len(latestDate[keys])):
-            check = d.checkDate(d.convertData(\
-                latestDate[keys][i]['created_at']))
-            check = True ########## TEST ###########
-            if check == True:
-                if latestDate[keys][i]['field6'] != None:
-                    tempList.append(latestDate[keys][i]['field6'])
-                if latestDate[keys][i]['field2'] != None:
-                    piList.append(latestDate[keys][i]['field2'])
-                if latestDate[keys][i]['field3'] != None:
-                    satList.append(latestDate[keys][i]['field3'])
-                if latestDate[keys][i]['field4'] != None:
-                    pulseList.append(latestDate[keys][i]['field4'])
-        temperature = d.averageTemp(tempList)
-        pulse,saturation = d.averagePi(piList,satList,pulseList)
-        d.uploadAVG(keys,c.channelList,temperature,'average temperature')
-        d.uploadAVG(keys,c.channelList,pulse,'average pulse rate')
-        d.uploadAVG(keys,c.channelList,saturation,'average saturation')
-
-
+    time.sleep(60) #######TEST########
+    #time.sleep(60*50)
+    flag_time = 1
+    lastTimeExec = 0
+    while True:
+        now = datetime.fromtimestamp(time.time())
+        print('LastTimeExec: ' + str(lastTimeExec))
+        print('Now: ' + str(now))
+        if lastTimeExec != 0:
+            if now.day > lastTimeExec.day:
+                if now.hour >= d.timeInterval[1]:
+                    if now.hour <= d.timeInterval[0]:
+                        flag_time = 1
+            else:
+                flag_time = 0
+        if lastTimeExec == 0:
+            lastTimeExec = now
+            flag_time = 1
+        if flag_time == 1:
+            c.listChannels()
+            if len(c.channelList) > 0:
+                latestDate = d.retriveData(c.channelList)
+                for keys in latestDate.keys():
+                    tempList = []
+                    piList = []
+                    satList = []
+                    pulseList = []
+                    for i in range(0,len(latestDate[keys])):
+                        check = d.checkDate(d.convertData(\
+                            latestDate[keys][i]['created_at']))
+                        check = True ########## TEST ###########
+                        if check == True:
+                            if latestDate[keys][i]['field6'] != None:
+                                tempList.append(latestDate[keys][i]['field6'])
+                            if latestDate[keys][i]['field2'] != None:
+                                piList.append(latestDate[keys][i]['field2'])
+                            if latestDate[keys][i]['field3'] != None:
+                                satList.append(latestDate[keys][i]['field3'])
+                            if latestDate[keys][i]['field4'] != None:
+                                pulseList.append(latestDate[keys][i]['field4'])
+                    temperature = d.averageTemp(tempList)
+                    pulse,saturation = d.averagePi(piList,satList,pulseList)
+                    d.uploadAVG(keys,c.channelList,temperature,'average temperature')
+                    d.uploadAVG(keys,c.channelList,pulse,'average pulse rate')
+                    d.uploadAVG(keys,c.channelList,saturation,'average saturation')
+        
 if __name__ == '__main__':
     perform()
 
