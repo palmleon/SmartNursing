@@ -13,14 +13,6 @@ class dataAnalysis():
         }))
         r = requests.get(self.conf_file['host']+"/channel-data")
         self.fields = r.json()
-        # self.fields = {'field1':'average saturation',
-        # 'field2': 'perfusion index', 
-        # 'field3': 'saturation', 
-        # 'field4':'pulse rate', 
-        # 'field5':'average pulse rate', 
-        # 'field6': 'temperature', 
-        # 'field7': 'average temperature', 
-        # 'field8': 'day_flag'}
         r = requests.get(self.conf_file['host']+"/patient-room-hourly-scheduling")
         r = r.json()
         self.timeInterval = r['night']
