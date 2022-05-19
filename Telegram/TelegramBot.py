@@ -41,7 +41,7 @@ class SmartClinicBot(object):
         # Define Working Staff List
         self.__working_staff = {}
 
-        # Create the Updater and the Dispatcher
+        # Create the Updater and the Dispatcher (the Bot)
         self.__updater = Updater(token=bot_token, use_context=True)
         dispatcher = self.__updater.dispatcher
 
@@ -604,7 +604,7 @@ class SmartClinicBot(object):
         try:
             text = update.message.text
             # Delete Patient
-            if text == 'Y':
+            if text == 'Y' or text == 'y':
                 delete_patientID = context.chat_data['patientID_to_delete']
                 nattempts = 0
                 request = requests.delete(self.__config_settings['host']+"/delete-patient/"+str(delete_patientID))
@@ -617,18 +617,18 @@ class SmartClinicBot(object):
                     raise ServerNotFoundError
                 update.message.reply_text("Patient removed successfully!")  
             # Do not Delete Patient
-            elif text == 'N':
+            elif text == 'N' or text == 'n':
                 update.message.reply_text("Patient not deleted.\nAbort.")
             else:
                 raise ValueError("Undefined Answer")
 
         except PatientNotFoundError as e:
-            update.message.reply_text("Patient not deleted correctly! If you want to retry, relaunch the command")
+            update.message.reply_text("Patient not deleted correctly! If you want to retry, relaunch the command.")
             print(e)
             return ConversationHandler.END
 
         except ServerNotFoundError as e:
-            update.message.reply_text("Host unreachable. Abort")
+            update.message.reply_text("Host unreachable. Abort.")
             print(e)
             # Abort the command, it is not the user's fault
             return ConversationHandler.END
