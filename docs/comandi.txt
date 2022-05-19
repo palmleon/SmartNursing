@@ -1,0 +1,28 @@
+COMANDI TELEGRAM:
+
+- /start: login and authentication
+- /addPatient: add patient
+- /editPatient: edit patient
+- /deletePatient: delete patient
+- /setRoomTemperature: set room temperature
+- /getRoomTemperature: get room temperature
+- /startWork: define start of a Work Shift
+- /endWork: define end of a Work Shift
+- /getSensorBattery: get battery charge of a sensor
+
+METODI REST:
+ 
+- get-telegram-chat-id
+- get-patients
+- get-patient
+- post-add-patients
+- get-room-temperature
+- get-battery-charge
+- delete-patient
+
+TOPIC MQTT:
+
+Group01/IotProject/
+- PatientAlarm/id
+- RoomAlarm/id
+- RoomTemperature/set

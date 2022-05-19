@@ -148,7 +148,7 @@ Telegram GUI + commands to interact with the Bot
 |       | - The system removes the patient |
 |       | - The system returns a success message to the User |
 
-### Scenario 5: Warning a Medical Emergency
+### Scenario 5: Warning a Medical Emergency OK
 
 | Field | Description |
 | ------| ----------- |
@@ -168,7 +168,7 @@ Telegram GUI + commands to interact with the Bot
 |       | Otherwise: |
 |       | - The warning is not forwarded |
 
-### Scenario 6: Warning a Room Temperature Anomaly
+### Scenario 6: Warning a Room Temperature Anomaly OK
 
 | Field | Description |
 | ------| ----------- |
@@ -188,7 +188,7 @@ Telegram GUI + commands to interact with the Bot
 |       | Otherwise: |
 |       | - The warning is not forwarded |
 
-### Scenario 7: Setting Room Temperature
+### Scenario 7: Setting Room Temperature OK
 
 | Field | Description |
 | ------| ----------- |
@@ -217,7 +217,7 @@ Telegram GUI + commands to interact with the Bot
 |       | The system forwards the request to the Room Temperature manager, asking for the searched value |
 |       | The User reads the value for the parameter |
 
-### Scenario 9: Defining Start/End of a work shift
+### Scenario 9: Defining Start/End of a work shift OK
 
 | Field | Description |
 | ------| ----------- |
@@ -230,7 +230,7 @@ Telegram GUI + commands to interact with the Bot
 |       | The system verifies whether the User has already notified the Start/End of a Work Shift |
 |       | The system register the information, which will not be updated unless the User send another StartWorkShift/EndWorkShift command |
 
-### Scenario 10: Monitoring Sensors (Battery Charge)
+### Scenario 10: Monitoring Sensors (Battery Charge) REMOVED
 
 | Field | Description |
 | ------| ----------- |
@@ -455,7 +455,7 @@ Telegram GUI + commands to interact with the Bot
 |       | If no acknowledge: |
 |       | - Retry |
 
-### Scenario E.11: Defining duplicate Start/End of a Work Shift
+### Scenario E.11: Defining duplicate Start/End of a Work Shift OK
 
 | Field | Description |
 | ------| ----------- |

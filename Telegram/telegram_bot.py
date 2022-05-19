@@ -1,26 +1,12 @@
 from telegram.ext import Updater, CallbackContext, CommandHandler, ConversationHandler, MessageHandler, Filters
 from telegram import Update
 from MyMQTT import MyMQTT
+from TelegramBotExceptions import *
 import logging
 import requests
 import json
 from time import sleep, time, strftime
 
-users = {190657895: "SuperUser"}
-patientCatalog = { 'patientCatalog':[] }
-rooms = {1: {"desired-temperature": 23},
-         2: {"desired-temperature": 9},
-         3: {"desired-temperature": 24}}
-
-def singleton(cls):
-    instances = {}
-    def getinstance():
-        if cls not in instances:
-            instances[cls] = cls()
-        return instances[cls]
-    return getinstance
-
-#@singleton
 class SmartClinicBot(object):
 
     ADD_PATIENT = 1
@@ -41,8 +27,10 @@ class SmartClinicBot(object):
         config_file.close()
 
         r = requests.get(self.__config_settings['host']+"/bot-token")
-        token  = r.json()
-        bot_token = token
+        while r.status_code != requests.codes.ok:
+            r = requests.get(self.__config_settings['host']+"/bot-token")
+        
+        bot_token  = r.json()
         
         # Define Alarm Black List
         self.__alarm_black_list = {
@@ -116,7 +104,7 @@ class SmartClinicBot(object):
                 CommandHandler('set_room_temperature', self.__set_room_temperature_entry)
             ],
             states={ 
-                SmartClinicBot.SET_ROOM_TEMPERATURE: [MessageHandler(Filters.text & ~(Filters.command), self.__set_room_temperature)]
+                SmartClinicBot.SET_ROOM_TEMPERATURE: [MessageHandler(Filters.text & ~(Filters.command), self.__set_room_temperature_update)]
             },
             fallbacks=[CommandHandler('cancel', self.__cancel)])
         dispatcher.add_handler(set_room_temperature_handler)
@@ -126,7 +114,7 @@ class SmartClinicBot(object):
                 CommandHandler('get_room_temperature', self.__get_room_temperature_entry)
             ],
             states={ 
-                SmartClinicBot.GET_ROOM_TEMPERATURE: [MessageHandler(Filters.text & ~(Filters.command), self.__get_room_temperature)]
+                SmartClinicBot.GET_ROOM_TEMPERATURE: [MessageHandler(Filters.text & ~(Filters.command), self.__get_room_temperature_update)]
             },
             fallbacks=[CommandHandler('cancel', self.__cancel)])
         dispatcher.add_handler(get_room_temperature_handler)
@@ -137,49 +125,49 @@ class SmartClinicBot(object):
         end_work_handler = CommandHandler('end_work', self.__end_work)
         dispatcher.add_handler(end_work_handler)
 
-        # Extract info about the MQTT Broker from the Device and Registry System TODO UNCOMMENT WHEN INTEGRATING WITH DEVICE AND REGISTRY SYSTEM
-        #ADD CHECK ON RESPONSE STATUS
-        #----------------------------------------
         r = requests.get(self.__config_settings['host']+"/message-broker")
+        while r.status_code != requests.codes.ok:
+            r = requests.get(self.__config_settings['host']+"/message-broker")
         mb = r.json()
         message_broker = {}
         message_broker['name'] = mb['name']
         message_broker['port'] = mb['port']
 
-        # Initialize the MQTT Client for Patient Alarm TODO INTEGRATE
+        # Initialize MQTT Client for Patient Alarms
         self.__mqttPatientClient = MyMQTT(self.__config_settings['mqttClientName-Patient'], message_broker['name'], message_broker['port'], self)
         
-        # Initialize the MQTT Client for Room Alarm TODO INTEGRATE
+        # Initialize MQTT Client for Room Alarms
         self.__mqttRoomClient = MyMQTT(self.__config_settings['mqttClientName-Room'], message_broker['name'], message_broker['port'], self)
         
     # Start the Bot
     def launch(self):
 
-        # Extract info about the MQTT Topics for Patient Alarms and Room Alarms TODO UNCOMMENT WHEN INTEGRATING WITH DEVICE AND REGISTRY SYSTEM
-        #r = requests.get(self.__config_settings['host'] + "/alarm-base-topic")
-        #while r.status_code != requests.codes.ok:
-        #    r = requests.get(self.__config_settings['host'] + "/alarm-base-topic")
-        #patient_topic = r.json()
-        #TODO CHECK RESPOSE STATUS
+        # Extract info about the MQTT Topics for Patient Alarms and Room Alarms 
         r = requests.get(self.__config_settings['host']+"/alarm-base-topic")
-        t = r.json()
-        patient_topic = t+"+"
-        #patient_topic = 'group01/IoTProject/PatientAlarm/+'
-
+        while r.status_code != requests.codes.ok:
+            r = requests.get(self.__config_settings['host']+"/alarm-base-topic")
+        
+        #patient_topic should be something like 'group01/IoTProject/PatientAlarm/+'
+        try:
+            patient_topic = r.json()+"+"
+        except ValueError:
+            print("Could not extract MQTT Topics - Abort")
+        
         #r = requests.get(self.__config_settings['host'] + "/alarm-room-topic")
         #while r.status_code != requests.codes.ok:
         #    r = requests.get(self.__config_settings['host'] + "/alarm-room-topic")
         #room_topic = r.json()
-        #TODO Aggiungere nel catalog
+        #TODO Integrate quando il Topic per Room Alarms sarà definito nel Device and Registry System
         room_topic = 'group01/IoTProject/RoomAlarm/+'
 
+        # Launch the Bot and the MQTT Clients
         self.__updater.start_polling()
         self.__mqttPatientClient.start()
         self.__mqttPatientClient.mySubscribe(patient_topic)
         self.__mqttRoomClient.start()
         self.__mqttRoomClient.mySubscribe(room_topic)
         
-        # Register the Bot to the Service Registry System TODO INTEGRATE
+        # Register the Bot to the Service Registry System
         
         r = requests.post(self.__config_settings['host'] + "/add-service",data = json.dumps({
             'serviceID' : self.__config_settings['serviceID'],
@@ -191,7 +179,7 @@ class SmartClinicBot(object):
             'name' : self.__config_settings['name']
             }))
 
-   # Stop the Bot
+    # Stop the Bot and the MQTT Clients
     def stop(self):
         self.__mqttRoomClient.unsubscribe()
         self.__mqttRoomClient.stop()
@@ -211,13 +199,11 @@ class SmartClinicBot(object):
                 alarm_type = 'PATIENT'
             elif topics[-2] == 'RoomAlarm':
                 alarm_type = 'ROOM'
-            id = int(topics[-1]) # POSSIBLE ERROR
+            id = int(topics[-1])
 
             # Extract the payload
-            msg = json.loads(payload) # POSSIBLE ERROR
-            print(msg)
-            #print('Hello from MQTT! Topic: ' + topic + ", Payload: " + msg)
-
+            msg = json.loads(payload)
+           
             # Construct an Alarm object
             new_alarm = {}
             new_alarm['alarm_type'] = alarm_type
@@ -247,10 +233,9 @@ class SmartClinicBot(object):
             if not already_sent:                
                 
                 for chatID in self.__working_staff.values():
-                    # TODO ADD WARNING SIGNS
                     text = "\u26a0 " + new_alarm['alarm_type'] + " ALARM \u26a0\n" + \
                            "[" + new_alarm['localtime'] + "]: " + new_alarm['msg'] 
-                    #NOTE: protect_content is True for privacy reasons (no information leakage outside of the actors involved)
+                    #protect_content is True for privacy reasons (no information leakage outside of the actors involved)
                     self.__updater.bot.send_message(chat_id=chatID, text=text, protect_content=True)
                 
                 # Update the Black List
@@ -266,41 +251,54 @@ class SmartClinicBot(object):
                 self.__alarm_black_list['last_update'] = curr_time
 
             self.__alarm_black_list['alarms'] = alarm_black_list
-            #print(self.__alarm_black_list['alarms'])
-            #print(self.__alarm_black_list['last_update'])
 
-        except Exception as e:
-            print("Exception found")
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            print("The msg is not in the expected format!")
             print(e)
+        #except Exception as e:
+        #    print("Exception found")
+        #    print(e)
 
 
     # Method for Authentication and Authorization
     def __check_authZ_authN(self, update, command, userID):
-        # Retrieve the list of recognized Users TODO INTEGRATE WITH DEVICE REGISTRY SYSTEM
-        request = requests.get(self.__config_settings['host']+ "/telegram-chat-id-list")
-        while request.status_code != requests.codes.ok:
+        
+        try:
+            # Retrieve the list of recognized Users 
+            nattempts = 0
             request = requests.get(self.__config_settings['host']+ "/telegram-chat-id-list")
-        users = request.json()
-        found = False
-        user_role = None
-        for user in users:
-            if user['user-id'] == userID:
-                found = True
-                user_role = user['role']
-        # Check if the User is among those recognized
-        if not found:
-            update.message.reply_text("Authentication failed!")
-            return False
-        # Check if the User has a suitable role for the task to perform
-        config_tasks = self.__config_settings['tasks']
-        for task in config_tasks:
-            if task['command'] == command:
-                authz_roles = task['roles']
-                if user_role in authz_roles:
-                    return True
-                else: 
-                   update.message.reply_text("Authorization failed!") 
-                   return False
+            while nattempts < 5 and request.status_code != requests.codes.ok:
+                request = requests.get(self.__config_settings['host']+ "/telegram-chat-id-list")
+            if nattempts == 5:
+                raise ServerNotFoundError
+            users = request.json()
+            found = False
+            user_role = None
+            for user in users:
+                if user['user-id'] == userID:
+                    found = True
+                    user_role = user['role']
+            # Check if the User is among those recognized
+            if not found:
+                update.message.reply_text("Authentication failed!")
+                return False
+            # Check if the User has a suitable role for the task to perform
+            config_tasks = self.__config_settings['tasks']
+            for task in config_tasks:
+                if task['command'] == command:
+                    authz_roles = task['roles']
+                    if user_role in authz_roles:
+                        return True
+                    else: 
+                        update.message.reply_text("Authorization failed!")
+        except json.JSONDecodeError as e:
+            update.message.reply_text(
+                "Invalid answer from the Host - Abort"
+            )
+            print(e) 
+        except ServerNotFoundError:
+            update.message.reply_text("Host unreachable")
+            print(e)
         return False #default bhv
 
     def __start(self, update: Update, context: CallbackContext):
@@ -309,7 +307,6 @@ class SmartClinicBot(object):
         # Check if the User is among those recognized
         if self.__check_authZ_authN(update, 'start', userID):
             update.message.reply_text("Congratulations! You're in!")
-            update.message.reply_text("Your user ID: " + str(update.effective_chat.id))
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
 
@@ -320,7 +317,7 @@ class SmartClinicBot(object):
         for entry in text_entries:
             entry_list = entry.split("-")
             if len(entry_list) != 2:
-                raise Exception("A key does not have a corresponding value or viceversa")
+                raise ValueError
             entry_key = entry_list[0].strip()
             entry_value = entry_list[1].strip()         
             patient[entry_key] = entry_value
@@ -348,19 +345,19 @@ class SmartClinicBot(object):
             new_patient = SmartClinicBot.__parse_input(update.message.text)
             # Check if you have fetched the correct number of elements
             if len(new_patient) != 5:
-                raise Exception("Incorrect number of elements")
+                raise ValueError("Incorrect number of elements")
             # Check if all the excepted keys are present
             if 'name' not in new_patient or 'patientID'   not in new_patient or 'surname' not in new_patient or \
                 'age' not in new_patient or 'description' not in new_patient:
-                raise Exception("Missing key")
+                raise ValueError("Missing key")
             # Treat the patientID as a number
             new_patient['patientID'] = int(new_patient['patientID'])
             # Check that both the name and the surname contain alphabetic chars only
             if not new_patient['name'].isalpha() or not new_patient['surname'].isalpha():
-                raise Exception("Patient Name/Surname is not alphabetic")
+                raise ValueError("Patient Name/Surname is not alphabetic")
             # Treat the age as a number
             new_patient['age'] = int(new_patient['age'])
-        except Exception as e:
+        except ValueError as e:
             update.message.reply_text(
                 "Sorry, this Patient description is invalid.\n"
                 "Please, use the following syntax:\n"
@@ -372,24 +369,27 @@ class SmartClinicBot(object):
             print(e)
             return SmartClinicBot.ADD_PATIENT
 
-        # Take the current Patient Catalog and check whether the Patient is already present TODO INTEGRATE WITH DEVICE AND REGISTRY SYSTEM
-        #patient_catalog = patientCatalog['patientCatalog']
-        
-
-        #print(patient_catalog)
         try:
-            # Check if the Patient is already present
-            
+
             # If the Patient is already present, abort the operation; otherwise, insert it in the Patient Catalog
-            request = requests.post(self.__config_settings['host']+"/add-patient",data =json.dumps( new_patient))
+            request = requests.post(self.__config_settings['host']+"/add-patient",data =json.dumps(new_patient))
             if request.status_code == 400 :
-                raise Exception("Duplicate Patient")
-            elif request.status_code == 500 :
-                raise Exception("Server error")
+                raise DuplicatePatientError
+            elif str(request.status_code).startswith('5'):
+                nattempt = 1
+                while nattempt < 5 and str(request.status_code).startswith('5'):
+                    request = requests.post(self.__config_settings['host']+"/add-patient",data =json.dumps(new_patient))
+                    nattempt += 1
+                if nattempt == 5:
+                    raise ServerNotFoundError
             else:
                 update.message.reply_text("Patient added successfully!")
-        except Exception as e: #Assumption: all patients in the Patient Catalog are well formatted
-            update.message.reply_text("There is an error")
+        except DuplicatePatientError as e:
+            update.message.reply_text("This patient is already present!")
+            print(e)
+            return SmartClinicBot.ADD_PATIENT
+        except ServerNotFoundError as e:
+            update.message.reply_text("Host unreachable")
             print(e)
             return SmartClinicBot.ADD_PATIENT
         return ConversationHandler.END
@@ -416,38 +416,46 @@ class SmartClinicBot(object):
             curr_command = context.chat_data['command']
             # Define a Patient from the User Data
             req_patient = SmartClinicBot.__parse_input(update.message.text)
-            # Check if you have fetched the correct number of elements
-            # Take the current Patient Catalog and check whether the Patient is already present TODO INTEGRATE WITH DEVICE AND REGISTRY SYSTEM
             
+            # Check if you have fetched the correct number of elements
             # Look for the Patient either by using the PatientID or their name and surname
             patient_present = False
             found_patients = [] 
             if len(req_patient) == 1: # Case in which the User provides the PatientID
-                if 'patientID' not in req_patient:
-                    raise Exception("Missing key")
+                #if 'patientID' not in req_patient:
+                #    raise ValueError("Missing key")
                 req_patientID = int(req_patient['patientID'])
 
+                nattempts = 0
                 r = requests.get(self.__config_settings['host']+"/patient/"+str(req_patientID))
-                if r.status_code == requests.codes.ok : 
+                while nattempts < 5 and r.status_code != requests.codes.ok : 
+                    r = requests.get(self.__config_settings['host']+"/patient/"+str(req_patientID))
+                if r.status_code == requests.codes.ok:
                     patient_present = True
                     found_patients.append(r.json())
-
                           
             # Case in which the User provides the Name and Surname of the patient
-            elif len(req_patient) == 2: # TODO VERIFY WHAT HAPPENS WITH EDIT PATIENT
-                if 'name' not in req_patient or 'surname' not in req_patient:
-                    raise Exception("Missing key")
+            elif len(req_patient) == 2:
+                #if 'name' not in req_patient or 'surname' not in req_patient:
+                #    raise Exception("Missing key")
                 # Check that both the name and the surname contain alphabetic chars only
                 if not req_patient['name'].isalpha() or not req_patient['surname'].isalpha():
-                    raise Exception("Patient Name/Surname is not alphabetic")
+                    raise ValueError("Patient Name/Surname is not alphabetic")
+                # Try to contact the Server up to 5 times to retrieve the Patient Catalog
+                nattempts = 0
                 request = requests.get(self.__config_settings['host']+"/patients")
+                while nattempts < 5 and request.status_code != requests.codes.ok:
+                    nattempts += 1
+                    request = requests.get(self.__config_settings['host']+"/patients")
+                if nattempts == 5:
+                    raise ServerNotFoundError
                 patient_catalog = request.json()
                 for patient in patient_catalog:
                     if patient['name'] == req_patient['name'] and patient['surname'] == req_patient['surname']:
                         patient_present = True
                         found_patients.append(patient)
             else:
-                raise Exception("Incorrect number of parameters")
+                raise ValueError("Incorrect number of parameters")
                 # If the Patient is not present, abort the operation; otherwise, display its data and ask for a new Patient description
             if patient_present:
                 if len(found_patients) == 1:
@@ -487,8 +495,16 @@ class SmartClinicBot(object):
                     elif curr_command == 'edit_patient':
                         return SmartClinicBot.EDIT_PATIENT_1             
             else:
-                raise Exception("Patient not present")    
-        except Exception as e:
+                raise PatientNotFoundError
+
+        except json.JSONDecodeError as e:
+            update.message.reply_text(
+                "Invalid answer from the Host - Abort"
+            )
+            print(e)  
+            return ConversationHandler.END
+
+        except (ValueError, KeyError) as e:
             update.message.reply_text(
                 "Something went wrong. Please use the following format:\n"
                 "patientID - <insert_patientID>\n" 
@@ -502,6 +518,10 @@ class SmartClinicBot(object):
             elif curr_command == 'search_patient':
                 return SmartClinicBot.SEARCH_PATIENT
 
+        except PatientNotFoundError:
+            update.message.reply_text("Patient not found!")
+            return ConversationHandler.END
+
         if curr_command == 'delete_patient':
             return SmartClinicBot.DELETE_PATIENT_2
         elif curr_command == 'edit_patient':
@@ -514,29 +534,32 @@ class SmartClinicBot(object):
             #print(edited_patient)
             # Check if you have fetched the correct number of elements
             if len(edited_patient) != 4:
-                raise Exception("Incorrect number of elements")
+                raise ValueError("Incorrect number of elements")
             # Check if all the excepted keys are present
-            if 'name' not in edited_patient or 'surname' not in edited_patient or \
-                'age' not in edited_patient or 'description' not in edited_patient:
-                raise Exception("Missing key")
+            #if 'name' not in edited_patient or 'surname' not in edited_patient or \
+            #    'age' not in edited_patient or 'description' not in edited_patient:
+            #    raise Exception("Missing key")
             # Check that both the name and the surname contain alphabetic chars only
             if not edited_patient['name'].isalpha() or not edited_patient['surname'].isalpha():
-                raise Exception("Patient Name/Surname is not alphabetic")
+                raise ValueError("Patient Name/Surname is not alphabetic")
             # Treat the age as a number
             edited_patient['age'] = int(edited_patient['age'])
 
             # Insert the PatientID in the edited Patient
             edited_patient['patientID'] = context.chat_data['patientID_to_edit']
-            # Take the Patient Catalog TODO INTEGRATE WITH DEVICE AND REGISTRY SYSTEM
-            
-            request = requests.put(self.__config_settings['host']+"/update-patient",data = json.dumps(edited_patient))
-            if request.status_code != requests.codes.ok : 
-                raise Exception("Server error") #TODO review error code
+
+            # Take the Patient Catalog             
+            nattempts = 0
+            request = requests.put(self.__config_settings['host']+"/update-patient", data = json.dumps(edited_patient))
+            while nattempts < 5 and request.status_code != requests.codes.ok :
+                nattempts += 1 
+                request = requests.put(self.__config_settings['host']+"/update-patient", data = json.dumps(edited_patient))
+            if nattempts == 5:
+                raise ServerNotFoundError
             else :
                 update.message.reply_text("Patient updated successfully!")
 
-        except Exception as e:
-            # TODO HANDLE ERRORS THAT ARE NOT FORMAT ERRORS
+        except (ValueError, KeyError) as e:
             update.message.reply_text(
                 "Sorry, this Patient description is invalid.\n"
                 "Please, use the following format:\n"
@@ -544,9 +567,14 @@ class SmartClinicBot(object):
                 "surname - <insert_surname>\n"
                 "age - <insert_age>\n"
                 "description - <insert_description>\n")
-            #print(e)
             # Retry until success
             return SmartClinicBot.EDIT_PATIENT_2
+        
+        except ServerNotFoundError:
+            update.message.reply_text("Host unreachable")
+            print(e)
+            # Abort the command, it is not the user's fault
+            return ConversationHandler.END
  
         return ConversationHandler.END
 
@@ -573,17 +601,34 @@ class SmartClinicBot(object):
             if text == 'Y':
                 delete_patientID = context.chat_data['patientID_to_delete']
                 # Take the Patient Catalog TODO INTEGRATE WITH DEVICE AND REGISTRY SYSTEM
+                nattempts = 0
                 request = requests.delete(self.__config_settings['host']+"/delete-patient/"+str(delete_patientID))
-                if request.status_code != requests.codes.ok :
-                    raise Exception("Server error") #TODO review error code
+                if request.status_code == 404:
+                    raise PatientNotFoundError
+                while nattempts < 5 and str(request.status_code).startswith('5') :
+                    nattempts += 1
+                    request = requests.delete(self.__config_settings['host']+"/delete-patient/"+str(delete_patientID))
+                if nattempts == 5:
+                    raise ServerNotFoundError
                 update.message.reply_text("Patient removed successfully!")  
             # Do not Delete Patient
             elif text == 'N':
                 update.message.reply_text("Patient not deleted.\nAbort")
             else:
-                raise Exception("Undefined Answer")
+                raise ValueError("Undefined Answer")
 
-        except Exception as e:
+        except PatientNotFoundError as e:
+            update.message.reply_text("Patient not found!")
+            print(e)
+            return ConversationHandler.END
+
+        except ServerNotFoundError as e:
+            update.message.reply_text("Host unreachable")
+            print(e)
+            # Abort the command, it is not the user's fault
+            return ConversationHandler.END
+
+        except ValueError as e:
             update.message.reply_text("Sorry, Reply with [Y/N]")
             print(e)
             # Retry until success
@@ -608,27 +653,39 @@ class SmartClinicBot(object):
             return ConversationHandler.END
 
     def __show_patients(self, update: Update, context: CallbackContext):
-        userID = update.message.from_user.id
-        if self.__check_authZ_authN(update, 'show_patients', userID):
-            context.chat_data['command'] = 'show_patients'
-            request = requests.get(self.__config_settings['host']+"/patients")
-            if request.status_code != requests.codes.ok :
-                raise Exception("Server error") #TODO review error code
-            patient_catalog = request.json()
-            if len(patient_catalog) == 0:
-                msg = "No patient found"
+        
+        try:
+            userID = update.message.from_user.id
+            if self.__check_authZ_authN(update, 'show_patients', userID):
+                context.chat_data['command'] = 'show_patients'
+                nattempts = 0
+                request = requests.get(self.__config_settings['host']+"/patients")
+                while nattempts < 5 and request.status_code != requests.codes.ok :
+                    request = requests.get(self.__config_settings['host']+"/patients")
+                if nattempts == 5:
+                    raise ServerNotFoundError
+                patient_catalog = request.json()
+                if len(patient_catalog) == 0:
+                    msg = "No patient found"
+                else:
+                    msg = "Currently registered patients:\n"
+                    for found_patient in sorted(patient_catalog, key=lambda p: p['patientID']):
+                        msg +=  "-"*40 + "\n" + \
+                                "patientID - {patientID}\n".format(patientID=found_patient['patientID']) + \
+                                "name - {patientName}\n".format(patientName=found_patient['name']) + \
+                                "surname - {patientSurname}\n".format(patientSurname=found_patient['surname']) + \
+                                "age - {patientAge}\n".format(patientAge=found_patient['age']) + \
+                                "description - {patientDescription}\n".format(patientDescription=found_patient['description']) 
+                update.message.reply_text(msg)
             else:
-                msg = "Currently registered patients:\n"
-                for found_patient in sorted(patient_catalog, key=lambda p: p['patientID']):
-                    msg +=  "-"*40 + "\n" + \
-                            "patientID - {patientID}\n".format(patientID=found_patient['patientID']) + \
-                            "name - {patientName}\n".format(patientName=found_patient['name']) + \
-                            "surname - {patientSurname}\n".format(patientSurname=found_patient['surname']) + \
-                            "age - {patientAge}\n".format(patientAge=found_patient['age']) + \
-                            "description - {patientDescription}\n".format(patientDescription=found_patient['description']) 
-            update.message.reply_text(msg)
-        else:
-            update.message.reply_text("Sorry, you cannot interact with the Bot!")
+                update.message.reply_text("Sorry, you cannot interact with the Bot!")
+        except ServerNotFoundError as e:
+            update.message.reply_text("Host unreachable")
+            print(e)
+        except json.JSONDecodeError as e:
+            update.message.reply_text("Invalid answer from the Host - Abort")
+            print(e)  
+
  
     def __set_room_temperature_entry(self, update: Update, context: CallbackContext):
         userID = update.message.from_user.id
@@ -644,34 +701,38 @@ class SmartClinicBot(object):
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
             return ConversationHandler.END
 
-    def __set_room_temperature(self, update: Update, context: CallbackContext):
+    def __set_room_temperature_update(self, update: Update, context: CallbackContext):
         try:
             room = SmartClinicBot.__parse_input(update.message.text)
             # Check if you have fetched the correct number of elements
             if len(room) != 2:
-                raise Exception("Incorrect number of elements")
+                raise ValueError("Incorrect number of elements")
             # Check if all the excepted keys are present
-            if 'roomID' not in room and 'temp' not in room:
-                raise Exception("Missing key")
+            #if 'roomID' not in room and 'temp' not in room:
+            #    raise Exception("Missing key")
             # Treat the Room Number as an integer
             roomID = int(room['roomNumber'])
             # Treat the Room Temperature as an integer
             roomTemp = int(room['temp'])
-            # Set the Room info TODO INTEGRATE WITH DEVICE AND REGISTRY SYSTEM
-            request = requests.post(self.__config_settings['host']+"/update-room",data =json.dumps(
+            # Set the Room info
+            room_json = json.dumps(
                 {
                     'roomID': roomID,
                     'desired-temperature': roomTemp
                 }
-            ))
-            if request.status_code == requests.codes.ok:
-                update.message.reply_text(
-                    "Room Temperature for Room " + str(roomID) + ": updated!"
-                )
-            else: # TODO REVIEW ERROR CODES
-                raise Exception("Server Error")
+            )
+            nattempts = 0
+            request = requests.post(self.__config_settings['host']+"/update-room",data=room_json)
+            while nattempts < 5 and request.status_code != requests.codes.ok:
+                nattempts += 1
+                request = requests.post(self.__config_settings['host']+"/update-room",data=room_json)
+            if nattempts == 5:
+                raise ServerNotFoundError
+            update.message.reply_text(
+                "Room Temperature for Room " + str(roomID) + ": updated!"
+            )
 
-        except Exception as e:
+        except (ValueError, KeyError) as e:
             update.message.reply_text(
                 "Something went wrong. "
                 "Please, use the following format:\n"
@@ -680,6 +741,11 @@ class SmartClinicBot(object):
             print(e)
             # Retry until success
             return SmartClinicBot.SET_ROOM_TEMPERATURE
+        
+        except ServerNotFoundError as e:
+            update.message.reply_text("Host unreachable")
+            print(e)
+            return ConversationHandler.END
 
         return ConversationHandler.END
 
@@ -696,28 +762,39 @@ class SmartClinicBot(object):
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
             return ConversationHandler.END
 
-    def __get_room_temperature(self, update: Update, context: CallbackContext):
+    def __get_room_temperature_update(self, update: Update, context: CallbackContext):
         try:
             room = SmartClinicBot.__parse_input(update.message.text)
             # Check if you have fetched the correct number of elements
             if len(room) != 1:
-                raise Exception("Incorrect number of elements")
+                raise ValueError("Incorrect number of elements")
             # Check if all the excepted keys are present
-            if 'roomID' not in room:
-                raise Exception("Missing key")
+            #if 'roomID' not in room:
+            #    raise Exception("Missing key")
             # Treat the Room Number as an integer
             roomID = int(room['roomID'])
-            # Get the Room info TODO INTEGRATE WITH DEVICE AND REGISTRY SYSTEM
+            # Get the Room info 
+            nattempts = 0
             request = requests.get(self.__config_settings['host']+"/room-temperature/" + str(roomID))
-            if request.status_code != requests.codes.ok:
-                raise Exception("Server Error") #TODO HANDLE ERROR CODES
+            while nattempts < 5 and str(request.status_code).startswith('5'):
+                nattempts += 1
+                request = requests.get(self.__config_settings['host']+"/room-temperature/" + str(roomID))
+            if nattempts == 5:
+                raise ServerNotFoundError
+            if request.status_code == 404:
+                raise RoomNotFoundError
             fetched_room = request.json()
             fetched_room_temp = fetched_room['desired-temperature']
             update.message.reply_text(
                 "Room Temperature for Room " + str(roomID) + ": " + str(fetched_room_temp)
             )
 
-        except Exception as e:
+        except json.JSONDecodeError as e:
+            update.message.reply_text("Invalid answer from the Host - Abort")
+            print(e)
+            return ConversationHandler.END
+
+        except (ValueError, KeyError) as e:
             update.message.reply_text(
                 "Something went wrong. "
                 "Please, use the following format:\n"
@@ -725,6 +802,11 @@ class SmartClinicBot(object):
             print(e)
             # Retry until success
             return SmartClinicBot.GET_ROOM_TEMPERATURE
+
+        except RoomNotFoundError as e:
+            update.message.reply_text("Room not found!")
+            print(e)
+            return ConversationHandler.END
 
         return ConversationHandler.END
 
@@ -743,13 +825,13 @@ class SmartClinicBot(object):
                     self.__working_staff[userID] = chatID
                     update.message.reply_text("You have been added to the Working Staff!")
                 else:
-                    raise Exception("You have already started to work!")
+                    raise ShiftStartedError
 
             else:
-                raise Exception("Authentication/Authorization failed.")
+                update.message.reply_text("Sorry, you cannot interact with the Bot!")
 
-        except Exception as e:
-            update.message.reply_text("Something went wrong. Retry")
+        except ShiftStartedError as e:
+            update.message.reply_text("You have already started to work!")
             print(e)
 
     def __end_work(self, update: Update, context: CallbackContext):
@@ -766,19 +848,14 @@ class SmartClinicBot(object):
                     del self.__working_staff[userID]
                     update.message.reply_text("You have been removed from the Working Staff!")
                 else:
-                    raise Exception("You have already finished to work!")
+                    raise ShiftEndedError
                     
             else:
-                raise Exception("Authentication/Authorization failed.")
+                update.message.reply_text("Sorry, you cannot interact with the Bot!")
 
-        except Exception as e:
-            update.message.reply_text("Something went wrong. Retry")
+        except ShiftEndedError as e:
+            update.message.reply_text("You have already finished to work!")
             print(e)
-
-    def __get_sensor_battery(self, update: Update, context: CallbackContext):
-        context.chat_data['command'] = 'get_sensor_battery'        
-        pass
-        return SmartClinicBot.GET_SENSOR_BATTERY
 
     def __cancel(self, update: Update, context: CallbackContext):
         update.message.reply_text("Command aborted!")
@@ -787,10 +864,16 @@ class SmartClinicBot(object):
     def updateService(self) :
         while True :
             sleep(100)
+            nattempts = 0
             r = requests.put(self.__config_settings['host'] + "/update-service",data = json.dumps({
             'serviceID' : self.__config_settings['serviceID'],
             'name' : self.__config_settings['name']
             }))
+            while nattempts < 5 and r.status_code != requests.codes.ok:
+                r = requests.put(self.__config_settings['host'] + "/update-service",data = json.dumps({
+                'serviceID' : self.__config_settings['serviceID'],
+                'name' : self.__config_settings['name']
+                }))
 
 if __name__ == '__main__':
     bot = SmartClinicBot()

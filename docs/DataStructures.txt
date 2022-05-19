@@ -1,0 +1,36 @@
+STRUTTURE DATI DA UTILIZZARE:
+
+- Chat ID List [esterno]: contiene tutti gli Utenti Autorizzati, assieme al ruolo (Nurse/Doctor/SuperUser)
+- config.json [interno]: contiene:
+	 - per ogni task, il livello di autorizzazione richiesto
+	 - il token del Bot OK
+	 - l'URL per il Service Registry System OK
+		 (da cui ottenere l'MQTT Broker e qualsiasi altro servizio) OK
+- Patient Catalog [esterno]:
+	- per ogni paziente:
+		- Patient ID
+		- Nome e Cognome
+		- Data di nascita
+		- Patologie note
+		- Numero di telefono per le emergenze
+- WorkingStaff List [interno]: contiene tutti gli Utenti attualmente al lavoro (hanno lanciato uno /StartWork, ma non ancora il corrispondente /StopWork)
+	- per ogni utente:
+		- Chat ID
+- Alarm Black List [interno]: contiene tutti i messaggi inviati < 1 minuto prima. La lista viene aggiornata:
+	- ogni volta che un alarm viene ricevuto 
+		(verifica se nella Black List è presente un messaggio dello stesso tipo e quanto tempo fa è stato inviato; se assente o dt > 1 minuto, aggiorna la Black List; altrimenti non fare nulla)
+	- ogni 5 minuti a partire dall'ultimo aggiornamento, durante il primo aggiornamento a più di 5 minuti di distanza dall'ultimo aggiornamento
+	Contiene:
+	- timestamp ultimo aggiornamento
+	- per ogni alarm:
+		- tipologia alarm (patient/room)
+		- Patient/Room ID
+		- msg
+- Room Catalog [esterno]: contiene le info riguardanti tutte le stanze e in particolare
+	- per ogni stanza, contiene:
+		- Room ID
+		- Info per accedere ai rispettivi sensori, in particolare:
+			- Temperatura
+			- Illuminazione
+			- Per ogni sensore, stato della batteria
+	
