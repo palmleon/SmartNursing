@@ -786,7 +786,7 @@ class SmartClinicBot(object):
             fetched_room = request.json()
             fetched_room_temp = fetched_room['desired-temperature']
             update.message.reply_text(
-                "Room Temperature for Room " + str(roomID) + ": " + str(fetched_room_temp)
+                "Room Temperature for Room " + str(roomID) + ": " + str(fetched_room_temp) + "°C"
             )
 
         except json.JSONDecodeError as e:
