@@ -5,7 +5,52 @@
         "name": "test.mosquitto.org"
     },
     "city": "Turin",
-    "telegram-chat-id-list": [{"user-id": 190657895, "role": "SuperUser"},{"user-id": 389414686, "role": "SuperUser"}],
+    "telegram-user-id-list": [{"user-id": 190657895, "role": "SuperUser"},{"user-id": 389414686, "role": "SuperUser"}],
+    "telegram-tasks": [{
+            "command": "start",
+            "roles": ["Nurse", "Doctor", "SuperUser"]
+        },
+        {
+            "command": "add_patient",
+            "roles": ["Doctor", "SuperUser"]
+        },
+        {
+            "command": "edit_patient",
+            "roles": ["Doctor", "SuperUser"]
+        },
+        {
+            "command": "delete_patient",
+            "roles": ["Doctor", "SuperUser"]
+        },
+        {
+            "command": "search_patient",
+            "roles": ["Doctor", "SuperUser"]
+        },
+        {
+            "command": "show_patients",
+            "roles": ["Doctor", "SuperUser"]
+        },
+        {
+            "command": "set_room_temperature",
+            "roles": ["Nurse", "Doctor", "SuperUser"]
+        },
+        {
+            "command": "get_room_temperature",
+            "roles": ["Nurse", "Doctor", "SuperUser"]
+        },
+        {
+            "command": "start_work",
+            "roles": ["Nurse", "SuperUser"]
+        },
+        {
+            "command": "end_work",
+            "roles": ["Nurse", "SuperUser"]
+        },
+        {
+            "command": "get_sensor_battery",
+            "roles": ["Nurse", "Doctor", "SuperUser"]
+        }
+    ],
     "room-list": [
         {
             "roomID": 2,

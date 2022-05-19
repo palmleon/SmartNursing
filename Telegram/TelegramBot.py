@@ -267,9 +267,10 @@ class SmartClinicBot(object):
         try:
             # Retrieve the list of recognized Users 
             nattempts = 0
-            request = requests.get(self.__config_settings['host']+ "/telegram-chat-id-list")
+            request = requests.get(self.__config_settings['host']+ "/telegram-user-id-list")
             while nattempts < 5 and request.status_code != requests.codes.ok:
-                request = requests.get(self.__config_settings['host']+ "/telegram-chat-id-list")
+                nattempts += 1
+                request = requests.get(self.__config_settings['host']+ "/telegram-user-id-list")
             if nattempts == 5 and request.status_code != requests.codes.ok:
                 raise ServerNotFoundError
             users = request.json()
@@ -283,8 +284,16 @@ class SmartClinicBot(object):
             if not found:
                 update.message.reply_text("Authentication failed!")
                 return False
+
             # Check if the User has a suitable role for the task to perform
-            config_tasks = self.__config_settings['tasks']
+            nattempts = 0
+            request = requests.get(self.__config_settings['host']+ "/telegram-tasks")
+            while nattempts < 5 and request.status_code != requests.codes.ok:
+                nattempts += 1
+                request = requests.get(self.__config_settings['host']+ "/telegram-tasks")
+            if nattempts == 5 and request.status_code != requests.codes.ok:
+                raise ServerNotFoundError
+            config_tasks = request.json()
             for task in config_tasks:
                 if task['command'] == command:
                     authz_roles = task['roles']
@@ -292,6 +301,7 @@ class SmartClinicBot(object):
                         return True
                     else: 
                         update.message.reply_text("Authorization failed!")
+                        
         except json.JSONDecodeError as e:
             update.message.reply_text(
                 "Invalid answer from the Host. Abort."

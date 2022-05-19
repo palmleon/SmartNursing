@@ -4,51 +4,5 @@
     "name" : "telegram-bot",
     "mqttClientName-Patient": "Smart-Clinic-Telegram-Bot-Patient",
     "mqttClientName-Room": "Smart-Clinic-Telegram-Bot-Room",
-    "botToken":"5346738235:AAHv_Z9LEp-E3wZkow5JiYhPX1PuG-_AS0Y",
-    "tasks": 
-        [{
-            "command": "start",
-            "roles": ["Nurse", "Doctor", "SuperUser"]
-        },
-        {
-            "command": "add_patient",
-            "roles": ["Doctor", "SuperUser"]
-        },
-        {
-            "command": "edit_patient",
-            "roles": ["Doctor", "SuperUser"]
-        },
-        {
-            "command": "delete_patient",
-            "roles": ["Doctor", "SuperUser"]
-        },
-        {
-            "command": "search_patient",
-            "roles": ["Doctor", "SuperUser"]
-        },
-        {
-            "command": "show_patients",
-            "roles": ["Doctor", "SuperUser"]
-        },
-        {
-            "command": "set_room_temperature",
-            "roles": ["Nurse", "Doctor", "SuperUser"]
-        },
-        {
-            "command": "get_room_temperature",
-            "roles": ["Nurse", "Doctor", "SuperUser"]
-        },
-        {
-            "command": "start_work",
-            "roles": ["Nurse", "SuperUser"]
-        },
-        {
-            "command": "end_work",
-            "roles": ["Nurse", "SuperUser"]
-        },
-        {
-            "command": "get_sensor_battery",
-            "roles": ["Nurse", "Doctor", "SuperUser"]
-        }
-    ]
+    "botToken":"5346738235:AAHv_Z9LEp-E3wZkow5JiYhPX1PuG-_AS0Y"
 }

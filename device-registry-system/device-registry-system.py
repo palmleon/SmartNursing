@@ -45,8 +45,11 @@ class Catalog(object) :
         elif uri[0] == 'bot-token' :
             return json.dumps(self.catalogList['bot-token'])
         
-        elif uri[0] == 'telegram-chat-id-list' :
-            return json.dumps(self.catalogList['telegram-chat-id-list'])
+        elif uri[0] == 'telegram-user-id-list' :
+            return json.dumps(self.catalogList['telegram-user-id-list'])
+
+        elif uri[0] == 'telegram-tasks' :
+            return json.dumps(self.catalogList['telegram-tasks'])
 
         elif uri[0] == 'room-temperature' :
             if len(uri) != 2 :

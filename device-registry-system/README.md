@@ -15,13 +15,22 @@ RESPONSE json body, readable with request.json() method :
 }
 ```
 
-*telegram chat id list*
+*telegram user id list*
 
-`/telegram-chat-id-list`
+`/telegram-user-id-list`
 
 RESPONSE json body, readable with request.json() method :
 ```
-[1,2,3,4]
+[1: "Doctor", 2: "Nurse", ...]
+```
+
+*telegram tasks*
+
+`/telegram-tasks`
+
+RESPONSE json body, readable with request.json() method :
+```
+[{"command": "start", "roles": ["Nurse", "Doctor", "SuperUser"]}, {"command": "add_patient","roles": ["Doctor", "SuperUser"]}, ...]
 ```
 
 *alarm base topic*
