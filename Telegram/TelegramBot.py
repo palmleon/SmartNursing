@@ -293,15 +293,15 @@ class SmartClinicBot(object):
                 request = requests.get(self.__config_settings['host']+ "/telegram-tasks")
             if nattempts == 5 and request.status_code != requests.codes.ok:
                 raise ServerNotFoundError
-            config_tasks = request.json()
-            for task in config_tasks:
+            tasks = request.json()
+            for task in tasks:
                 if task['command'] == command:
-                    authz_roles = task['roles']
-                    if user_role in authz_roles:
+                    roles = task['roles']
+                    if user_role in roles:
                         return True
                     else: 
                         update.message.reply_text("Authorization failed!")
-                        
+
         except json.JSONDecodeError as e:
             update.message.reply_text(
                 "Invalid answer from the Host. Abort."
