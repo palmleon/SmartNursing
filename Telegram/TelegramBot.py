@@ -1,11 +1,12 @@
-from telegram.ext import Updater, CallbackContext, CommandHandler, ConversationHandler, MessageHandler, Filters
-from telegram import Update
-from MyMQTT import MyMQTT
-from TelegramBotExceptions import *
 import logging
 import requests
 import json
-from time import sleep, time, strftime
+from telegram.ext import Updater, CallbackContext, CommandHandler, ConversationHandler, MessageHandler, Filters
+from telegram import Update
+from MyMQTT import MyMQTT
+from TelegramBotExceptions import DuplicatePatientError, ServerNotFoundError, \
+   PatientNotFoundError, RoomNotFoundError, ShiftStartedError, ShiftEndedError
+from time import sleep, time
 
 class SmartClinicBot(object):
 
