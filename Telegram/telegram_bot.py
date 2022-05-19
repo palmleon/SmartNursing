@@ -269,7 +269,7 @@ class SmartClinicBot(object):
             request = requests.get(self.__config_settings['host']+ "/telegram-chat-id-list")
             while nattempts < 5 and request.status_code != requests.codes.ok:
                 request = requests.get(self.__config_settings['host']+ "/telegram-chat-id-list")
-            if nattempts == 5:
+            if nattempts == 5 and request.status_code != requests.codes.ok:
                 raise ServerNotFoundError
             users = request.json()
             found = False
@@ -293,11 +293,11 @@ class SmartClinicBot(object):
                         update.message.reply_text("Authorization failed!")
         except json.JSONDecodeError as e:
             update.message.reply_text(
-                "Invalid answer from the Host - Abort"
+                "Invalid answer from the Host. Abort."
             )
             print(e) 
         except ServerNotFoundError:
-            update.message.reply_text("Host unreachable")
+            update.message.reply_text("Host unreachable. Abort.")
             print(e)
         return False #default bhv
 
@@ -357,19 +357,6 @@ class SmartClinicBot(object):
                 raise ValueError("Patient Name/Surname is not alphabetic")
             # Treat the age as a number
             new_patient['age'] = int(new_patient['age'])
-        except ValueError as e:
-            update.message.reply_text(
-                "Sorry, this Patient description is invalid.\n"
-                "Please, use the following syntax:\n"
-                "patientID - <insert_patientID>\n" 
-                "name - <insert_name>\n"
-                "surname - <insert_surname>\n"
-                "age - <insert_age>\n"
-                "description - <insert_description>")
-            print(e)
-            return SmartClinicBot.ADD_PATIENT
-
-        try:
 
             # If the Patient is already present, abort the operation; otherwise, insert it in the Patient Catalog
             request = requests.post(self.__config_settings['host']+"/add-patient",data =json.dumps(new_patient))
@@ -384,12 +371,24 @@ class SmartClinicBot(object):
                     raise ServerNotFoundError
             else:
                 update.message.reply_text("Patient added successfully!")
+
+        except ValueError as e:
+            update.message.reply_text(
+                "Sorry, this Patient description is invalid.\n"
+                "Please, use the following syntax:\n"
+                "patientID - <insert_patientID>\n" 
+                "name - <insert_name>\n"
+                "surname - <insert_surname>\n"
+                "age - <insert_age>\n"
+                "description - <insert_description>")
+            print(e)
+            return SmartClinicBot.ADD_PATIENT
         except DuplicatePatientError as e:
-            update.message.reply_text("This patient is already present!")
+            update.message.reply_text("This patient is already present! Retry")
             print(e)
             return SmartClinicBot.ADD_PATIENT
         except ServerNotFoundError as e:
-            update.message.reply_text("Host unreachable")
+            update.message.reply_text("Host unreachable. Abort")
             print(e)
             return SmartClinicBot.ADD_PATIENT
         return ConversationHandler.END
@@ -425,10 +424,10 @@ class SmartClinicBot(object):
                 #if 'patientID' not in req_patient:
                 #    raise ValueError("Missing key")
                 req_patientID = int(req_patient['patientID'])
-
                 nattempts = 0
                 r = requests.get(self.__config_settings['host']+"/patient/"+str(req_patientID))
                 while nattempts < 5 and r.status_code != requests.codes.ok : 
+                    nattempts += 1
                     r = requests.get(self.__config_settings['host']+"/patient/"+str(req_patientID))
                 if r.status_code == requests.codes.ok:
                     patient_present = True
@@ -447,7 +446,7 @@ class SmartClinicBot(object):
                 while nattempts < 5 and request.status_code != requests.codes.ok:
                     nattempts += 1
                     request = requests.get(self.__config_settings['host']+"/patients")
-                if nattempts == 5:
+                if nattempts == 5 and request.status_code != requests.codes.ok:
                     raise ServerNotFoundError
                 patient_catalog = request.json()
                 for patient in patient_catalog:
@@ -462,9 +461,9 @@ class SmartClinicBot(object):
                     found_patient = found_patients.pop()
                     # Store this infomation for when the new Patient description will be provided and the current one will be discarded
                     if curr_command == 'delete_patient':
-                        context.chat_data['patientID_to_delete'] = req_patientID
+                        context.chat_data['patientID_to_delete'] = found_patient['patientID']
                     elif curr_command == 'edit_patient':
-                        context.chat_data['patientID_to_edit'] = req_patientID
+                        context.chat_data['patientID_to_edit'] = found_patient['patientID']
                     msg = ("Patient found:\n" + "-"*40 + "\n" +
                         "patientID - {patientID}\n"   .format(patientID=      found_patient['patientID']) +
                         "name - {patientName}\n"      .format(patientName=    found_patient['name']) +
@@ -472,22 +471,23 @@ class SmartClinicBot(object):
                         "age - {patientAge}\n"        .format(patientAge=     found_patient['age']) +
                         "description - {patientDescription}\n".format(patientDescription=found_patient['description']))
                     if curr_command == 'delete_patient':
-                        msg += "-"*40
+                        msg += "-"*40 + "\n"
                         msg += "Are you sure you want to delete them? [Y/N]"
                     elif curr_command == 'edit_patient':
-                        msg += "-"*40
+                        msg += "-"*40 + "\n"
                         msg += "Redefine the Patient using the same format without patientID"
                     update.message.reply_text(msg) 
                 else:
-                    msg = "Multiple Patients found!\n" + "-"*40 + "\n"
-                    for found_patient in sorted(found_patients, key=lambda p: p['patientID']):
-                        msg += "patientID - {patientID}\n".format(patientID=found_patient['patientID']) + \
+                    msg = "Multiple Patients found!\n"
+                    for found_patient in sorted(found_patients, key=lambda patient: patient['patientID']):
+                        msg += "-"*40 + "\n" + \
+                            "patientID - {patientID}\n".format(patientID=found_patient['patientID']) + \
                             "name - {patientName}\n".format(patientName=found_patient['name']) + \
                             "surname - {patientSurname}\n".format(patientSurname=found_patient['surname']) + \
                             "age - {patientAge}\n".format(patientAge=found_patient['age']) + \
                             "description - {patientDescription}\n".format(patientDescription=found_patient['description'])
                     if curr_command == 'delete_patient' or curr_command == 'edit_patient':
-                        msg += "-"*40
+                        msg += "-"*40 + "\n"
                         msg += "Choose the patient by using their ID with the following format:\n" "patientID - <insert_patientID>" 
                     update.message.reply_text(msg)
                     if curr_command == 'delete_patient':
@@ -499,7 +499,7 @@ class SmartClinicBot(object):
 
         except json.JSONDecodeError as e:
             update.message.reply_text(
-                "Invalid answer from the Host - Abort"
+                "Invalid answer from the Host. Abort."
             )
             print(e)  
             return ConversationHandler.END
@@ -518,9 +518,15 @@ class SmartClinicBot(object):
             elif curr_command == 'search_patient':
                 return SmartClinicBot.SEARCH_PATIENT
 
-        except PatientNotFoundError:
-            update.message.reply_text("Patient not found!")
-            return ConversationHandler.END
+        except PatientNotFoundError as e:
+            update.message.reply_text("Patient not found! Retry")
+            print(e)
+            if curr_command == 'delete_patient':
+                return SmartClinicBot.DELETE_PATIENT_1
+            elif curr_command == 'edit_patient':
+                return SmartClinicBot.EDIT_PATIENT_1 
+            elif curr_command == 'search_patient':
+                return SmartClinicBot.SEARCH_PATIENT
 
         if curr_command == 'delete_patient':
             return SmartClinicBot.DELETE_PATIENT_2
@@ -554,7 +560,7 @@ class SmartClinicBot(object):
             while nattempts < 5 and request.status_code != requests.codes.ok :
                 nattempts += 1 
                 request = requests.put(self.__config_settings['host']+"/update-patient", data = json.dumps(edited_patient))
-            if nattempts == 5:
+            if nattempts == 5 and request.status_code != requests.codes.ok:
                 raise ServerNotFoundError
             else :
                 update.message.reply_text("Patient updated successfully!")
@@ -571,7 +577,7 @@ class SmartClinicBot(object):
             return SmartClinicBot.EDIT_PATIENT_2
         
         except ServerNotFoundError:
-            update.message.reply_text("Host unreachable")
+            update.message.reply_text("Host unreachable. Abort")
             print(e)
             # Abort the command, it is not the user's fault
             return ConversationHandler.END
@@ -600,30 +606,29 @@ class SmartClinicBot(object):
             # Delete Patient
             if text == 'Y':
                 delete_patientID = context.chat_data['patientID_to_delete']
-                # Take the Patient Catalog TODO INTEGRATE WITH DEVICE AND REGISTRY SYSTEM
                 nattempts = 0
                 request = requests.delete(self.__config_settings['host']+"/delete-patient/"+str(delete_patientID))
-                if request.status_code == 404:
-                    raise PatientNotFoundError
                 while nattempts < 5 and str(request.status_code).startswith('5') :
                     nattempts += 1
                     request = requests.delete(self.__config_settings['host']+"/delete-patient/"+str(delete_patientID))
-                if nattempts == 5:
+                if request.status_code == 404:
+                    raise PatientNotFoundError
+                if nattempts == 5 and request.status_code != requests.codes.ok:
                     raise ServerNotFoundError
                 update.message.reply_text("Patient removed successfully!")  
             # Do not Delete Patient
             elif text == 'N':
-                update.message.reply_text("Patient not deleted.\nAbort")
+                update.message.reply_text("Patient not deleted.\nAbort.")
             else:
                 raise ValueError("Undefined Answer")
 
         except PatientNotFoundError as e:
-            update.message.reply_text("Patient not found!")
+            update.message.reply_text("Patient not deleted correctly! If you want to retry, relaunch the command")
             print(e)
             return ConversationHandler.END
 
         except ServerNotFoundError as e:
-            update.message.reply_text("Host unreachable")
+            update.message.reply_text("Host unreachable. Abort")
             print(e)
             # Abort the command, it is not the user's fault
             return ConversationHandler.END
@@ -661,8 +666,9 @@ class SmartClinicBot(object):
                 nattempts = 0
                 request = requests.get(self.__config_settings['host']+"/patients")
                 while nattempts < 5 and request.status_code != requests.codes.ok :
+                    nattempts += 1
                     request = requests.get(self.__config_settings['host']+"/patients")
-                if nattempts == 5:
+                if nattempts == 5 and request.status_code != requests.codes.ok:
                     raise ServerNotFoundError
                 patient_catalog = request.json()
                 if len(patient_catalog) == 0:
@@ -680,10 +686,10 @@ class SmartClinicBot(object):
             else:
                 update.message.reply_text("Sorry, you cannot interact with the Bot!")
         except ServerNotFoundError as e:
-            update.message.reply_text("Host unreachable")
+            update.message.reply_text("Host unreachable. Abort.")
             print(e)
         except json.JSONDecodeError as e:
-            update.message.reply_text("Invalid answer from the Host - Abort")
+            update.message.reply_text("Invalid answer from the Host. Abort.")
             print(e)  
 
  
@@ -711,7 +717,7 @@ class SmartClinicBot(object):
             #if 'roomID' not in room and 'temp' not in room:
             #    raise Exception("Missing key")
             # Treat the Room Number as an integer
-            roomID = int(room['roomNumber'])
+            roomID = int(room['roomID'])
             # Treat the Room Temperature as an integer
             roomTemp = int(room['temp'])
             # Set the Room info
@@ -722,11 +728,11 @@ class SmartClinicBot(object):
                 }
             )
             nattempts = 0
-            request = requests.post(self.__config_settings['host']+"/update-room",data=room_json)
+            request = requests.put(self.__config_settings['host']+"/update-room",data=room_json)
             while nattempts < 5 and request.status_code != requests.codes.ok:
                 nattempts += 1
-                request = requests.post(self.__config_settings['host']+"/update-room",data=room_json)
-            if nattempts == 5:
+                request = requests.put(self.__config_settings['host']+"/update-room",data=room_json)
+            if nattempts == 5 and request.status_code != requests.codes.ok:
                 raise ServerNotFoundError
             update.message.reply_text(
                 "Room Temperature for Room " + str(roomID) + ": updated!"
@@ -743,7 +749,7 @@ class SmartClinicBot(object):
             return SmartClinicBot.SET_ROOM_TEMPERATURE
         
         except ServerNotFoundError as e:
-            update.message.reply_text("Host unreachable")
+            update.message.reply_text("Host unreachable. Abort")
             print(e)
             return ConversationHandler.END
 
@@ -779,7 +785,7 @@ class SmartClinicBot(object):
             while nattempts < 5 and str(request.status_code).startswith('5'):
                 nattempts += 1
                 request = requests.get(self.__config_settings['host']+"/room-temperature/" + str(roomID))
-            if nattempts == 5:
+            if nattempts == 5 and request.status_code != requests.codes.ok:
                 raise ServerNotFoundError
             if request.status_code == 404:
                 raise RoomNotFoundError
@@ -790,7 +796,7 @@ class SmartClinicBot(object):
             )
 
         except json.JSONDecodeError as e:
-            update.message.reply_text("Invalid answer from the Host - Abort")
+            update.message.reply_text("Invalid answer from the Host. Abort.")
             print(e)
             return ConversationHandler.END
 
@@ -804,7 +810,7 @@ class SmartClinicBot(object):
             return SmartClinicBot.GET_ROOM_TEMPERATURE
 
         except RoomNotFoundError as e:
-            update.message.reply_text("Room not found!")
+            update.message.reply_text("Room not found! Abort")
             print(e)
             return ConversationHandler.END
 

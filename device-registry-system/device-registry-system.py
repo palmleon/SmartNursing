@@ -227,33 +227,44 @@ class Catalog(object) :
 
         if uri[0] == 'delete-patient' :
             id = int(uri[1])
+            found = False
             for i in range(len(self.catalogList['patients'])) :
                 if self.catalogList['patients'][i]['patientID'] == id :
                     del self.catalogList['patients'][i]
-            raise cherrypy.HTTPError(404,'patient not found')
+                    found = True
+            if not found:
+                raise cherrypy.HTTPError(404,'patient not found')
         
         if uri[0] == 'delete-room' :
             id = int(uri[1])
+            found = False
             for i in range(len(self.catalogList['room-list'])) :
                 if self.catalogList['room-list'][i]['roomID'] == id :
                     del self.catalogList['room-list'][i]
-                    return
-            raise cherrypy.HTTPError(404,'room not found')
+                    found = True
+            if not found:
+                raise cherrypy.HTTPError(404,'room not found')
         
         #Is necessary?
         elif uri[0] == 'delete-service' :
             id = int(uri[1])
+            found = False
             for i in range(len(self.catalogList['services'])) :
                 if self.catalogList['services'][i]['serviceID'] == id :
                     del self.catalogList['services'][i]
-            raise cherrypy.HTTPError(404,'service not found')
+                    found = True
+            if not found:
+                raise cherrypy.HTTPError(404,'service not found')
 
         elif uri[0] == 'delete-telegram-chat-id' :
             id = int(uri[1])
+            found = False
             for i in range(len(self.catalogList['telegram-chat-id-list'])) :
                 if self.catalogList['telegram-chat-id-list'][i] == id :
                     del self.catalogList['telegram-chat-id-list'][i]
-            raise cherrypy.HTTPError(404,'id  not found')
+                    found = True
+            if not found:
+                raise cherrypy.HTTPError(404,'id  not found')
         
        
         else :
