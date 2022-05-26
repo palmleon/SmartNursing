@@ -1,7 +1,0 @@
-- Bisogna effettivamente allertare lo staff in caso di temperatura anomala:
-	- Definire "troppo caldo/freddo"
-	- Definire un minimo intervallo tra due messaggi identici (il servizio che genera i messaggi
-		si occupa di non spammarli)
-	- Definire topic per temperatura anomala (a cui il Bot fa subscribe)
-- Le password accettate dal bot devono essere salvate nel device-registry system e modificate via raspberry emulator;
-  Le password sono già divise per livello di privilegio
