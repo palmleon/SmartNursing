@@ -58,9 +58,6 @@ class Catalog(object) :
                 if room['roomID'] == int(uri[1]) :
                     return json.dumps({"desired-temperature" : room['desired-temperature']})
             raise cherrypy.HTTPError(404,'room not found')
-
-        
-
         
         elif uri[0] == 'room-list' :
             return json.dumps(self.catalogList['room-list'])
@@ -158,12 +155,12 @@ class Catalog(object) :
             self.catalogList['patients'].append(newPatient)
             return 
 
-        elif uri[0] == 'add-telegram-chat-id' :
+        elif uri[0] == 'add-telegram-user-id' :
             newId = json.loads(cherrypy.request.body.read())
-            for id in self.catalogList['telegram-chat-id-list'] :
+            for id in self.catalogList['telegram-user-id-list'] :
                 if id == newId :
                     raise cherrypy.HTTPError(400,"id already exists")
-            self.catalogList['telegram-chat-id-list'].append(newId)
+            self.catalogList['telegram-user-id-list'].append(newId)
             return 
 
         elif uri[0] == 'add-service' :
@@ -200,6 +197,7 @@ class Catalog(object) :
                 if self.catalogList['patients'][i]['patientID'] == id :
                     self.catalogList['patients'][i] = newPatient
                     return 
+                    
         if uri[0] == 'update-room' :
             newRoom = json.loads(cherrypy.request.body.read())
             #print(newDevice)
@@ -259,12 +257,12 @@ class Catalog(object) :
             if not found:
                 raise cherrypy.HTTPError(404,'service not found')
 
-        elif uri[0] == 'delete-telegram-chat-id' :
+        elif uri[0] == 'delete-telegram-user-id' :
             id = int(uri[1])
             found = False
-            for i in range(len(self.catalogList['telegram-chat-id-list'])) :
-                if self.catalogList['telegram-chat-id-list'][i] == id :
-                    del self.catalogList['telegram-chat-id-list'][i]
+            for i in range(len(self.catalogList['telegram-user-id-list'])) :
+                if self.catalogList['telegram-user-id-list'][i] == id :
+                    del self.catalogList['telegram-user-id-list'][i]
                     found = True
             if not found:
                 raise cherrypy.HTTPError(404,'id  not found')

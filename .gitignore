@@ -1,7 +1,6 @@
-test.txt
+*.txt
 testMultipleConnections/
 threadTest.py
 __*
 recap.py
-ToDo.txt
 .DS_Store
