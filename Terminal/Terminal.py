@@ -1,5 +1,7 @@
 import requests
 import json
+import time
+from threading import Thread
 from enum import Enum
 
 class CommandType(Enum):
@@ -21,52 +23,36 @@ class Role(Enum):
 
 class Terminal(object):
 
-    def __init__(self):
-        config_file = open('config.json')
-        self.__config_settings = json.load(config_file)
-        config_file.close()
-
+    ##########################
+    # Very simple dispatcher
+    ##########################
     def __handle_command(self, command: Command, command_type: CommandType):
         
         if command_type == CommandType.ROOM:
 
             # Add Room
             if command == Command.ADD:
-                # Insert Room Number
-                # Check if it is already taken
-                # If not, add the room
-                # Otherwise, cancel the command
+                self.__room_add()
                 pass
 
             # Search Room
             elif command == Command.SEARCH:
-                # Insert Room Number
-                # Check if it exists
-                # If so, show it, the patients inside and the sensors
-                # Otherwise, cancel the command
+                self.__room_search()
                 pass
 
             # Edit Room
             elif command == Command.EDIT:
-                # Insert Room Number
-                # Check if it exists
-                # If so, show it, the patients inside and the sensors
-                #     and ask for the new room number
-                # Otherwise, cancel the command
+                self.__room_edit()
                 pass
 
             # Show Room
             elif command == Command.SHOW:
-                # Show all rooms, the patients inside and the sensors
+                self.__room_show()
                 pass
 
             # Delete Room
             elif command == Command.DELETE:
-                # Insert Room Number
-                # Check if it exists
-                # If so, and if there is no patient inside, ask for confirmation
-                # Otherwise, if the room has patients inside, cancel the command
-                # If the room does not exist, cancel the command
+                self.__room_delete()
                 pass
 
         elif command_type == CommandType.USER_TELEGRAM:
@@ -84,11 +70,11 @@ class Terminal(object):
 
             # Show User
             elif command == Command.SHOW:
-                self.__user_telegram.show()
+                self.__user_telegram_show()
 
             # Delete User
             elif command == Command.DELETE:
-                self.__user_telegram.delete()
+                self.__user_telegram_delete()
 
     def launch(self):
         print("Welcome to the SmartClinic Terminal!\n"
@@ -136,20 +122,316 @@ class Terminal(object):
                 print("Command not recognized! Retry.")
                 print("-"*40)
 
+    #########################################
+    # Add a Room
+    #########################################
     def __room_add(self):
-        pass
+        
+        try:
+            
+            end = False
 
+            while not end:
+
+                # Insert Room Number
+                roomID = int(input("Please insert the ID of the new room: "))
+                isCommon_str = input("Is it common [Y/N]? ")
+
+                 
+                if isCommon_str == 'Y' or isCommon_str == 'y':
+                    newRoom = {
+                        'roomID': roomID,
+                        'desired-temperature': 20,
+                        'isCommon': True
+                    }
+
+                    # Check if it is already taken
+                    # If not, add it (TODO ADD THE ADD COMMON ROOM METHOD IN THE DEVICE REGISTRY SYSTEM)
+                    r = requests.post(self.__config_settings['host']+"/add-common-room/", data = newRoom)
+                    nattempts = 1
+
+                    while nattempts < 5 and str(r.status_code).startswith('5'):
+                        r = requests.post(self.__config_settings['host']+"/add-common-room/", data = newRoom)
+                        nattempts += 1
+                else:
+                    newRoom = {
+                        'roomID': roomID,
+                        'desired-temperature': 20,
+                        'patients': [],
+                        'isCommon': False
+                        #'sensors': []
+                    }
+
+                    # Check if it is already taken
+                    # If not, add it                     
+                    r = requests.post(self.__config_settings['host']+"/add-room/", data = newRoom)
+                    nattempts = 1
+
+                    while nattempts < 5 and str(r.status_code).startswith('5'):
+                        r = requests.post(self.__config_settings['host']+"/add-room/", data = newRoom)
+                        nattempts += 1
+                
+                if r.status_code == requests.codes.ok:
+                    print("Room added successfully!")
+                    end = True
+                else:
+                    if nattempts == 5 and str(r.status_code).startswith('5'):
+                        command = input("Operation failed: Server unreachable! Retry [r] or quit [q]: ")
+                    else:
+                        command = input("Operation failed: Room already present! Retry [r] or quit [q]: ")
+                    if command == 'q':
+                        end = True
+
+                # Otherwise, retry or cancel the command
+        except ValueError:
+            print("Input not recognized! Retry.")
+
+    #########################################
+    # Search a Room
+    #########################################
     def __room_search(self):
+
+        try:
+
+            while not end:
+                # Insert Room Number
+                roomID = int(input("Please insert the ID of room to search: "))
+                isCommon_str = input("Is it common [Y/N]? ")
+
+                # Check if it exists #TODO REST METHODS TO BE DEFINED!
+                if isCommon_str == 'Y' or isCommon_str == 'y':
+                    r = requests.get(self.__config_settings['host']+"/common-room/"+str(roomID))
+                else:
+                    r = requests.get(self.__config_settings['host']+"/room/"+str(roomID))
+                nattempts = 1
+
+                while nattempts < 5 and str(r.status_code).startswith('5'):
+                    if isCommon_str == 'Y' or isCommon_str == 'y':
+                        r = requests.get(self.__config_settings['host']+"/common-room/"+str(roomID))
+                    else:
+                        r = requests.get(self.__config_settings['host']+"/room/"+str(roomID))
+                    nattempts += 1 
+                
+                # If so, show it and all its data
+                if r.status_code == requests.codes.ok:
+                    print("Room found!")
+                    json.dumps(r.json(), indent=4)
+                    
+                # Otherwise, retry or cancel the command
+                else:
+                    if nattempts == 5:
+                        command = input("Operation failed: Server not reachable! Retry [r] or quit [q]: ")
+                    else:
+                        command = input("Operation failed: Room not found! Retry [r] or quit [q]: ")
+                    if command == 'q':
+                        end = True
+
+        except ValueError:
+            print("Input not recognized! Retry.")
         pass      
 
+    #########################################
+    # Edit a Room
+    #########################################
     def __room_edit(self):
-        pass       
+       
+        try:
 
+            while not end:
+                # Insert Room Number
+                roomID = int(input("Please insert the ID of the room to edit: "))
+                isCommon_str = input("Is it common [Y/N]? ")
+
+                # Check if it exists #TODO REST METHODS TO BE DEFINED!
+                if isCommon_str == 'Y' or isCommon_str == 'y':
+                    r = requests.get(self.__config_settings['host']+"/common-room/"+str(roomID))
+                else:
+                    r = requests.get(self.__config_settings['host']+"/room/"+str(roomID))
+                nattempts = 1
+
+                while nattempts < 5 and str(r.status_code).startswith('5'):
+                    if isCommon_str == 'Y' or isCommon_str == 'y':
+                        r = requests.get(self.__config_settings['host']+"/common-room/"+str(roomID))
+                    else:
+                        r = requests.get(self.__config_settings['host']+"/room/"+str(roomID))
+                    nattempts += 1 
+                
+                # If so, show it and all its data
+                if r.status_code == requests.codes.ok:
+                    print("Room found!")
+                    room = r.json()
+                    json.dumps(room, indent=4)
+
+                    # Ask for the new room number
+                    newRoomID = int(input("Please insert the new ID of the room to edit: "))
+
+                    roomUpdated = {
+                        'roomID_old' : roomID,
+                        'roomID_new' : newRoomID
+                    }
+                    
+                    # UPDATE THE ROOM ID TODO REST METHOD TO BE DEFINED
+                    nattempts = 1
+                    r = requests.put(self.__config_settings['host']+"/update-room-id", data=roomUpdated)
+
+                    while nattempts < 5 and str(r.status_code).startswith('5'):
+                        nattempts += 1
+                        if isCommon_str == 'Y' or isCommon_str == 'y':
+                            r = requests.put(self.__config_settings['host']+"/update-common-room-id", data=roomUpdated)
+                        else:
+                            r = requests.put(self.__config_settings['host']+"/update-room-id", data=roomUpdated)
+
+                    if r.status_code == requests.codes.ok:
+                        print("Room updated successfully!")
+                        end = True
+                    else:
+                        if nattempts == 5 and str(r.status_code).startswith('5'):
+                            command = input("Operation failed: Server not reachable! Retry [r] or quit [q]: ")
+                        else:
+                            command = input("Operation failed: Room not found! Retry [r] or quit [q]: ")
+                        if command == 'q':
+                            end = True
+                    
+                # Otherwise, retry or cancel the command
+                else:
+                    if nattempts == 5:
+                        command = input("Operation failed: Server not reachable! Retry [r] or quit [q]: ")
+                    else:
+                        command = input("Operation failed: Room not found! Retry [r] or quit [q]: ")
+                    if command == 'q':
+                        end = True
+
+        except ValueError:
+            print("Input not recognized! Retry.")     
+
+    #########################################
+    # Show all Rooms
+    #########################################
     def __room_show(self):
-        pass
+        # Show all rooms, the patients inside and the sensors
+        r = requests.get(self.__config_settings['host']+"room-list")
+        nattempts = 1
 
+        while nattempts < 5 and str(r.status_code).startswith('5'):
+            r = requests.get(self.__config_settings['host']+"room-list")
+            nattempts += 1
+
+        if r.status_code == requests.codes.ok:
+            print("Registered Rooms and their content:")
+            json.dumps(r.json(), indent=4)
+
+        else:
+            if nattempts == 5:
+                print("Operation failed: Server not reachable!")
+            else:
+                print("Operation failed: Unknown error!")
+
+        # Show all common rooms
+        r = requests.get(self.__config_settings['host']+"common-room-list")
+        nattempts = 1
+
+        while nattempts < 5 and str(r.status_code).startswith('5'):
+            r = requests.get(self.__config_settings['host']+"common-room-list")
+            nattempts += 1
+
+        if r.status_code == requests.codes.ok:
+            print("Registered Common Rooms and their content:")
+            json.dumps(r.json(), indent=4)
+
+        else:
+            if nattempts == 5:
+                print("Operation failed: Server not reachable!")
+            else:
+                print("Operation failed: Unknown error!")        
+            
+
+
+    #########################################
+    # Delete a Room
+    #########################################
     def __room_delete(self):
-        pass
+    
+        try:
+
+            end = False
+
+            while not end:
+
+                # Insert Room Number
+                roomID = int(input("Please insert the ID of the room to delete: "))
+                isCommon_str = input("Is it common [Y/N]? ")
+                
+                # Check if it exists #TODO REST METHOD TO BE DEFINED!
+                if isCommon_str == 'Y' or isCommon_str == 'y':
+                    r = requests.get(self.__config_settings['host']+"/common-room/"+str(roomID))
+                else:
+                    r = requests.get(self.__config_settings['host']+"/room/"+str(roomID))
+                nattempts = 1
+                
+                while nattempts < 5 and str(r.status_code).startswith('5'):
+                    if isCommon_str == 'Y' or isCommon_str == 'y':
+                        r = requests.get(self.__config_settings['host']+"/common-room/"+str(roomID))
+                    else:
+                        r = requests.get(self.__config_settings['host']+"/room/"+str(roomID))
+                    nattempts += 1 
+                
+                # If so, show it and all its data
+                if r.status_code == requests.codes.ok:
+                    print("Room found!")
+                    room = r.json()
+                    json.dumps(room, indent=4)
+
+                    # If so, and if there is no patient inside, ask for confirmation
+                    if room['isCommon'] or len(room['patients']) == 0:
+                        confirm_reply = input("Are you sure you want to delete this user [Y/N]? ")
+                        
+                        # Delete or not depending on confirmation reply (TODO IMPLEMENT DELETE COMMON ROOM)
+                        if confirm_reply == 'Y' or confirm_reply == 'y':
+
+                            if isCommon_str == 'Y' or isCommon_str == 'y':
+                                r = requests.delete(self.__config_settings['host']+"/delete-common-room/"+str(userID))
+                            else:
+                                r = requests.delete(self.__config_settings['host']+"/delete-room/"+str(userID))
+                            nattempts = 1
+
+                            while nattempts < 5 and str(r.status_code).startswith('5'):
+                                if isCommon_str == 'Y' or isCommon_str == 'y':
+                                    r = requests.delete(self.__config_settings['host']+"/delete-common-room/"+str(userID))
+                                else:
+                                    r = requests.delete(self.__config_settings['host']+"/delete-room/"+str(userID))                            
+                                nattempts += 1
+
+                            if r.status_code == requests.codes.ok:
+                                print("User deleted!")
+                                end = True
+                            else:
+                                if nattempts == 5:
+                                    command = input(("Operation failed: Server not reachable! Retry [r] or quit [q]: "))
+                                else:
+                                    command = input("Operation failed: Room not found! Retry [r] or quit [q]: ")
+                                if command == 'q':
+                                    end = True
+
+                        else:
+                            print("Operation aborted.")
+                            end = True
+
+                    # Otherwise, if the room has patients inside, cancel the command
+                    else:
+                        print("You cannot delete this Room: there are patients inside!")
+                        end = True
+                    
+                # Otherwise, retry or cancel the command
+                else:
+                    if nattempts == 5:
+                        command = input("Operation failed: Server not reachable! Retry [r] or quit [q]: ")
+                    else:
+                        command = input("Operation failed: Room not found! Retry [r] or quit [q]: ")
+                    if command == 'q':
+                        end = True
+
+        except (ValueError, KeyError):
+            print("Input not recognized! Retry.")
 
     #########################################
     # Add a User to the Telegram ID List
@@ -167,7 +449,14 @@ class Terminal(object):
                 role = Role[input("Please insert their role [Doctor, Nurse, SuperUser]: ").upper()]
 
                 # Check if the UserID is already present in the Telegram ID List
+                nattempts = 1
                 r = requests.post(self.__config_settings['host']+"/add-telegram-user-id/", data = json.dumps({
+                    'user-id': userID,
+                    'role' : role
+                }))
+                while nattempts < 5 and str(r.status_code).startswith('5'):
+                    nattempts += 1
+                    r = requests.post(self.__config_settings['host']+"/add-telegram-user-id/", data = json.dumps({
                     'user-id': userID,
                     'role' : role
                 }))
@@ -175,7 +464,10 @@ class Terminal(object):
                     print("User added successfully!")
                     end = True
                 else:
-                    command = input("Operation failed: User already present! Retry [r] or quit [q]: ")
+                    if nattempts == 5:
+                        command = input(("Operation failed: Server not reachable! Retry [r] or quit [q]: "))
+                    else:
+                        command = input("Operation failed: User already present! Retry [r] or quit [q]: ")
                     if command == 'q':
                         end = True
 
@@ -198,6 +490,11 @@ class Terminal(object):
                 
                 # Look for the UserID in the Telegram ID List TODO PATH TO BE DEFINED YET!
                 r = requests.get(self.__config_settings['host'] + "/get-telegram-user-id/" + str(userID))
+                nattempts = 1
+
+                while nattempts < 5 and str(r.status_code).startswith('5'):
+                    r = requests.get(self.__config_settings['host'] + "/get-telegram-user-id/" + str(userID))
+                    nattempts += 1
 
                 # If present, show it
                 if r.status_code == requests.codes.ok:
@@ -208,7 +505,10 @@ class Terminal(object):
 
                 # Otherwise, notify that it does not exist
                 else:
-                    command = input("Operation failed: User not found! Retry [r] or quit [q]: ")
+                    if nattempts == 5:
+                        command = input(("Operation failed: Server not reachable! Retry [r] or quit [q]: "))
+                    else:
+                        command = input("Operation failed: User not found! Retry [r] or quit [q]: ")
                     if command == 'q':
                         end = True
 
@@ -230,7 +530,12 @@ class Terminal(object):
                 userID = int(input("Please insert the UserID to edit: "))
                 
                 # Look for the UserID in the Telegram ID List TODO PATH TO BE DEFINED YET!
-                r = requests.get(self.__config_settings['host'] + "/get-telegram-user-id/" + str(userID))
+                r = requests.get(self.__config_settings['host'] + "/telegram-user-id/" + str(userID))
+                nattempts = 1
+
+                while nattempts < 5 and str(r.status_code).startswith('5'):
+                    r = requests.get(self.__config_settings['host'] + "/telegram-user-id/" + str(userID))
+                    nattempts += 1
 
                 # If present, ask for the new role
                 if r.status_code == requests.codes.ok:
@@ -239,24 +544,35 @@ class Terminal(object):
                     role = Role[input("Set the new role: ").upper()]
 
                     # Update the UserID in the Telegram ID List
-                    nattempts = 0
-                    while nattempts < 5 and r.status.code != requests.codes.ok:
+                    nattempts = 1
+                    r = requests.put(self.__config_settings['host']+"/update-telegram-user-id/", data = json.dumps({
+                            'user-id': userID,
+                            'role' : role
+                        }))
+                    while nattempts < 5 and str(r.status.code).startswith('5'):
                         nattempts += 1
                         r = requests.put(self.__config_settings['host']+"/update-telegram-user-id/", data = json.dumps({
                             'user-id': userID,
                             'role' : role
                         }))
 
-                    if nattempts == 5 and r.status.code != requests.codes.ok:
-                        print("Operation failed: Reached the max. number of attempts!")
-                    else:
+                    if r.status_code == requests.status_codes.ok:
                         print("User updated successfully!")
-
-                    end = True
+                        end = True
+                    else:
+                        if nattempts == 5:
+                            command = input(("Operation failed: Server not reachable! Retry [r] or quit [q]: "))
+                        else:
+                            command = input("Operation failed: User not found! Retry [r] or quit [q]: ")
+                        if command == 'q':
+                            end = True
 
                 # Otherwise, notify that it does not exist
                 else:
-                    command = input("Operation failed: User not found! Retry [r] or quit [q]: ")
+                    if nattempts == 5:
+                        command = input(("Operation failed: Server not reachable! Retry [r] or quit [q]: "))
+                    else:
+                        command = input("Operation failed: User not found! Retry [r] or quit [q]: ")
                     if command == 'q':
                         end = True
 
@@ -269,11 +585,12 @@ class Terminal(object):
     def __user_telegram_show(self):
         
         # Retrieve the Telegram ID List
-        nattempts = 0
+        nattempts = 1
         request = requests.get(self.__config_settings['host']+ "/telegram-user-id-list")
-        while nattempts < 5 and request.status_code != requests.codes.ok:
+        while nattempts < 5 and str(request.status_code).startswith('5'):
             nattempts += 1
             request = requests.get(self.__config_settings['host']+ "/telegram-user-id-list")
+
         if nattempts == 5 and request.status_code != requests.codes.ok:
             print("Operation failed! Server not reachable")
             return
@@ -300,13 +617,17 @@ class Terminal(object):
                 userID = int(input("Please insert the UserID to delete: "))
                 
                 # Look for the UserID in the Telegram ID List TODO PATH TO BE DEFINED YET!
-                r = requests.get(self.__config_settings['host'] + "/get-telegram-user-id/" + str(userID))
+                r = requests.get(self.__config_settings['host'] + "/telegram-user-id/" + str(userID))
+                nattempts = 1
+
+                while nattempts < 5 and str(r.status_code).startswith('5'):
+                    r = requests.get(self.__config_settings['host'] + "/telegram-user-id/" + str(userID))
+                    nattempts += 1
 
                 # If present, ask for confirmation
                 if r.status_code == requests.codes.ok:
 
                     end = True
-
                     user = r.json()
                     print("User found!")
                     print("UserID: {userID}, Role: {role}".format(userID=user['user-id'], role=user['role']))
@@ -316,33 +637,71 @@ class Terminal(object):
                     if confirm_reply == 'Y' or confirm_reply == 'y':
 
                         r = requests.delete(self.__config_settings['host']+"/delete-telegram-user-id/"+str(userID))
+                        nattempts = 1
+
+                        while nattempts < 5 and str(r.status_code).startswith('5'):
+                            r = requests.delete(self.__config_settings['host']+"/delete-telegram-user-id/"+str(userID))
+                            nattempts += 1
 
                         if r.status_code == requests.codes.ok:
                             print("User deleted!")
+                            end = True
                         else:
-                            command = input("Operation failed: User not found! Retry [r] or quit [q]: ")
-                            if command != 'q':
-                                end = False
+                            if nattempts == 5:
+                                command = input(("Operation failed: Server not reachable! Retry [r] or quit [q]: "))
+                            else:
+                                command = input("Operation failed: User not found! Retry [r] or quit [q]: ")
+                            if command == 'q':
+                                end = True
 
                     else:
                         print("Operation aborted.")
+                        end = True
 
                 # Otherwise, notify that it does not exist
                 else:
-                    command = input("Operation failed: User not found! Retry [r] or quit [q]: ")
+                    if nattempts == 5:
+                        command = input(("Operation failed: Server not reachable! Retry [r] or quit [q]: "))
+                    else:
+                        command = input("Operation failed: User not found! Retry [r] or quit [q]: ")
                     if command == 'q':
                         end = True
 
         except (ValueError, KeyError):
             print("Input not recognized! Retry.")
 
+    def __updateService(self) :
+
+        while True :
+
+            time.sleep(100)
+
+            nattempts = 1
+            r = requests.put(self.__register+"/update-service",data = json.dumps({"serviceID" : self.__config_settings['serviceID'],
+                 "name" : self.__config_settings['name']}))
+
+            while nattempts < 5 and str(r.status_code).startswith('5'):
+                nattempts += 1
+                r = requests.put(self.__register+"/update-service",data = json.dumps({"serviceID" : self.__config_settings['serviceID'],
+                 "name" : self.__config_settings['name']}))
+
+    ###################################################################################################
+    # During initialization, only the configuration file is set, and the updating thread is launched
+    ###################################################################################################
+    def __init__(self):
+        
+        # Load settings
+        config_file = open('config.json')
+        self.__config_settings = json.load(config_file)
+        config_file.close()
+
+        # Launch thread for service update
+        thread = Thread(target=self.__updateService, args=(), daemon=False)
+        thread.start()
 
 if __name__ == '__main__':
 
     terminal = Terminal()
-    
-    # Register/Update Service
-    pass
 
     # Launch Service
     terminal.launch()

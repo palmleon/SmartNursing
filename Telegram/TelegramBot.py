@@ -266,7 +266,7 @@ class SmartClinicBot(object):
         
         try:
             # Retrieve the list of recognized Users 
-            nattempts = 0
+            nattempts = 1
             request = requests.get(self.__config_settings['host']+ "/telegram-user-id-list")
             while nattempts < 5 and request.status_code != requests.codes.ok:
                 nattempts += 1
@@ -286,7 +286,7 @@ class SmartClinicBot(object):
                 return False
 
             # Check if the User has a suitable role for the task to perform
-            nattempts = 0
+            nattempts = 1
             request = requests.get(self.__config_settings['host']+ "/telegram-tasks")
             while nattempts < 5 and request.status_code != requests.codes.ok:
                 nattempts += 1
@@ -435,7 +435,7 @@ class SmartClinicBot(object):
                 #if 'patientID' not in req_patient:
                 #    raise ValueError("Missing key")
                 req_patientID = int(req_patient['patientID'])
-                nattempts = 0
+                nattempts = 1
                 r = requests.get(self.__config_settings['host']+"/patient/"+str(req_patientID))
                 while nattempts < 5 and r.status_code != requests.codes.ok : 
                     nattempts += 1
@@ -452,7 +452,7 @@ class SmartClinicBot(object):
                 if not req_patient['name'].isalpha() or not req_patient['surname'].isalpha():
                     raise ValueError("Patient Name/Surname is not alphabetic")
                 # Try to contact the Server up to 5 times to retrieve the Patient Catalog
-                nattempts = 0
+                nattempts = 1
                 request = requests.get(self.__config_settings['host']+"/patients")
                 while nattempts < 5 and request.status_code != requests.codes.ok:
                     nattempts += 1
@@ -566,7 +566,7 @@ class SmartClinicBot(object):
             edited_patient['patientID'] = context.chat_data['patientID_to_edit']
 
             # Take the Patient Catalog             
-            nattempts = 0
+            nattempts = 1
             request = requests.put(self.__config_settings['host']+"/update-patient", data = json.dumps(edited_patient))
             while nattempts < 5 and request.status_code != requests.codes.ok :
                 nattempts += 1 
@@ -617,7 +617,7 @@ class SmartClinicBot(object):
             # Delete Patient
             if text == 'Y' or text == 'y':
                 delete_patientID = context.chat_data['patientID_to_delete']
-                nattempts = 0
+                nattempts = 1
                 request = requests.delete(self.__config_settings['host']+"/delete-patient/"+str(delete_patientID))
                 while nattempts < 5 and str(request.status_code).startswith('5') :
                     nattempts += 1
@@ -674,7 +674,7 @@ class SmartClinicBot(object):
             userID = update.message.from_user.id
             if self.__check_authZ_authN(update, 'show_patients', userID):
                 context.chat_data['command'] = 'show_patients'
-                nattempts = 0
+                nattempts = 1
                 request = requests.get(self.__config_settings['host']+"/patients")
                 while nattempts < 5 and request.status_code != requests.codes.ok :
                     nattempts += 1
@@ -710,7 +710,8 @@ class SmartClinicBot(object):
             update.message.reply_text(
                 "To set the temperature of a room, use the following format:\n"
                 "roomID - <insert_roomNumber>\n"
-                "temp - <insert_temperature>"
+                "temp - <insert_temperature>\n"
+                "isCommon - <True/False>"
                 )
             context.chat_data['command'] = 'set_room_temperature'
             return SmartClinicBot.SET_ROOM_TEMPERATURE
@@ -719,10 +720,11 @@ class SmartClinicBot(object):
             return ConversationHandler.END
 
     def __set_room_temperature_update(self, update: Update, context: CallbackContext):
+        
         try:
             room = SmartClinicBot.__parse_input(update.message.text)
             # Check if you have fetched the correct number of elements
-            if len(room) != 2:
+            if len(room) != 3:
                 raise ValueError("Incorrect number of elements")
             # Check if all the excepted keys are present
             #if 'roomID' not in room and 'temp' not in room:
@@ -731,36 +733,62 @@ class SmartClinicBot(object):
             roomID = int(room['roomID'])
             # Treat the Room Temperature as an integer
             roomTemp = int(room['temp'])
-            # Set the Room info
-            room_json = json.dumps(
-                {
-                    'roomID': roomID,
-                    'desired-temperature': roomTemp
-                }
-            )
-            nattempts = 0
-            request = requests.put(self.__config_settings['host']+"/update-room",data=room_json)
-            while nattempts < 5 and request.status_code != requests.codes.ok:
+            # Treat the fact that the Room is common as a boolean
+            isCommon = room['isCommon'] == 'True'
+            if isCommon:
+                uri = "common-room"
+            else:
+                uri = "room"
+            request = requests.get(self.__config_settings['host']+"/"+uri+"/"+str(roomID))
+            nattempts = 1
+            if nattempts < 5 and str(request.status_code).startswith('5'):
+                request = requests.get(self.__config_settings['host']+"/"+uri+"/"+str(roomID))
                 nattempts += 1
-                request = requests.put(self.__config_settings['host']+"/update-room",data=room_json)
-            if nattempts == 5 and request.status_code != requests.codes.ok:
+            
+            if request.status_code == requests.codes.ok:
+                # Set the Room info
+                room = request.json()
+                room['desired-temperature'] = roomTemp
+
+                # Update the Room
+                nattempts = 1
+                request = requests.put(self.__config_settings['host']+"/update-"+uri+"-temperature",data=room_json)
+                while nattempts < 5 and str(request.status_code).startswith('5'):
+                    nattempts += 1
+                    request = requests.put(self.__config_settings['host']+"/update-"+uri+"-temperature",data=room_json)
+                if request.status_code == requests.codes.ok:
+                    update.message.reply_text(
+                        "Room Temperature for Room " + str(roomID) + ": updated!"
+                    )
+                elif nattempts == 5 and request.status_code.startswith('5'):
+                    raise ServerNotFoundError
+                elif request.status_code != requests.codes.ok:
+                    raise RoomNotFoundError
+            
+            elif nattempts == 5 and str(request.status_code).startswith('5'):
                 raise ServerNotFoundError
-            update.message.reply_text(
-                "Room Temperature for Room " + str(roomID) + ": updated!"
-            )
+
+            elif request.status_code != requests.codes.ok:
+                raise RoomNotFoundError
 
         except (ValueError, KeyError) as e:
             update.message.reply_text(
                 "Something went wrong. "
                 "Please, use the following format:\n"
                 "roomID - <insert_roomNumber>\n"
-                "temp - <insert_temperature>")
+                "temp - <insert_temperature>\n"
+                "isCommon - <True/False>")
             print(e)
             # Retry until success
             return SmartClinicBot.SET_ROOM_TEMPERATURE
         
         except ServerNotFoundError as e:
             update.message.reply_text("Host unreachable. Abort")
+            print(e)
+            return ConversationHandler.END
+
+        except RoomNotFoundError as e:
+            update.message.reply_text("Room not found. Abort")
             print(e)
             return ConversationHandler.END
 
@@ -771,7 +799,8 @@ class SmartClinicBot(object):
         if self.__check_authZ_authN(update, 'get_room_temperature', userID):
             update.message.reply_text(
                 "To read the temperature of a room, insert its number using the following format:\n"
-                "roomID - <insert_roomID>"
+                "roomID - <insert_roomID>\n"
+                "isCommon - <True/False>"
                 )
             context.chat_data['command'] = 'get_room_temperature'
             return SmartClinicBot.GET_ROOM_TEMPERATURE
@@ -783,28 +812,40 @@ class SmartClinicBot(object):
         try:
             room = SmartClinicBot.__parse_input(update.message.text)
             # Check if you have fetched the correct number of elements
-            if len(room) != 1:
+            if len(room) != 2:
                 raise ValueError("Incorrect number of elements")
             # Check if all the excepted keys are present
             #if 'roomID' not in room:
             #    raise Exception("Missing key")
             # Treat the Room Number as an integer
             roomID = int(room['roomID'])
+            # Treat the fact that the Room is common as a boolean
+            isCommon = room['isCommon'] == 'True'
+            if isCommon:
+                uri = "common-room"
+            else:
+                uri = "room"
+
             # Get the Room info 
-            nattempts = 0
-            request = requests.get(self.__config_settings['host']+"/room-temperature/" + str(roomID))
+            nattempts = 1
+            request = requests.get(self.__config_settings['host']+"/"+uri+"-temperature/" + str(roomID))
             while nattempts < 5 and str(request.status_code).startswith('5'):
                 nattempts += 1
-                request = requests.get(self.__config_settings['host']+"/room-temperature/" + str(roomID))
-            if nattempts == 5 and request.status_code != requests.codes.ok:
+                request = requests.get(self.__config_settings['host']+"/"+uri+"-temperature/" + str(roomID))
+            if nattempts == 5 and str(request.status_code).startswith('5'):
                 raise ServerNotFoundError
             if request.status_code == 404:
                 raise RoomNotFoundError
             fetched_room = request.json()
             fetched_room_temp = fetched_room['desired-temperature']
-            update.message.reply_text(
-                "Room Temperature for Room " + str(roomID) + ": " + str(fetched_room_temp) + "°C"
-            )
+            if isCommon:
+                update.message.reply_text(
+                    "Temperature for Common Room " + str(roomID) + ": " + str(fetched_room_temp) + "°C"
+                )
+            else:
+                update.message.reply_text(
+                    "Temperature for Room " + str(roomID) + ": " + str(fetched_room_temp) + "°C"
+                )
 
         except json.JSONDecodeError as e:
             update.message.reply_text("Invalid answer from the Host. Abort.")
@@ -815,7 +856,8 @@ class SmartClinicBot(object):
             update.message.reply_text(
                 "Something went wrong. "
                 "Please, use the following format:\n"
-                "roomID - <insert_roomID>")
+                "roomID - <insert_roomID>\n"
+                "isCommon - <True/False>")
             print(e)
             # Retry until success
             return SmartClinicBot.GET_ROOM_TEMPERATURE
@@ -881,7 +923,7 @@ class SmartClinicBot(object):
     def updateService(self) :
         while True :
             sleep(100)
-            nattempts = 0
+            nattempts = 1
             r = requests.put(self.__config_settings['host'] + "/update-service",data = json.dumps({
             'serviceID' : self.__config_settings['serviceID'],
             'name' : self.__config_settings['name']
