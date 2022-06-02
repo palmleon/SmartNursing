@@ -24,7 +24,7 @@ cd raspberry-emulator
 docker build -t  rei .
 cd ..
 
-cd Telegram
+cd TelegramBot
 docker build -t  ti .
 cd ..
 
