@@ -340,7 +340,8 @@ class SmartClinicBot(object):
             context.chat_data['command'] = 'add_patients'
             update.message.reply_text(
                 "To insert a new Patient, insert the following data in the following format:\n"
-                "patientID - <insert_patientID>\n" 
+                "patientID - <insert_patientID>\n"
+                "roomID - <insert_roomID>\n" 
                 "name - <insert_name>\n"
                 "surname - <insert_surname>\n"
                 "age - <insert_age>\n"
@@ -355,14 +356,16 @@ class SmartClinicBot(object):
         try:
             new_patient = SmartClinicBot.__parse_input(update.message.text)
             # Check if you have fetched the correct number of elements
-            if len(new_patient) != 5:
+            if len(new_patient) != 6:
                 raise ValueError("Incorrect number of elements")
             # Check if all the excepted keys are present
-            if 'name' not in new_patient or 'patientID'   not in new_patient or 'surname' not in new_patient or \
-                'age' not in new_patient or 'description' not in new_patient:
+            if 'name' not in new_patient or 'patientID'   not in new_patient or 'roomID' not in new_patient \
+                or 'surname' not in new_patient or 'age' not in new_patient or 'description' not in new_patient:
                 raise ValueError("Missing key")
             # Treat the patientID as a number
             new_patient['patientID'] = int(new_patient['patientID'])
+            # Treat the patientID as a number
+            new_patient['roomID'] = int(new_patient['roomID'])
             # Check that both the name and the surname contain alphabetic chars only
             if not new_patient['name'].isalpha() or not new_patient['surname'].isalpha():
                 raise ValueError("Patient Name/Surname is not alphabetic")
@@ -374,11 +377,11 @@ class SmartClinicBot(object):
             if request.status_code == 400 :
                 raise DuplicatePatientError
             elif str(request.status_code).startswith('5'):
-                nattempt = 1
-                while nattempt < 5 and str(request.status_code).startswith('5'):
+                nattempts = 1
+                while nattempts < 5 and str(request.status_code).startswith('5'):
                     request = requests.post(self.__config_settings['host']+"/add-patient",data =json.dumps(new_patient))
-                    nattempt += 1
-                if nattempt == 5:
+                    nattempts += 1
+                if nattempts == 5:
                     raise ServerNotFoundError
             else:
                 update.message.reply_text("Patient added successfully!")
@@ -388,6 +391,7 @@ class SmartClinicBot(object):
                 "Sorry, this Patient description is invalid.\n"
                 "Please, use the following syntax:\n"
                 "patientID - <insert_patientID>\n" 
+                "roomID - <insert_roomID>\n"
                 "name - <insert_name>\n"
                 "surname - <insert_surname>\n"
                 "age - <insert_age>\n"
@@ -477,6 +481,7 @@ class SmartClinicBot(object):
                         context.chat_data['patientID_to_edit'] = found_patient['patientID']
                     msg = ("Patient found:\n" + "-"*40 + "\n" +
                         "patientID - {patientID}\n"   .format(patientID=      found_patient['patientID']) +
+                        "roomID - {roomID}\n"         .format(roomID=         found_patient['roomID']) +
                         "name - {patientName}\n"      .format(patientName=    found_patient['name']) +
                         "surname - {patientSurname}\n".format(patientSurname= found_patient['surname']) + 
                         "age - {patientAge}\n"        .format(patientAge=     found_patient['age']) +
@@ -493,6 +498,7 @@ class SmartClinicBot(object):
                     for found_patient in sorted(found_patients, key=lambda patient: patient['patientID']):
                         msg += "-"*40 + "\n" + \
                             "patientID - {patientID}\n".format(patientID=found_patient['patientID']) + \
+                            "roomID - {roomID}\n".format(roomID=found_patient['roomID']) + \
                             "name - {patientName}\n".format(patientName=found_patient['name']) + \
                             "surname - {patientSurname}\n".format(patientSurname=found_patient['surname']) + \
                             "age - {patientAge}\n".format(patientAge=found_patient['age']) + \
@@ -550,7 +556,7 @@ class SmartClinicBot(object):
             edited_patient = SmartClinicBot.__parse_input(update.message.text)
             #print(edited_patient)
             # Check if you have fetched the correct number of elements
-            if len(edited_patient) != 4:
+            if len(edited_patient) != 5:
                 raise ValueError("Incorrect number of elements")
             # Check if all the excepted keys are present
             #if 'name' not in edited_patient or 'surname' not in edited_patient or \
@@ -561,6 +567,9 @@ class SmartClinicBot(object):
                 raise ValueError("Patient Name/Surname is not alphabetic")
             # Treat the age as a number
             edited_patient['age'] = int(edited_patient['age'])
+
+            # Insert the RoomID in the edited Patient
+            edited_patient['roomID'] = int(edited_patient['roomID'])
 
             # Insert the PatientID in the edited Patient
             edited_patient['patientID'] = context.chat_data['patientID_to_edit']
@@ -580,6 +589,7 @@ class SmartClinicBot(object):
             update.message.reply_text(
                 "Sorry, this Patient description is invalid.\n"
                 "Please, use the following format:\n"
+                "roomID - <insert_roomID>\n"
                 "name - <insert_name>\n"
                 "surname - <insert_surname>\n"
                 "age - <insert_age>\n"
@@ -689,6 +699,7 @@ class SmartClinicBot(object):
                     for found_patient in sorted(patient_catalog, key=lambda p: p['patientID']):
                         msg +=  "-"*40 + "\n" + \
                                 "patientID - {patientID}\n".format(patientID=found_patient['patientID']) + \
+                                "roomID - {roomID}\n".format(roomID=found_patient['roomID']) + \
                                 "name - {patientName}\n".format(patientName=found_patient['name']) + \
                                 "surname - {patientSurname}\n".format(patientSurname=found_patient['surname']) + \
                                 "age - {patientAge}\n".format(patientAge=found_patient['age']) + \

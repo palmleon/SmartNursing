@@ -648,7 +648,7 @@ class Terminal(object):
                             end = True
                         else:
                             if nattempts == 5:
-                                command = input(("Operation failed: Server not reachable! Retry [r] or quit [q]: "))
+                                command = input("Operation failed: Server not reachable! Retry [r] or quit [q]: ")
                             else:
                                 command = input("Operation failed: User not found! Retry [r] or quit [q]: ")
                             if command == 'q':
