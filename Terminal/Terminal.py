@@ -141,35 +141,26 @@ class Terminal(object):
                 if isCommon_str == 'Y' or isCommon_str == 'y':
                     newRoom = {
                         'roomID': roomID,
-                        'desired-temperature': 20,
-                        'isCommon': True
+                        'desired-temperature': 20
                     }
-
-                    # Check if it is already taken
-                    # If not, add it (TODO ADD THE ADD COMMON ROOM METHOD IN THE DEVICE REGISTRY SYSTEM)
-                    r = requests.post(self.__config_settings['host']+"/add-common-room/", data = newRoom)
-                    nattempts = 1
-
-                    while nattempts < 5 and str(r.status_code).startswith('5'):
-                        r = requests.post(self.__config_settings['host']+"/add-common-room/", data = newRoom)
-                        nattempts += 1
+                    uri = 'common-room'
                 else:
                     newRoom = {
                         'roomID': roomID,
                         'desired-temperature': 20,
-                        'patients': [],
-                        'isCommon': False
+                        'patients': []
                         #'sensors': []
                     }
+                    uri = 'room'
 
-                    # Check if it is already taken
-                    # If not, add it                     
-                    r = requests.post(self.__config_settings['host']+"/add-room/", data = newRoom)
-                    nattempts = 1
+                # Check if it is already taken
+                # If not, add it 
+                r = requests.post(self.__config_settings['host']+"/add-"+uri+"/", data = newRoom)
+                nattempts = 1
 
-                    while nattempts < 5 and str(r.status_code).startswith('5'):
-                        r = requests.post(self.__config_settings['host']+"/add-room/", data = newRoom)
-                        nattempts += 1
+                while nattempts < 5 and str(r.status_code).startswith('5'):
+                    r = requests.post(self.__config_settings['host']+"/add-"+uri+"/", data = newRoom)
+                    nattempts += 1
                 
                 if r.status_code == requests.codes.ok:
                     print("Room added successfully!")
@@ -198,18 +189,16 @@ class Terminal(object):
                 roomID = int(input("Please insert the ID of room to search: "))
                 isCommon_str = input("Is it common [Y/N]? ")
 
-                # Check if it exists #TODO REST METHODS TO BE DEFINED!
+                # Check if it exists
                 if isCommon_str == 'Y' or isCommon_str == 'y':
-                    r = requests.get(self.__config_settings['host']+"/common-room/"+str(roomID))
+                    uri = 'common-room'
                 else:
-                    r = requests.get(self.__config_settings['host']+"/room/"+str(roomID))
-                nattempts = 1
+                    uri = 'room'
 
+                r = requests.get(self.__config_settings['host']+"/"+uri+"/"+str(roomID))
+                nattempts = 1
                 while nattempts < 5 and str(r.status_code).startswith('5'):
-                    if isCommon_str == 'Y' or isCommon_str == 'y':
-                        r = requests.get(self.__config_settings['host']+"/common-room/"+str(roomID))
-                    else:
-                        r = requests.get(self.__config_settings['host']+"/room/"+str(roomID))
+                    r = requests.get(self.__config_settings['host']+"/"+uri+"/"+str(roomID))
                     nattempts += 1 
                 
                 # If so, show it and all its data
@@ -219,7 +208,7 @@ class Terminal(object):
                     
                 # Otherwise, retry or cancel the command
                 else:
-                    if nattempts == 5:
+                    if nattempts == 5 and str(r.status_code).startswith('5'):
                         command = input("Operation failed: Server not reachable! Retry [r] or quit [q]: ")
                     else:
                         command = input("Operation failed: Room not found! Retry [r] or quit [q]: ")
@@ -242,18 +231,17 @@ class Terminal(object):
                 roomID = int(input("Please insert the ID of the room to edit: "))
                 isCommon_str = input("Is it common [Y/N]? ")
 
-                # Check if it exists #TODO REST METHODS TO BE DEFINED!
+                # Check if it exists
                 if isCommon_str == 'Y' or isCommon_str == 'y':
-                    r = requests.get(self.__config_settings['host']+"/common-room/"+str(roomID))
+                    uri = 'common-room'
                 else:
-                    r = requests.get(self.__config_settings['host']+"/room/"+str(roomID))
+                    uri = 'room'
+                
+                r = requests.get(self.__config_settings['host']+"/"+uri+"/"+str(roomID))
                 nattempts = 1
 
                 while nattempts < 5 and str(r.status_code).startswith('5'):
-                    if isCommon_str == 'Y' or isCommon_str == 'y':
-                        r = requests.get(self.__config_settings['host']+"/common-room/"+str(roomID))
-                    else:
-                        r = requests.get(self.__config_settings['host']+"/room/"+str(roomID))
+                    r = requests.get(self.__config_settings['host']+"/"+uri+"/"+str(roomID))
                     nattempts += 1 
                 
                 # If so, show it and all its data
@@ -264,23 +252,18 @@ class Terminal(object):
 
                     # Ask for the new room number
                     newRoomID = int(input("Please insert the new ID of the room to edit: "))
-
-                    roomUpdated = {
-                        'roomID_old' : roomID,
-                        'roomID_new' : newRoomID
-                    }
                     
-                    # UPDATE THE ROOM ID TODO REST METHOD TO BE DEFINED
+                    room['roomID_old'] = room['roomID']
+                    room['roomID'] = newRoomID
+                    
+                    # Update the Room ID
                     nattempts = 1
-                    r = requests.put(self.__config_settings['host']+"/update-room-id", data=roomUpdated)
+                    r = requests.put(self.__config_settings['host']+"/update-"+uri, data=room)
 
                     while nattempts < 5 and str(r.status_code).startswith('5'):
                         nattempts += 1
-                        if isCommon_str == 'Y' or isCommon_str == 'y':
-                            r = requests.put(self.__config_settings['host']+"/update-common-room-id", data=roomUpdated)
-                        else:
-                            r = requests.put(self.__config_settings['host']+"/update-room-id", data=roomUpdated)
-
+                        r = requests.put(self.__config_settings['host']+"/update-"+uri, data=room)
+                        
                     if r.status_code == requests.codes.ok:
                         print("Room updated successfully!")
                         end = True
@@ -294,7 +277,7 @@ class Terminal(object):
                     
                 # Otherwise, retry or cancel the command
                 else:
-                    if nattempts == 5:
+                    if nattempts == 5 and str(r.status_code).startswith('5'):
                         command = input("Operation failed: Server not reachable! Retry [r] or quit [q]: ")
                     else:
                         command = input("Operation failed: Room not found! Retry [r] or quit [q]: ")
@@ -309,11 +292,11 @@ class Terminal(object):
     #########################################
     def __room_show(self):
         # Show all rooms, the patients inside and the sensors
-        r = requests.get(self.__config_settings['host']+"room-list")
+        r = requests.get(self.__config_settings['host']+"/room-list")
         nattempts = 1
 
         while nattempts < 5 and str(r.status_code).startswith('5'):
-            r = requests.get(self.__config_settings['host']+"room-list")
+            r = requests.get(self.__config_settings['host']+"/room-list")
             nattempts += 1
 
         if r.status_code == requests.codes.ok:
@@ -327,11 +310,11 @@ class Terminal(object):
                 print("Operation failed: Unknown error!")
 
         # Show all common rooms
-        r = requests.get(self.__config_settings['host']+"common-room-list")
+        r = requests.get(self.__config_settings['host']+"/common-room-list")
         nattempts = 1
 
         while nattempts < 5 and str(r.status_code).startswith('5'):
-            r = requests.get(self.__config_settings['host']+"common-room-list")
+            r = requests.get(self.__config_settings['host']+"/common-room-list")
             nattempts += 1
 
         if r.status_code == requests.codes.ok:
@@ -361,18 +344,16 @@ class Terminal(object):
                 roomID = int(input("Please insert the ID of the room to delete: "))
                 isCommon_str = input("Is it common [Y/N]? ")
                 
-                # Check if it exists #TODO REST METHOD TO BE DEFINED!
+                # Check if it exists
                 if isCommon_str == 'Y' or isCommon_str == 'y':
-                    r = requests.get(self.__config_settings['host']+"/common-room/"+str(roomID))
+                    uri = 'common-room'
                 else:
-                    r = requests.get(self.__config_settings['host']+"/room/"+str(roomID))
+                    uri = 'room'
+
+                r = requests.get(self.__config_settings['host']+"/"+uri+"/"+str(roomID))
                 nattempts = 1
-                
                 while nattempts < 5 and str(r.status_code).startswith('5'):
-                    if isCommon_str == 'Y' or isCommon_str == 'y':
-                        r = requests.get(self.__config_settings['host']+"/common-room/"+str(roomID))
-                    else:
-                        r = requests.get(self.__config_settings['host']+"/room/"+str(roomID))
+                    r = requests.get(self.__config_settings['host']+"/"+uri+"/"+str(roomID))
                     nattempts += 1 
                 
                 # If so, show it and all its data
@@ -382,23 +363,17 @@ class Terminal(object):
                     json.dumps(room, indent=4)
 
                     # If so, and if there is no patient inside, ask for confirmation
-                    if room['isCommon'] or len(room['patients']) == 0:
+                    if isCommon_str == 'Y' or isCommon_str == 'y' or len(room['patients']) == 0:
                         confirm_reply = input("Are you sure you want to delete this user [Y/N]? ")
                         
-                        # Delete or not depending on confirmation reply (TODO IMPLEMENT DELETE COMMON ROOM)
+                        # Delete or not depending on confirmation reply
                         if confirm_reply == 'Y' or confirm_reply == 'y':
 
-                            if isCommon_str == 'Y' or isCommon_str == 'y':
-                                r = requests.delete(self.__config_settings['host']+"/delete-common-room/"+str(userID))
-                            else:
-                                r = requests.delete(self.__config_settings['host']+"/delete-room/"+str(userID))
+                            r = requests.delete(self.__config_settings['host']+"/delete-"+uri+"/"+str(roomID))
                             nattempts = 1
 
                             while nattempts < 5 and str(r.status_code).startswith('5'):
-                                if isCommon_str == 'Y' or isCommon_str == 'y':
-                                    r = requests.delete(self.__config_settings['host']+"/delete-common-room/"+str(userID))
-                                else:
-                                    r = requests.delete(self.__config_settings['host']+"/delete-room/"+str(userID))                            
+                                r = requests.delete(self.__config_settings['host']+"/delete-"+uri+"/"+str(roomID))                          
                                 nattempts += 1
 
                             if r.status_code == requests.codes.ok:
@@ -406,7 +381,7 @@ class Terminal(object):
                                 end = True
                             else:
                                 if nattempts == 5:
-                                    command = input(("Operation failed: Server not reachable! Retry [r] or quit [q]: "))
+                                    command = input("Operation failed: Server not reachable! Retry [r] or quit [q]: ")
                                 else:
                                     command = input("Operation failed: Room not found! Retry [r] or quit [q]: ")
                                 if command == 'q':
@@ -450,13 +425,13 @@ class Terminal(object):
 
                 # Check if the UserID is already present in the Telegram ID List
                 nattempts = 1
-                r = requests.post(self.__config_settings['host']+"/add-telegram-user-id/", data = json.dumps({
+                r = requests.post(self.__config_settings['host']+"/add-telegram-user/", data = json.dumps({
                     'user-id': userID,
                     'role' : role
                 }))
                 while nattempts < 5 and str(r.status_code).startswith('5'):
                     nattempts += 1
-                    r = requests.post(self.__config_settings['host']+"/add-telegram-user-id/", data = json.dumps({
+                    r = requests.post(self.__config_settings['host']+"/add-telegram-user/", data = json.dumps({
                     'user-id': userID,
                     'role' : role
                 }))
@@ -488,12 +463,12 @@ class Terminal(object):
                 # Retrieve UserID
                 userID = int(input("Please insert the UserID to search: "))
                 
-                # Look for the UserID in the Telegram ID List TODO PATH TO BE DEFINED YET!
-                r = requests.get(self.__config_settings['host'] + "/get-telegram-user-id/" + str(userID))
+                # Look for the UserID in the Telegram ID List
+                r = requests.get(self.__config_settings['host'] + "/telegram-user/" + str(userID))
                 nattempts = 1
 
                 while nattempts < 5 and str(r.status_code).startswith('5'):
-                    r = requests.get(self.__config_settings['host'] + "/get-telegram-user-id/" + str(userID))
+                    r = requests.get(self.__config_settings['host'] + "/telegram-user/" + str(userID))
                     nattempts += 1
 
                 # If present, show it
@@ -529,12 +504,12 @@ class Terminal(object):
                 # Retrieve UserID
                 userID = int(input("Please insert the UserID to edit: "))
                 
-                # Look for the UserID in the Telegram ID List TODO PATH TO BE DEFINED YET!
-                r = requests.get(self.__config_settings['host'] + "/telegram-user-id/" + str(userID))
+                # Look for the UserID in the Telegram ID List
+                r = requests.get(self.__config_settings['host'] + "/telegram-user/" + str(userID))
                 nattempts = 1
 
                 while nattempts < 5 and str(r.status_code).startswith('5'):
-                    r = requests.get(self.__config_settings['host'] + "/telegram-user-id/" + str(userID))
+                    r = requests.get(self.__config_settings['host'] + "/telegram-user/" + str(userID))
                     nattempts += 1
 
                 # If present, ask for the new role
@@ -545,13 +520,13 @@ class Terminal(object):
 
                     # Update the UserID in the Telegram ID List
                     nattempts = 1
-                    r = requests.put(self.__config_settings['host']+"/update-telegram-user-id/", data = json.dumps({
+                    r = requests.put(self.__config_settings['host']+"/update-telegram-user/", data = json.dumps({
                             'user-id': userID,
                             'role' : role
                         }))
                     while nattempts < 5 and str(r.status.code).startswith('5'):
                         nattempts += 1
-                        r = requests.put(self.__config_settings['host']+"/update-telegram-user-id/", data = json.dumps({
+                        r = requests.put(self.__config_settings['host']+"/update-telegram-user/", data = json.dumps({
                             'user-id': userID,
                             'role' : role
                         }))
@@ -616,12 +591,12 @@ class Terminal(object):
                 # Retrieve UserID
                 userID = int(input("Please insert the UserID to delete: "))
                 
-                # Look for the UserID in the Telegram ID List TODO PATH TO BE DEFINED YET!
-                r = requests.get(self.__config_settings['host'] + "/telegram-user-id/" + str(userID))
+                # Look for the UserID in the Telegram ID List
+                r = requests.get(self.__config_settings['host'] + "/telegram-user/" + str(userID))
                 nattempts = 1
 
                 while nattempts < 5 and str(r.status_code).startswith('5'):
-                    r = requests.get(self.__config_settings['host'] + "/telegram-user-id/" + str(userID))
+                    r = requests.get(self.__config_settings['host'] + "/telegram-user/" + str(userID))
                     nattempts += 1
 
                 # If present, ask for confirmation
@@ -636,11 +611,11 @@ class Terminal(object):
                     # Delete or not depending on confirmation reply
                     if confirm_reply == 'Y' or confirm_reply == 'y':
 
-                        r = requests.delete(self.__config_settings['host']+"/delete-telegram-user-id/"+str(userID))
+                        r = requests.delete(self.__config_settings['host']+"/delete-telegram-user/"+str(userID))
                         nattempts = 1
 
                         while nattempts < 5 and str(r.status_code).startswith('5'):
-                            r = requests.delete(self.__config_settings['host']+"/delete-telegram-user-id/"+str(userID))
+                            r = requests.delete(self.__config_settings['host']+"/delete-telegram-user/"+str(userID))
                             nattempts += 1
 
                         if r.status_code == requests.codes.ok:
@@ -661,7 +636,7 @@ class Terminal(object):
                 # Otherwise, notify that it does not exist
                 else:
                     if nattempts == 5:
-                        command = input(("Operation failed: Server not reachable! Retry [r] or quit [q]: "))
+                        command = input("Operation failed: Server not reachable! Retry [r] or quit [q]: ")
                     else:
                         command = input("Operation failed: User not found! Retry [r] or quit [q]: ")
                     if command == 'q':
@@ -677,13 +652,17 @@ class Terminal(object):
             time.sleep(100)
 
             nattempts = 1
-            r = requests.put(self.__register+"/update-service",data = json.dumps({"serviceID" : self.__config_settings['serviceID'],
-                 "name" : self.__config_settings['name']}))
+            r = requests.put(self.__register+"/update-service",data = json.dumps({
+                    "serviceID" : self.__config_settings['serviceID'],
+                    "name" : self.__config_settings['name']
+                 }))
 
             while nattempts < 5 and str(r.status_code).startswith('5'):
                 nattempts += 1
-                r = requests.put(self.__register+"/update-service",data = json.dumps({"serviceID" : self.__config_settings['serviceID'],
-                 "name" : self.__config_settings['name']}))
+                r = requests.put(self.__register+"/update-service",data = json.dumps({
+                    "serviceID" : self.__config_settings['serviceID'],
+                    "name" : self.__config_settings['name']
+                 }))
 
     ###################################################################################################
     # During initialization, only the configuration file is set, and the updating thread is launched

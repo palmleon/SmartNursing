@@ -5,7 +5,7 @@ from telegram.ext import Updater, CallbackContext, CommandHandler, ConversationH
 from telegram import Update
 from MyMQTT import MyMQTT
 from TelegramBotExceptions import DuplicatePatientError, ServerNotFoundError, \
-   PatientNotFoundError, RoomNotFoundError, ShiftStartedError, ShiftEndedError
+   PatientNotFoundError, RoomNotFoundError, ShiftStartedError, ShiftEndedError, TelegramTaskNotFoundError, TelegramUserNotFoundError
 from time import sleep, time
 
 class SmartClinicBot(object):
@@ -267,40 +267,35 @@ class SmartClinicBot(object):
         try:
             # Retrieve the list of recognized Users 
             nattempts = 1
-            request = requests.get(self.__config_settings['host']+ "/telegram-user-id-list")
-            while nattempts < 5 and request.status_code != requests.codes.ok:
+            request = requests.get(self.__config_settings['host']+ "/telegram-user/"+str(userID))
+            while nattempts < 5 and str(request.status_code).startswith('5'):
                 nattempts += 1
-                request = requests.get(self.__config_settings['host']+ "/telegram-user-id-list")
-            if nattempts == 5 and request.status_code != requests.codes.ok:
-                raise ServerNotFoundError
-            users = request.json()
-            found = False
-            user_role = None
-            for user in users:
-                if user['user-id'] == userID:
-                    found = True
-                    user_role = user['role']
-            # Check if the User is among those recognized
-            if not found:
-                update.message.reply_text("Authentication failed!")
-                return False
+                request = requests.get(self.__config_settings['host']+ "/telegram-user/"+str(userID))
 
+            if nattempts == 5 and str(request.status_code).startswith('5'):
+                raise ServerNotFoundError
+            elif request.status_code != requests.codes.ok:
+                raise TelegramUserNotFoundError
+            user = request.json()
+            
             # Check if the User has a suitable role for the task to perform
             nattempts = 1
-            request = requests.get(self.__config_settings['host']+ "/telegram-tasks")
-            while nattempts < 5 and request.status_code != requests.codes.ok:
+            request = requests.get(self.__config_settings['host']+ "/telegram-task/"+command)
+            while nattempts < 5 and str(request.status_code).startswith('5'):
                 nattempts += 1
-                request = requests.get(self.__config_settings['host']+ "/telegram-tasks")
-            if nattempts == 5 and request.status_code != requests.codes.ok:
+                request = requests.get(self.__config_settings['host']+ "/telegram-task/"+command)
+            
+            if nattempts == 5 and str(request.status_code).startswith('5'):
                 raise ServerNotFoundError
-            tasks = request.json()
-            for task in tasks:
-                if task['command'] == command:
-                    roles = task['roles']
-                    if user_role in roles:
-                        return True
-                    else: 
-                        update.message.reply_text("Authorization failed!")
+            elif request.status_code != requests.codes.ok:
+                raise TelegramTaskNotFoundError
+
+            task = request.json()
+            roles = task['roles']
+            if user['role'] in roles:
+                return True
+            else: 
+                update.message.reply_text("Authorization failed!")
 
         except json.JSONDecodeError as e:
             update.message.reply_text(
@@ -310,6 +305,13 @@ class SmartClinicBot(object):
         except ServerNotFoundError:
             update.message.reply_text("Host unreachable. Abort.")
             print(e)
+        except TelegramUserNotFoundError:
+            update.message.reply_text("Telegram User not found. Authentication failed!")
+            print(e)
+        except TelegramTaskNotFoundError:
+            update.message.reply_text("Telegram task not found. Abort.")
+            print(e)
+
         return False #default bhv
 
     def __start(self, update: Update, context: CallbackContext):
@@ -374,15 +376,16 @@ class SmartClinicBot(object):
 
             # If the Patient is already present, abort the operation; otherwise, insert it in the Patient Catalog
             request = requests.post(self.__config_settings['host']+"/add-patient",data =json.dumps(new_patient))
+            nattempts = 1
+            while nattempts < 5 and str(request.status_code).startswith('5'):
+                request = requests.post(self.__config_settings['host']+"/add-patient",data =json.dumps(new_patient))
+                nattempts += 1
+            if nattempts == 5 and str(request.status_code).startswith('5'):
+                raise ServerNotFoundError
             if request.status_code == 400 :
                 raise DuplicatePatientError
-            elif str(request.status_code).startswith('5'):
-                nattempts = 1
-                while nattempts < 5 and str(request.status_code).startswith('5'):
-                    request = requests.post(self.__config_settings['host']+"/add-patient",data =json.dumps(new_patient))
-                    nattempts += 1
-                if nattempts == 5:
-                    raise ServerNotFoundError
+            if request.status_code == 406 :
+                raise RoomNotFoundError
             else:
                 update.message.reply_text("Patient added successfully!")
 
@@ -400,6 +403,10 @@ class SmartClinicBot(object):
             return SmartClinicBot.ADD_PATIENT
         except DuplicatePatientError as e:
             update.message.reply_text("This patient is already present! Retry")
+            print(e)
+            return SmartClinicBot.ADD_PATIENT
+        except RoomNotFoundError as e:
+            update.message.reply_text("Room not found! Retry")
             print(e)
             return SmartClinicBot.ADD_PATIENT
         except ServerNotFoundError as e:
@@ -444,6 +451,7 @@ class SmartClinicBot(object):
                 while nattempts < 5 and r.status_code != requests.codes.ok : 
                     nattempts += 1
                     r = requests.get(self.__config_settings['host']+"/patient/"+str(req_patientID))
+
                 if r.status_code == requests.codes.ok:
                     patient_present = True
                     found_patients.append(r.json())
@@ -577,11 +585,13 @@ class SmartClinicBot(object):
             # Take the Patient Catalog             
             nattempts = 1
             request = requests.put(self.__config_settings['host']+"/update-patient", data = json.dumps(edited_patient))
-            while nattempts < 5 and request.status_code != requests.codes.ok :
+            while nattempts < 5 and str(request.status_code).startswith('5'):
                 nattempts += 1 
                 request = requests.put(self.__config_settings['host']+"/update-patient", data = json.dumps(edited_patient))
-            if nattempts == 5 and request.status_code != requests.codes.ok:
+            if nattempts == 5 and str(request.status_code).startswith('5'):
                 raise ServerNotFoundError
+            elif request.status_code == 406:
+                raise RoomNotFoundError
             else :
                 update.message.reply_text("Patient updated successfully!")
 
@@ -602,6 +612,11 @@ class SmartClinicBot(object):
             print(e)
             # Abort the command, it is not the user's fault
             return ConversationHandler.END
+        
+        except RoomNotFoundError:
+            update.message.reply_text("Room not found! Retry")
+            print(e)
+            return SmartClinicBot.EDIT_PATIENT_2
  
         return ConversationHandler.END
 
@@ -763,10 +778,10 @@ class SmartClinicBot(object):
 
                 # Update the Room
                 nattempts = 1
-                request = requests.put(self.__config_settings['host']+"/update-"+uri+"-temperature",data=room_json)
+                request = requests.put(self.__config_settings['host']+"/update-"+uri+"/",data=room)
                 while nattempts < 5 and str(request.status_code).startswith('5'):
                     nattempts += 1
-                    request = requests.put(self.__config_settings['host']+"/update-"+uri+"-temperature",data=room_json)
+                    request = requests.put(self.__config_settings['host']+"/update-"+uri+"/",data=room)
                 if request.status_code == requests.codes.ok:
                     update.message.reply_text(
                         "Room Temperature for Room " + str(roomID) + ": updated!"

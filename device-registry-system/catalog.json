@@ -54,6 +54,7 @@
     "room-list": [
         {
             "roomID": 2,
+            "patients": [],
             "desired-temperature": 23
         }
     ],
@@ -73,10 +74,22 @@
     "api-weather": "http://api.weatherstack.com/current?access_key=36fcb02003026b9fae56e4c0a5a228fe&query=",
     "bot-token" : "5346738235:AAEL3YF-CdKU0XA1HLmJ73jlQbf_n7vHGNc",
     "common-room-list": [
-        1,
-        2,
-        3,
-        4
+        {
+            "roomID": 1,
+            "desired-temperature": 23
+        },
+        {
+            "roomID": 2,
+            "desired-temperature": 23
+        },
+        {
+            "roomID": 3,
+            "desired-temperature": 23
+        },
+        {
+            "roomID": 4,
+            "desired-temperature": 23
+        }
     ],
     "common-room-hourly-scheduling": {
         "night": [
@@ -124,6 +137,5 @@
     {
         "deviceID" : 2,
         "timestamp" : "2022-05-15 22:53:40.844402"
-    }],
-    "patients": []
+    }]
 }

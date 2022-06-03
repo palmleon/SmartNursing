@@ -2,6 +2,10 @@
 
 class DuplicatePatientError(Exception):
     pass
+class TelegramUserNotFoundError(Exception):
+    pass
+class TelegramTaskNotFoundError(Exception):
+    pass
 class ServerNotFoundError(Exception):
     pass
 class PatientNotFoundError(Exception):
