@@ -36,5 +36,9 @@ cd DataAnalysis
 docker build -t dai .
 cd ..
 
-#docker compose up -d
+cd Terminal
+docker build -t sti .
+cd ..
+
+docker compose up -d
 #docker run  --name crei -it --link cdrsi:localhost --net smartclinic_default rei

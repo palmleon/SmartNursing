@@ -1,7 +1,7 @@
 import requests
 import json
-#import time
-#from threading import Thread
+import time
+from threading import Thread
 from enum import Enum
 
 class CommandType(Enum):
@@ -100,7 +100,7 @@ class Terminal(object):
                         "edit: edit a room\n"
                         "show: show all the rooms\n"
                         "delete: remove a room")
-                elif command_type == CommandType.USER:
+                elif command_type == CommandType.USER_TELEGRAM:
                     print("Commands available:\n"
                         "add: add an user\n"
                         "search: search an user\n"
@@ -109,6 +109,8 @@ class Terminal(object):
                         "delete: remove an user")
                 elif command_type == CommandType.EXIT:
                     return
+                #elif command_type == CommandType.EXIT:
+                #    return
                 print("-"*40)
 
                 # Catch command
@@ -649,24 +651,24 @@ class Terminal(object):
         except (ValueError, KeyError):
             print("Input not recognized! Retry.")
 
-    #def __updateService(self) :
+    def __updateService(self) :
 
-    #    while True :
+        while True :
 
-    #        time.sleep(100)
+            time.sleep(100)
 
-    #        nattempts = 1
-    #        r = requests.put(self.__register+"/update-service",data = json.dumps({
-    #                "serviceID" : self.__config_settings['serviceID'],
-    #                "name" : self.__config_settings['name']
-    #             }))
+            nattempts = 1
+            r = requests.put(self.__config_settings['host']+"/update-service",data = json.dumps({
+                    "serviceID" : self.__config_settings['serviceID'],
+                    "name" : self.__config_settings['name']
+                 }))
 
-    #        while nattempts < 5 and str(r.status_code).startswith('5'):
-    #            nattempts += 1
-    #            r = requests.put(self.__register+"/update-service",data = json.dumps({
-    #                "serviceID" : self.__config_settings['serviceID'],
-    #                "name" : self.__config_settings['name']
-    #             }))
+            while nattempts < 5 and str(r.status_code).startswith('5'):
+                nattempts += 1
+                r = requests.put(self.__config_settings['host']+"/update-service",data = json.dumps({
+                    "serviceID" : self.__config_settings['serviceID'],
+                    "name" : self.__config_settings['name']
+                 }))
 
     ###################################################################################################
     # During initialization, only the configuration file is set, and the updating thread is launched
@@ -679,8 +681,8 @@ class Terminal(object):
         config_file.close()
 
         # Launch thread for service update
-        #thread = Thread(target=self.__updateService, args=(), daemon=False)
-        #thread.start()
+        thread = Thread(target=self.__updateService, args=(), daemon=False)
+        thread.start()
 
 if __name__ == '__main__':
 
