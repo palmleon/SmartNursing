@@ -32,7 +32,7 @@ class SmartClinicBot(object):
             r = requests.get(self.__config_settings['host']+"/bot-token")
         
         bot_token  = r.json()
-        
+       
         # Define Alarm Black List
         self.__alarm_black_list = {
             'alarms': [],
@@ -776,17 +776,21 @@ class SmartClinicBot(object):
                 room = request.json()
                 room['desired-temperature'] = roomTemp
 
+                update.message.reply_text('here')
+                update.message.reply_text(json.dumps(room))
                 # Update the Room
                 nattempts = 1
-                request = requests.put(self.__config_settings['host']+"/update-"+uri+"/",data=room)
+                request = requests.put(self.__config_settings['host']+"/update-"+uri+"/",data=json.dumps(room))
                 while nattempts < 5 and str(request.status_code).startswith('5'):
                     nattempts += 1
-                    request = requests.put(self.__config_settings['host']+"/update-"+uri+"/",data=room)
+                    request = requests.put(self.__config_settings['host']+"/update-"+uri+"/",data=json.dumps(room))
+                update.message.reply_text(request.status_code)
+                update.message.reply_text("N. attempts: " + str(nattempts))
                 if request.status_code == requests.codes.ok:
                     update.message.reply_text(
                         "Room Temperature for Room " + str(roomID) + ": updated!"
                     )
-                elif nattempts == 5 and request.status_code.startswith('5'):
+                elif nattempts == 5 and str(request.status_code).startswith('5'):
                     raise ServerNotFoundError
                 elif request.status_code != requests.codes.ok:
                     raise RoomNotFoundError
@@ -863,7 +867,7 @@ class SmartClinicBot(object):
             if request.status_code == 404:
                 raise RoomNotFoundError
             fetched_room = request.json()
-            fetched_room_temp = fetched_room['desired-temperature']
+            fetched_room_temp = int(fetched_room['desired-temperature'])
             if isCommon:
                 update.message.reply_text(
                     "Temperature for Common Room " + str(roomID) + ": " + str(fetched_room_temp) + "°C"

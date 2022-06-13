@@ -217,8 +217,8 @@ class Catalog(object) :
                 if patient['patientID'] == newPatient['patientID'] :
                     raise cherrypy.HTTPError(400,"patient already exists")
             for room in self.catalogList['room-list']:
-                if patient['roomID'] == room['roomID']:
-                    room['patients'].append(patient)
+                if newPatient['roomID'] == room['roomID']:
+                    room['patients'].append(newPatient)
                     return
             return 
 
@@ -298,7 +298,8 @@ class Catalog(object) :
                     if room['roomID'] == oldRoomID:
                         room['roomID'] = newRoom['roomID']
 
-            self.catalogList['room-list'][:] = [newRoom if room['roomID'] == newRoom['roomID'] else room for room in rooms]
+            self.catalogList['room-list'] = [newRoom if int(room['roomID']) == int(newRoom['roomID']) else room for room in rooms]
+            return
 
         if uri[0] == 'update-common-room' :
             
@@ -314,7 +315,8 @@ class Catalog(object) :
                     if room['roomID'] == oldRoomID:
                         room['roomID'] = newRoom['roomID']
 
-            self.catalogList['common-room-list'][:] = [newRoom if room['roomID'] == newRoom['roomID'] else room for room in rooms]
+            self.catalogList['common-room-list'] = [newRoom if int(room['roomID']) == int(newRoom['roomID']) else room for room in rooms]
+            return
             
 
         if uri[0] == 'update-service' :
