@@ -1,12 +1,14 @@
+from subprocess import TimeoutExpired
 import requests
 import json
 import time
+import signal
 from threading import Thread
 from enum import Enum
 
 class CommandType(Enum):
     ROOM = 0
-    USER_TELEGRAM = 1 
+    USER = 1 
     EXIT = 2
 
 class Command(Enum):
@@ -56,7 +58,7 @@ class Terminal(object):
                 self.__room_delete()
                 pass
 
-        elif command_type == CommandType.USER_TELEGRAM:
+        elif command_type == CommandType.USER:
             # Add User
             if command == Command.ADD:
                self.__user_telegram_add()
@@ -78,7 +80,8 @@ class Terminal(object):
                 self.__user_telegram_delete()
 
     def launch(self):
-        print("Welcome to the SmartClinic Terminal!\n"
+
+        print("\nWelcome to the SmartClinic Terminal!\n"
           "You can use this terminal to manage rooms and users!")
         print("-"*40)
 
@@ -88,7 +91,7 @@ class Terminal(object):
             try:
                 print("What do you want to manage?\n"
                     "room: to manage rooms\n"
-                    "users: to manage users\n"
+                    "user: to manage users\n"
                     "exit: to exit")
                 print("-"*40)
                 command_type = CommandType[input().upper()]
@@ -100,7 +103,7 @@ class Terminal(object):
                         "edit: edit a room\n"
                         "show: show all the rooms\n"
                         "delete: remove a room")
-                elif command_type == CommandType.USER_TELEGRAM:
+                elif command_type == CommandType.USER:
                     print("Commands available:\n"
                         "add: add an user\n"
                         "search: search an user\n"
@@ -127,6 +130,10 @@ class Terminal(object):
                 print("-"*40)
                 print("Command not recognized! Retry.")
                 print("-"*40)
+
+    def stop(self):
+        self.__running = False
+        self.__thread.join()
 
     #########################################
     # Add a Room
@@ -161,11 +168,11 @@ class Terminal(object):
 
                 # Check if it is already taken
                 # If not, add it 
-                r = requests.post(self.__config_settings['host']+"/add-"+uri+"/", data = newRoom)
+                r = requests.post(self.__config_settings['host']+"/add-"+uri, data = newRoom)
                 nattempts = 1
 
                 while nattempts < 5 and str(r.status_code).startswith('5'):
-                    r = requests.post(self.__config_settings['host']+"/add-"+uri+"/", data = newRoom)
+                    r = requests.post(self.__config_settings['host']+"/add-"+uri, data = newRoom)
                     nattempts += 1
                 
                 if r.status_code == requests.codes.ok:
@@ -189,7 +196,8 @@ class Terminal(object):
     def __room_search(self):
 
         try:
-
+            
+            end = False
             while not end:
                 # Insert Room Number
                 roomID = int(input("Please insert the ID of room to search: "))
@@ -232,6 +240,7 @@ class Terminal(object):
        
         try:
 
+            end = False
             while not end:
                 # Insert Room Number
                 roomID = int(input("Please insert the ID of the room to edit: "))
@@ -300,17 +309,17 @@ class Terminal(object):
         # Show all rooms, the patients inside and the sensors
         r = requests.get(self.__config_settings['host']+"/room-list")
         nattempts = 1
-
+        
         while nattempts < 5 and str(r.status_code).startswith('5'):
             r = requests.get(self.__config_settings['host']+"/room-list")
             nattempts += 1
 
         if r.status_code == requests.codes.ok:
             print("Registered Rooms and their content:")
-            json.dumps(r.json(), indent=4)
+            print(json.dumps(r.json(), indent=4))
 
         else:
-            if nattempts == 5:
+            if nattempts == 5 and str(r.status_code).startswith('5'):
                 print("Operation failed: Server not reachable!")
             else:
                 print("Operation failed: Unknown error!")
@@ -325,10 +334,10 @@ class Terminal(object):
 
         if r.status_code == requests.codes.ok:
             print("Registered Common Rooms and their content:")
-            json.dumps(r.json(), indent=4)
+            print(json.dumps(r.json(), indent=4))
 
         else:
-            if nattempts == 5:
+            if nattempts == 5 and str(r.status_code).startswith('5'):
                 print("Operation failed: Server not reachable!")
             else:
                 print("Operation failed: Unknown error!")        
@@ -653,22 +662,26 @@ class Terminal(object):
 
     def __updateService(self) :
 
-        while True :
+        while self.__running :
 
-            time.sleep(100)
+            nwait = 0
+            while nwait < 20 and self.__running:
+                time.sleep(5)
+                nwait += 1
 
-            nattempts = 1
-            r = requests.put(self.__config_settings['host']+"/update-service",data = json.dumps({
-                    "serviceID" : self.__config_settings['serviceID'],
-                    "name" : self.__config_settings['name']
-                 }))
-
-            while nattempts < 5 and str(r.status_code).startswith('5'):
-                nattempts += 1
+            if self.__running:
+                nattempts = 1
                 r = requests.put(self.__config_settings['host']+"/update-service",data = json.dumps({
-                    "serviceID" : self.__config_settings['serviceID'],
-                    "name" : self.__config_settings['name']
-                 }))
+                        "serviceID" : self.__config_settings['serviceID'],
+                        "name" : self.__config_settings['name']
+                    }))
+
+                while nattempts < 5 and str(r.status_code).startswith('5'):
+                    nattempts += 1
+                    r = requests.put(self.__config_settings['host']+"/update-service",data = json.dumps({
+                        "serviceID" : self.__config_settings['serviceID'],
+                        "name" : self.__config_settings['name']
+                    }))
 
     ###################################################################################################
     # During initialization, only the configuration file is set, and the updating thread is launched
@@ -680,15 +693,42 @@ class Terminal(object):
         self.__config_settings = json.load(config_file)
         config_file.close()
 
+        self.__running = True
+
         # Launch thread for service update
-        thread = Thread(target=self.__updateService, args=(), daemon=False)
-        thread.start()
+        self.__thread = Thread(target=self.__updateService, args=(), daemon=False)
+        self.__thread.start()
+
+def alarm_handler(signum, frame):
+    raise TimeoutError
+
+def input_with_timeout(timeout):
+    signal.signal(signal.SIGALRM, alarm_handler) # the lambda is only used to raise an Exception in case the timer expires
+    signal.alarm(timeout) # produce SIGALRM in `timeout` seconds 
+    reply = None
+    try:
+        reply = input("Type anything to start: ")
+    except TimeoutError:
+        print('\r')
+    finally:
+        signal.alarm(0) # cancel alarm
+        if reply != None:
+            return False
+        else:
+            return True
 
 if __name__ == '__main__':
 
     terminal = Terminal()
 
+    # Timed input to start the terminal
+    timer_active = True
+    while timer_active:
+        timer_active = input_with_timeout(5)
+
     # Launch Service
     terminal.launch()
-    
+    terminal.stop()
+
+
 

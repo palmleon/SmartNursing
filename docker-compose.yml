@@ -97,6 +97,17 @@ services:
     stdin_open: true
     tty: true
 
+  #system terminal
+  csti:
+    image: sti
+    links:
+      - cdrsi
+    depends_on:
+      - cdrsi
+    stdin_open: true
+    restart: always
+    #tty: true
+
 # raspberry emulator
 #  crei : 
 #    image : rei
