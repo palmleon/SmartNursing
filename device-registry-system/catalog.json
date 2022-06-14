@@ -80,7 +80,7 @@
         "field8" : null
       },
     "api-weather": "http://api.weatherstack.com/current?access_key=36fcb02003026b9fae56e4c0a5a228fe&query=",
-    "bot-token" : "5553441519:AAHadttgidR1PIj9O8dWaHbKCNjGGdDfwq4",
+    "bot-token" : "5553441519:AAFX3I2ooeeb0hER05cRsDN5ZYnFHw-EJlU",
     "common-room-list": [
         {
             "roomID": 1,

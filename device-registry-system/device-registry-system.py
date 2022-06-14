@@ -35,7 +35,7 @@ class Catalog(object) :
 
         if uri[0] == 'message-broker' :
             return json.dumps(self.catalogList["message-broker"])
-        if uri[0] == 'channel-data' :
+        elif uri[0] == 'channel-data' :
             return json.dumps(self.catalogList["channel-data"])
         elif uri[0] == 'city' :
             return json.dumps(self.catalogList['city'])
@@ -184,7 +184,7 @@ class Catalog(object) :
             self.catalogList['devices'].append(newDevice)
             return
 
-        if uri[0] == 'add-common-room' :
+        elif uri[0] == 'add-common-room' :
             
             newRoom = json.loads(cherrypy.request.body.read())
             for room in self.catalogList['common-room-list'] :
@@ -193,7 +193,7 @@ class Catalog(object) :
             self.catalogList['common-room-list'].append(newRoom)
             return
 
-        if uri[0] == 'add-room' :
+        elif uri[0] == 'add-room' :
             
             newRoom = json.loads(cherrypy.request.body.read())
             for room in self.catalogList['room-list'] :
@@ -257,7 +257,7 @@ class Catalog(object) :
                     self.catalogList['devices'][i]['timestamp'] = str(datetime.datetime.today())
             return
 
-        if uri[0] == 'update-patient' :
+        elif uri[0] == 'update-patient' :
             newPatient = json.loads(cherrypy.request.body.read())
             #print(newDevice)
             id = newPatient['patientID']
@@ -284,7 +284,7 @@ class Catalog(object) :
                     room['patients'].append(newPatient)
             return
                     
-        if uri[0] == 'update-room' :
+        elif uri[0] == 'update-room' :
             
             newRoom = json.loads(cherrypy.request.body.read())
             rooms = self.catalogList['room-list']
@@ -301,7 +301,7 @@ class Catalog(object) :
             self.catalogList['room-list'] = [newRoom if int(room['roomID']) == int(newRoom['roomID']) else room for room in rooms]
             return
 
-        if uri[0] == 'update-common-room' :
+        elif uri[0] == 'update-common-room' :
             
             newRoom = json.loads(cherrypy.request.body.read())
             rooms = self.catalogList['common-room-list']
@@ -319,7 +319,7 @@ class Catalog(object) :
             return
             
 
-        if uri[0] == 'update-service' :
+        elif uri[0] == 'update-service' :
             newService = json.loads(cherrypy.request.body.read())
             newService['timestamp'] = str(datetime.datetime.today())
             id = newService['serviceID']
@@ -328,7 +328,7 @@ class Catalog(object) :
                     self.catalogList['services'][i]['timestamp'] = str(datetime.datetime.today())
             return 
 
-        if uri[0] == 'update-telegram-user':
+        elif uri[0] == 'update-telegram-user':
             newUser = json.loads(cherrypy.request.body.read())
             prev_len = len(self.catalogList['telegram-user-id-list'])
             self.catalogList['telegram-user-id-list'][:] = \
@@ -359,23 +359,25 @@ class Catalog(object) :
             if not found:
                 raise cherrypy.HTTPError(404,'patient not found')
         
-        if uri[0] == 'delete-room' :
+        elif uri[0] == 'delete-room' :
             roomID = int(uri[1])
             found = False
-            for i in range(len(self.catalogList['room-list'])) :
-                if self.catalogList['room-list'][i]['roomID'] == roomID :
-                    del self.catalogList['room-list'][i]
-                    found = True
+            prev_len = len(self.catalogList['room-list'])
+            self.catalogList['room-list'][:] = [room for room in self.catalogList['room-list'] if room['roomID'] != roomID]
+            new_len = len(self.catalogList['room-list'])
+            if new_len < prev_len:
+                found = True
             if not found:
                 raise cherrypy.HTTPError(404,'room not found')
 
-        if uri[0] == 'delete-common-room' :
+        elif uri[0] == 'delete-common-room' :
             roomID = int(uri[1])
             found = False
-            for i in range(len(self.catalogList['common-room-list'])) :
-                if self.catalogList['common-room-list'][i]['roomID'] == roomID :
-                    del self.catalogList['common-room-list'][i]
-                    found = True
+            prev_len = len(self.catalogList['common-room-list'])
+            self.catalogList['common-room-list'][:] = [room for room in self.catalogList['common-room-list'] if room['roomID'] != roomID]
+            new_len = len(self.catalogList['common-room-list'])
+            if new_len < prev_len:
+                found = True
             if not found:
                 raise cherrypy.HTTPError(404,'room not found')
         

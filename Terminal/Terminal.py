@@ -112,8 +112,6 @@ class Terminal(object):
                         "delete: remove an user")
                 elif command_type == CommandType.EXIT:
                     return
-                #elif command_type == CommandType.EXIT:
-                #    return
                 print("-"*40)
 
                 # Catch command
@@ -150,6 +148,7 @@ class Terminal(object):
                 roomID = int(input("Please insert the ID of the new room: "))
                 isCommon_str = input("Is it common [Y/N]? ")
 
+                newRoom = None
                  
                 if isCommon_str == 'Y' or isCommon_str == 'y':
                     newRoom = {
@@ -168,11 +167,11 @@ class Terminal(object):
 
                 # Check if it is already taken
                 # If not, add it 
-                r = requests.post(self.__config_settings['host']+"/add-"+uri, data = newRoom)
+                r = requests.post(self.__config_settings['host']+"/add-"+uri, data=json.dumps(newRoom))
                 nattempts = 1
 
                 while nattempts < 5 and str(r.status_code).startswith('5'):
-                    r = requests.post(self.__config_settings['host']+"/add-"+uri, data = newRoom)
+                    r = requests.post(self.__config_settings['host']+"/add-"+uri, data=json.dumps(newRoom))
                     nattempts += 1
                 
                 if r.status_code == requests.codes.ok:
@@ -218,7 +217,8 @@ class Terminal(object):
                 # If so, show it and all its data
                 if r.status_code == requests.codes.ok:
                     print("Room found!")
-                    json.dumps(r.json(), indent=4)
+                    print(json.dumps(r.json(), indent=4))
+                    end = True
                     
                 # Otherwise, retry or cancel the command
                 else:
@@ -263,7 +263,7 @@ class Terminal(object):
                 if r.status_code == requests.codes.ok:
                     print("Room found!")
                     room = r.json()
-                    json.dumps(room, indent=4)
+                    print(json.dumps(room, indent=4))
 
                     # Ask for the new room number
                     newRoomID = int(input("Please insert the new ID of the room to edit: "))
@@ -273,11 +273,11 @@ class Terminal(object):
                     
                     # Update the Room ID
                     nattempts = 1
-                    r = requests.put(self.__config_settings['host']+"/update-"+uri, data=room)
+                    r = requests.put(self.__config_settings['host']+"/update-"+uri, data=json.dumps(room))
 
                     while nattempts < 5 and str(r.status_code).startswith('5'):
                         nattempts += 1
-                        r = requests.put(self.__config_settings['host']+"/update-"+uri, data=room)
+                        r = requests.put(self.__config_settings['host']+"/update-"+uri, data=json.dumps(room))
                         
                     if r.status_code == requests.codes.ok:
                         print("Room updated successfully!")
@@ -286,7 +286,7 @@ class Terminal(object):
                         if nattempts == 5 and str(r.status_code).startswith('5'):
                             command = input("Operation failed: Server not reachable! Retry [r] or quit [q]: ")
                         else:
-                            command = input("Operation failed: Room not found! Retry [r] or quit [q]: ")
+                            command = input("Operation failed: Room already existing! Retry [r] or quit [q]: ")
                         if command == 'q':
                             end = True
                     
@@ -375,7 +375,7 @@ class Terminal(object):
                 if r.status_code == requests.codes.ok:
                     print("Room found!")
                     room = r.json()
-                    json.dumps(room, indent=4)
+                    print(json.dumps(room, indent=4))
 
                     # If so, and if there is no patient inside, ask for confirmation
                     if isCommon_str == 'Y' or isCommon_str == 'y' or len(room['patients']) == 0:
@@ -392,10 +392,10 @@ class Terminal(object):
                                 nattempts += 1
 
                             if r.status_code == requests.codes.ok:
-                                print("User deleted!")
+                                print("Room deleted!")
                                 end = True
                             else:
-                                if nattempts == 5:
+                                if nattempts == 5 and str(r.status_code).startswith('5'):
                                     command = input("Operation failed: Server not reachable! Retry [r] or quit [q]: ")
                                 else:
                                     command = input("Operation failed: Room not found! Retry [r] or quit [q]: ")
@@ -408,7 +408,7 @@ class Terminal(object):
 
                     # Otherwise, if the room has patients inside, cancel the command
                     else:
-                        print("You cannot delete this Room: there are patients inside!")
+                        print("You cannot delete this Room: there are patients inside! Please, move them before removing the room and retry.")
                         end = True
                     
                 # Otherwise, retry or cancel the command
