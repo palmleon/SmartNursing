@@ -85,7 +85,7 @@ class Terminal(object):
           "You can use this terminal to manage rooms and users!")
         print("-"*40)
 
-        while(True): # The system should be shut down if you do not want to use it anymore
+        while(True): # The system should be shut down with an EXIT command
             
             # Launch menu 
             try:
@@ -95,7 +95,7 @@ class Terminal(object):
                     "exit: to exit")
                 print("-"*40)
                 command_type = CommandType[input().upper()]
-                print("-"*40)
+                print("-"*40, flush=True)
                 if command_type == CommandType.ROOM:
                     print("Commands available:\n"
                         "add: add a room\n"
@@ -111,6 +111,7 @@ class Terminal(object):
                         "show: show all the users\n"
                         "delete: remove an user")
                 elif command_type == CommandType.EXIT:
+                    print('Quitting (wait a few seconds)...',flush=True)
                     return
                 print("-"*40)
 
@@ -187,7 +188,7 @@ class Terminal(object):
 
                 # Otherwise, retry or cancel the command
         except ValueError:
-            print("Input not recognized! Retry.")
+            print("Input not recognized! Abort.")
 
     #########################################
     # Search a Room
@@ -230,7 +231,7 @@ class Terminal(object):
                         end = True
 
         except ValueError:
-            print("Input not recognized! Retry.")
+            print("Input not recognized! Abort.")
         pass      
 
     #########################################
@@ -300,7 +301,7 @@ class Terminal(object):
                         end = True
 
         except ValueError:
-            print("Input not recognized! Retry.")     
+            print("Input not recognized! Abort.")     
 
     #########################################
     # Show all Rooms
@@ -421,7 +422,7 @@ class Terminal(object):
                         end = True
 
         except (ValueError, KeyError):
-            print("Input not recognized! Retry.")
+            print("Input not recognized! Abort.")
 
     #########################################
     # Add a User to the Telegram ID List
@@ -436,20 +437,19 @@ class Terminal(object):
 
                 # Retrieve UserID and Role
                 userID = int(input("Please insert the UserID to add: "))
-                role = Role[input("Please insert their role [Doctor, Nurse, SuperUser]: ").upper()]
+                role = Role[input("Please insert their role [Doctor, Nurse, SuperUser]: ").upper()].value
+
+                newUser = {
+                    'user-id': userID,
+                    'role': role
+                }
 
                 # Check if the UserID is already present in the Telegram ID List
                 nattempts = 1
-                r = requests.post(self.__config_settings['host']+"/add-telegram-user/", data = json.dumps({
-                    'user-id': userID,
-                    'role' : role
-                }))
+                r = requests.post(self.__config_settings['host']+"/add-telegram-user/", data = json.dumps(newUser))
                 while nattempts < 5 and str(r.status_code).startswith('5'):
                     nattempts += 1
-                    r = requests.post(self.__config_settings['host']+"/add-telegram-user/", data = json.dumps({
-                    'user-id': userID,
-                    'role' : role
-                }))
+                    r = requests.post(self.__config_settings['host']+"/add-telegram-user/", data = json.dumps(newUser))
                 if r.status_code == requests.codes.ok:
                     print("User added successfully!")
                     end = True
@@ -462,7 +462,7 @@ class Terminal(object):
                         end = True
 
         except (ValueError, KeyError):
-            print("Input not recognized! Retry.")
+            print("Input not recognized! Abort.")
 
     #########################################
     # Search a User in the Telegram ID List
@@ -490,7 +490,7 @@ class Terminal(object):
                 if r.status_code == requests.codes.ok:
                     user = r.json()
                     print("User found!")
-                    print("UserID: {userID}\n Role: {role}".format(userID=user['user-id'], role=user['role']))
+                    print("UserID: {userID},\t Role: {role}".format(userID=user['user-id'], role=user['role']))
                     end = True
 
                 # Otherwise, notify that it does not exist
@@ -498,12 +498,13 @@ class Terminal(object):
                     if nattempts == 5:
                         command = input(("Operation failed: Server not reachable! Retry [r] or quit [q]: "))
                     else:
-                        command = input("Operation failed: User not found! Retry [r] or quit [q]: ")
+                        print("User not found!")
+                        end = True
                     if command == 'q':
                         end = True
 
         except (ValueError, KeyError):
-            print("Input not recognized! Retry.")
+            print("Input not recognized! Abort.")
 
     #########################################
     # Edit a User of the Telegram ID List
@@ -531,22 +532,21 @@ class Terminal(object):
                 if r.status_code == requests.codes.ok:
 
                     # Retrieve the new Role and check that it is meaningful
-                    role = Role[input("Set the new role: ").upper()]
+                    role = Role[input("Set the new role: ").upper()].value
 
                     # Update the UserID in the Telegram ID List
                     nattempts = 1
-                    r = requests.put(self.__config_settings['host']+"/update-telegram-user/", data = json.dumps({
+                    editedUser = {
                             'user-id': userID,
                             'role' : role
-                        }))
-                    while nattempts < 5 and str(r.status.code).startswith('5'):
-                        nattempts += 1
-                        r = requests.put(self.__config_settings['host']+"/update-telegram-user/", data = json.dumps({
-                            'user-id': userID,
-                            'role' : role
-                        }))
+                        }
 
-                    if r.status_code == requests.status_codes.ok:
+                    r = requests.put(self.__config_settings['host']+"/update-telegram-user/", data = json.dumps(editedUser))
+                    while nattempts < 5 and str(r.status_code).startswith('5'):
+                        nattempts += 1
+                        r = requests.put(self.__config_settings['host']+"/update-telegram-user/", data = json.dumps(editedUser))
+
+                    if r.status_code == requests.codes.ok:
                         print("User updated successfully!")
                         end = True
                     else:
@@ -567,7 +567,7 @@ class Terminal(object):
                         end = True
 
         except (ValueError, KeyError):
-            print("Input not recognized! Retry.")
+            print("Input not recognized! Abort.")
 
     #########################################
     # Show all Users from the Telegram ID List
@@ -658,7 +658,7 @@ class Terminal(object):
                         end = True
 
         except (ValueError, KeyError):
-            print("Input not recognized! Retry.")
+            print("Input not recognized! Abort.")
 
     def __updateService(self) :
 
@@ -707,9 +707,9 @@ def input_with_timeout(timeout):
     signal.alarm(timeout) # produce SIGALRM in `timeout` seconds 
     reply = None
     try:
-        reply = input("Type anything to start: ")
+        reply = input("\rPress enter to start: ")
     except TimeoutError:
-        print('\r')
+        pass
     finally:
         signal.alarm(0) # cancel alarm
         if reply != None:

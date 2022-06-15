@@ -1,5 +1,5 @@
 #!/bin/bash
-cd Fibrillation;
+cd Fibrillation
 docker build -t fi .
 cd ..
 cd device-registry-system 

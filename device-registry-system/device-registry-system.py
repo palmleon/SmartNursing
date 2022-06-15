@@ -330,12 +330,12 @@ class Catalog(object) :
 
         elif uri[0] == 'update-telegram-user':
             newUser = json.loads(cherrypy.request.body.read())
-            prev_len = len(self.catalogList['telegram-user-id-list'])
+            #prev_len = len(self.catalogList['telegram-user-id-list'])
+            if newUser['user-id'] not in list(map(lambda user: user['user-id'], self.catalogList['telegram-user-id-list'])) :
+                 raise cherrypy.HTTPError(404, 'user not found')
             self.catalogList['telegram-user-id-list'][:] = \
                 [newUser if newUser['user-id'] == user['user-id'] else user for user in self.catalogList['telegram-user-id-list']]
-            new_len = len(self.catalogList['telegram-user-id-list'])
-            if new_len == prev_len:
-                raise cherrypy.HTTPError(404, 'user not found')
+            #new_len = len(self.catalogList['telegram-user-id-list'])
             return
         
         else : 
@@ -385,20 +385,22 @@ class Catalog(object) :
         elif uri[0] == 'delete-service' :
             serviceID = int(uri[1])
             found = False
-            for i in range(len(self.catalogList['services'])) :
-                if self.catalogList['services'][i]['serviceID'] == serviceID :
-                    del self.catalogList['services'][i]
-                    found = True
+            prev_len = len(self.catalogList['services'])
+            self.catalogList['services'][:] = [service for service in self.catalogList['services'] if service['serviceID'] != serviceID]
+            new_len = len(self.catalogList['services'])
+            if new_len < prev_len:
+                found = True
             if not found:
                 raise cherrypy.HTTPError(404,'service not found')
 
         elif uri[0] == 'delete-telegram-user' :
             userID = int(uri[1])
             found = False
-            for i in range(len(self.catalogList['telegram-user-id-list'])) :
-                if self.catalogList['telegram-user-id-list'][i] == userID :
-                    del self.catalogList['telegram-user-id-list'][i]
-                    found = True
+            prev_len = len(self.catalogList['telegram-user-id-list'])
+            self.catalogList['telegram-user-id-list'][:] = [user for user in self.catalogList['telegram-user-id-list'] if user['user-id'] != userID]
+            new_len = len(self.catalogList['telegram-user-id-list'])
+            if new_len < prev_len:
+                found = True
             if not found:
                 raise cherrypy.HTTPError(404,'user not found')
         
