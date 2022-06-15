@@ -8,9 +8,14 @@
 
 **3**. Then, you can use the following commands:
 
-- `make all`: launch SmartClinic
+- `make all` or `make`: launch SmartClinic
 - `make stop`: stop SmartClinic (restart it by using `make run`)
 - `make clean`: remove everything (images and containers)
+
+**4**. If you want to use either the system terminal or the raspberry emulator, use the following scripts:
+
+- `system_terminal.sh`
+- `raspberry_emulator.sh`
 
 ## Id services
 
