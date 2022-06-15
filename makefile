@@ -6,9 +6,10 @@ all: stop clean build run
 .PHONY:
 build:
 	@if [ -z "$$(docker images --format {{.Repository}} | grep $(PROJECT_NAME))" ] ; \
-	then echo "Creating the images..."; \
+	then echo "Building the images..."; \
 	docker compose build ; \
 	fi
+	@echo "OK: Images built!"
 	
 
 .PHONY:
@@ -17,6 +18,7 @@ clean: stop
 	then echo "Removing the containers..."; \
 	docker compose down --rmi all; \
 	fi
+	@echo "OK: Everything cleaned!" 
 
 .PHONY:
 run: stop #Only one container at a time
@@ -28,7 +30,6 @@ stop:
 	@if [ -n "$$(docker ps  --format {{.Names}} | grep $(PROJECT_NAME))" ] ; \
 	then echo "Stopping the containers"; \
 	docker compose down; \
+	else echo "No container running!"; \
 	fi
-	@#echo "Stopping the containers (if present)..."
-	@#docker compose down
 
