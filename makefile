@@ -30,6 +30,5 @@ stop:
 	@if [ -n "$$(docker ps  --format {{.Names}} | grep $(PROJECT_NAME))" ] ; \
 	then echo "Stopping the containers"; \
 	docker compose down; \
-	else echo "No container running!"; \
 	fi
 

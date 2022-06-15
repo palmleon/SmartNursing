@@ -1,6 +1,7 @@
 import time
 import requests
 import threading
+import signal
 from MyMQTT import *
 from roomSensor import *
 from patientTemperatureSensor import *
@@ -189,13 +190,37 @@ class RaspberryEmulator :
             print(self.rooms)
             choice = int(input("Inserisci 1 per aggiungere paziente, 0 per rimuovere paziente, 2 per terminare "))
 
+def alarm_handler(signum, frame):
+    raise TimeoutError
+
+def input_with_timeout(timeout):
+    signal.signal(signal.SIGALRM, alarm_handler) # the lambda is only used to raise an Exception in case the timer expires
+    signal.alarm(timeout) # produce SIGALRM in `timeout` seconds 
+    reply = None
+    try:
+        reply = input("\rPress enter to start: ")
+    except TimeoutError:
+        pass
+    finally:
+        signal.alarm(0) # cancel alarm
+        if reply != None:
+            return False
+        else:
+            return True
+
 if __name__ == "__main__" : 
+
+    # Timed input to start the raspberry emulator
+    timer_active = True
+    while timer_active:
+        timer_active = input_with_timeout(5)
+
     e = RaspberryEmulator()
-    t1 = threading.Thread(target=e.listenUserCommand)
+    t1 = threading.Thread(target=e.updateServices)
     t2 = threading.Thread(target=e.emulateCommonRoomData)
     t3 = threading.Thread(target=e.emulatePatientSaturationData)
     t4 = threading.Thread(target=e.emulatePatientRoomData)
-    t5 = threading.Thread(target=e.updateServices)
+    t5 = threading.Thread(target=e.listenUserCommand)
     t6 = threading.Thread(target=e.emulatePatientTemperatureData)
 
     t1.start()

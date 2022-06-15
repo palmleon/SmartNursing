@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ -z $(docker ps -q --filter name=csti) ] 
+if [ -z $(docker ps -q --filter name=smartclinic-csti-1) ] 
 then
     docker start -ai smartclinic-csti-1
 else
