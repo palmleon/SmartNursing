@@ -1,4 +1,3 @@
-*.txt
 testMultipleConnections/
 threadTest.py
 __*
