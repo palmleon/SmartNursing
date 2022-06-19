@@ -17,9 +17,6 @@ class temperature_patient_room_monitor() :
         r = requests.get(self.conf_file['host']+"/common-room-base-topic")
         t = r.json()
         self.subscribeTopic = t+"+"
-        r = requests.get(self.conf_file['host']+"/desired-temperature")
-        t = r.json()
-        self.desiredTemperature = t
         r = requests.get(self.conf_file['host']+"/common-room-hourly-scheduling")
         t = r.json()
         self.hourlyScheduling = t
@@ -74,30 +71,32 @@ class temperature_patient_room_monitor() :
         return False
 
 
-    def setTemperature(self,presence,currentTemperature) :
+    def setTemperature(self,room,presence,currentTemperature) :
         #migliorare questo calcolo
         currentHour =  datetime.datetime.now().hour
         season = self.getSeason()
-        
+        r = requests.get(self.conf_file['host']+"/common-room/"+room)
+        t = r.json()
+        desiredTemperature = t['desired-temperature']
         if  currentHour >= self.hourlyScheduling['night'][0] or currentHour <= self.hourlyScheduling['night'][1] : #night
             if season == 'hot' :
-                return self.defineCommand(self.desiredTemperature+4,currentTemperature,season)
+                return self.defineCommand(desiredTemperature+4,currentTemperature,season)
             else :
-                return self.defineCommand(self.desiredTemperature-4,currentTemperature,season)
+                return self.defineCommand(desiredTemperature-4,currentTemperature,season)
 
         else : #not night
             if presence == 1 :
-                return self.defineCommand(self.desiredTemperature,currentTemperature,season)
+                return self.defineCommand(desiredTemperature,currentTemperature,season)
             else : #not night and not presence 
                 expected = self.expectedPresence(currentHour)
                 if expected == True and season == 'hot':
-                    return self.defineCommand(self.desiredTemperature+2,currentTemperature,season)
+                    return self.defineCommand(desiredTemperature+2,currentTemperature,season)
                 elif expected == True and season == 'cold':
-                    return self.defineCommand(self.desiredTemperature-2,currentTemperature,season)
+                    return self.defineCommand(desiredTemperature-2,currentTemperature,season)
                 elif expected == False and season == 'hot':
-                    return self.defineCommand(self.desiredTemperature+4,currentTemperature,season)
+                    return self.defineCommand(desiredTemperature+4,currentTemperature,season)
                 elif expected == False and season == 'cold':
-                    return self.defineCommand(self.desiredTemperature-4,currentTemperature,season)
+                    return self.defineCommand(desiredTemperature-4,currentTemperature,season)
             
     
     def notify(self,topic,payload) :
@@ -107,7 +106,7 @@ class temperature_patient_room_monitor() :
         room = topic.split("/")[-1]
         #fai la richiesta 
         # invoca funzione che ritorna  
-        command = self.setTemperature(message['e'][1]['v'],message['e'][2]['v'])  
+        command = self.setTemperature(room,message['e'][1]['v'],message['e'][2]['v'])  
         self.__baseMessage['bt'] = time.time()
         self.__baseMessage['r'] = room
         self.__baseMessage['c']['v'] = command
