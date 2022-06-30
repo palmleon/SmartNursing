@@ -14,8 +14,11 @@ class PatientDeviceAnalyzer():
     self.__clientID=conf_file["serviceID"]
     self.__name=conf_file["name"]
     self.__register=conf_file["host"]
-    # Generazione template alert
+    # Acquisizione template alert e i vari alert
     self.__alert=conf_file["template_alarm"]
+    messagesdict=conf_file["alarm_messages"]
+    self.__alarm_T=messagesdict["alarm_T"].split("{}")
+    self.__alarm_P=messagesdict["alarm_P"].split("{}")
     # Iscrizione al registro
     r=requests.post(self.__register+"/add-service",data= json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
     
@@ -61,9 +64,11 @@ class PatientDeviceAnalyzer():
               if patient==device["patientID"]:
                 sensors.append(device["name"])
           if "patient temperature sensor" not in sensors:
-            alarm=f"Il termometro del paziente {patient} è offline"
-          elif "patient oximeter sensor" not in sensors:
-            alarm=f"Il pulsossimetro del paziente {patient} è offline"
+            alarm=self.__alarm_T[0]+patient+self.__alarm_T[1]+"\n"
+            #alarm=f"Il termometro del paziente {patient} è offline"
+          if "patient oximeter sensor" not in sensors:
+            alarm+=self.__alarm_P[0]+patient+self.__alarm_P[1]
+            #alarm+=f"Il pulsossimetro del paziente {patient} è offline"
           print(alarm) #print di DEBUG
           if len(alarm)>1:
             #Creazione messaggio

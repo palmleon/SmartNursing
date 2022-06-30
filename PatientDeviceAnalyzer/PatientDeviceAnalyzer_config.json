@@ -2,5 +2,10 @@
     "host" : "http://cdrsi:8080/catalog",
     "serviceID" : 4,
     "name": "Fibrillation-monitor-service4",
-    "template_alarm": {"alert":"","time":null}
+    "template_alarm": {"alert":"","time":null},
+    "alarm_messages":
+    {
+        "alarm_T": "ATTENZIONE, il paziente {} ha il Termometro offline",
+        "alarm_P": "ATTENZIONE, il paziente {} ha il Pulsossimetro offline"
+    }
 }
