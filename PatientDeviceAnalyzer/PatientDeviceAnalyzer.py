@@ -37,39 +37,38 @@ class PatientDeviceAnalyzer():
     # Richiesta table oraria
     r = requests.get(self.__register+"/patient-room-hourly-scheduling")
     d=r.json()
-    self.__hours=d["night"] # in teoria, carica una lista con d[0]=21 e d[1]=10
-    #self.__flag=0 # Serve per sapere se è iniziata la notte (1) o meno(0)
-    self.__devices=[] # Inizializzazione lista di dispositivi
+    self.__hours=d["night"] #carica una lista con d[0]=21 e d[1]=10
   
   def control(self):
     while True:
       time.sleep(20)
       #Controllo su orario (è notte?)
       if time.localtime()[3]>=self.__hours[0] or time.localtime()[3]<=self.__hours[1]:
-        # Richiesta dell'attuale lista dei pazienti (possibile uscita durante la notte)
+        # Richiesta dell'attuale lista dei pazienti
         r = requests.get(self.__register+"/patients")
-        patient_list=r.json()
+        patient_dict=r.json()
         patient_IDs=[]
-        for patient in patient_list:
+        for patient in patient_dict:
           patient_IDs.append(patient["patientID"])
         # Richiesta dell'attuale lista dei device
         r = requests.get(self.__register+"/devices")
         all_devices=r.json()
         for patient in patient_IDs: #Si cerca l'ID del paziente nella lista dei device
           sensors=[]
+          alarm=""
           for device in all_devices:
             if "patientID" in device: #Verifica del tipo di sensore (se del paziente o della stanza)
               if patient==device["patientID"]:
                 sensors.append(device["name"])
           if "patient temperature sensor" not in sensors:
-            r=f"Il termometro del paziente {patient} è offline"
+            alarm=f"Il termometro del paziente {patient} è offline"
           elif "patient oximeter sensor" not in sensors:
-            r=f"Il pulsossimetro del paziente {patient} è offline"
-          print(r) #print di DEBUG
-          if len(r)>1:
+            alarm=f"Il pulsossimetro del paziente {patient} è offline"
+          print(alarm) #print di DEBUG
+          if len(alarm)>1:
             #Creazione messaggio
             to_pub=self.__alert
-            to_pub["alert"]=r
+            to_pub["alert"]=alarm
             to_pub["time"]=time.localtime()
             # Publicazione alert
             self.client.myPublish(self.__base_topic_pub+patient,to_pub)
