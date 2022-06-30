@@ -14,8 +14,9 @@ class Fibrillation_Monitor_client():
     self.__clientID=conf_file["serviceID"]
     self.__name=conf_file["name"]
     self.__register=conf_file["host"]
-    # Generazione template alert
+    # Acquisizione template alert e i vari alert
     self.__alert=conf_file["template_alarm"]
+    messagesdict=conf_file["alarm_messages"]
     # Iscrizione al registro
     r = requests.post(self.__register+"/add-service",data= json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
 
@@ -36,7 +37,7 @@ class Fibrillation_Monitor_client():
     self.__base_topic_pub=mb
 
     # Creating analyzer
-    self.analyzer=Fibrillation_Monitor()
+    self.analyzer=Fibrillation_Monitor(messagesdict)
 
     # Creating client
     self.client = MyMQTT(self.__name, self.__broker, self.__port, self)

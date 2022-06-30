@@ -1,47 +1,56 @@
 import numpy as np
 
 class Patient_Monitor():
-    def __init__(self):
-        pass
+    def __init__(self,messagesdict):
+        # Estrazione messaggi di allarme
+        self.__alarm_Tbattery=messagesdict["alarm_Tbattery"].split("{}")
+        self.__alarm_Tplace=messagesdict["alarm_Tplace"].split("{}")
+        self.__alarm_Tl=messagesdict["alarm_Tl"].split("{}")
+        self.__alarm_Th=messagesdict["alarm_Th"].split("{}")
+        self.__alarm_Pbattery=messagesdict["alarm_Pbattery"].split("{}")
+        self.__alarm_Pplace=messagesdict["alarm_Pplace"].split("{}")
+        self.__alarm_Pl=messagesdict["alarm_Pl"].split("{}")
+        self.__alarm_Ph=messagesdict["alarm_Ph"].split("{}")
+        self.__alarm_Sl=messagesdict["alarm_Sl"].split("{}")
 
     def Temperature(self,ID_P,incoming,battery):
         # Suppongo arrivi un valore ogni 1m (1 solo valore, niente lista, quindi niente media)
 
         # battery è la sola tensione di batteria
         if battery<2.8: # Per informare che il termometro si sta scaricando (es. suppongo sia scarico a 2.5V)
-            r=f"ATTENZIONE, il paziente {ID_P} ha il termometro quasi scarico"
-            return r
-            #return [1, self.__ID_P]
+            alarm_battery=self.__alarm_Tbattery[0]+ID_P+self.__alarm_Tbattery[1]
+            #return f"ATTENZIONE, il paziente {ID_P} ha il termometro quasi scarico"
+            return alarm_battery
 
         # incoming è solo il valore di temperatura
         if incoming<=35:# Il sensore è mal posizionato
-            r=f"ATTENZIONE, il paziente {ID_P} ha il termometro mal posizionato"
-            return r
-            #return [2, ID_P]
+            alarm=self.__alarm_Tplace[0]+ID_P+self.__alarm_Tplace[1]
+            #return f"ATTENZIONE, il paziente {ID_P} ha il termometro mal posizionato"
+            return alarm
         if incoming<36:
-            r=f"ATTENZIONE, il paziente {ID_P} ha una temperatura bassa, pari a {incoming}"
-            return r
-            #return [3, ID_P, incoming]
+            alarm=self.__alarm_Tl[0]+ID_P+self.__alarm_Tl[1]+incoming+" C"
+            #return f"ATTENZIONE, il paziente {ID_P} ha una temperatura bassa, pari a {incoming}"
+            return alarm
         if incoming>=37:
-            r=f"ATTENZIONE, il paziente {ID_P} ha febbre, con temperatura pari a {incoming}"
-            return r
-            #return [4, ID_P, incoming]
-    
+            alarm=self.__alarm_Th[0]+ID_P+self.__alarm_Th[1]+incoming+" C"
+            #return f"ATTENZIONE, il paziente {ID_P} ha febbre, con temperatura pari a {incoming}"
+            return alarm
+
     def Pulse(self,ID_P,PI,pulse,sat,battery):
         # Suppongo, per ogni input, arrivi una stringa ogni  10s, con fc=1Hz.
         # Battery, potrebbe essere anche un solo valore ogni 10s(discorso di ridurre i bit mandati)
         
         # battery è la sola tensione di batteria
         if battery<2.8:# Per informare che il pulsossimetro si sta scaricando (es. suppongo sia scarico a 2.5V)
-            r=f"ATTENZIONE, il paziente {ID_P} ha il pulsossimetro quasi scarico"
-            return r
-            #return [5, ID_P]
+            alarm=self.__alarm_Pbattery[0]+ID_P+self.__alarm_Pbattery[1]
+            #return f"ATTENZIONE, il paziente {ID_P} ha il pulsossimetro quasi scarico"
+            return alarm
 
         if max(PI)<4: # Cercando su internet, la soglia per una lettura attendibile è al 4%
             # Se nessuna lettura attendibile, inutile proseguire
-            r=f"ATTENZIONE, il paziente {ID_P} ha il pulsossimetro mal posizionato o l'ha rimosso"
-            return r
-            #return [6, ID_P]
+            alarm=self.__alarm_Pplace[0]+ID_P+self.__alarm_Pplace[1]
+            #return f"ATTENZIONE, il paziente {ID_P} ha il pulsossimetro mal posizionato o l'ha rimosso"
+            return alarm
 
         to_remove=[]
         for i in range(len(PI)):
@@ -59,17 +68,16 @@ class Patient_Monitor():
         pulse=np.mean(pulse)
         sat=np.mean(sat)
 
-        r=""
-        #r=[]
+        alarm=""
         if sat<=95:
-            r=f"ATTENZIONE, il paziente {ID_P} è in ipossia. Saturazione al {sat} % \n"
-            #r=[[7, self.__ID_P, sat]]
+            alarm=self.__alarm_Sl[0]+ID_P+self.__alarm_Sl[1]+sat+" %\n"
+            #alarm=f"ATTENZIONE, il paziente {ID_P} è in ipossia. Saturazione al {sat} % \n"
         if pulse<55:
-            r+= f"ATTENZIONE, il paziente {ID_P} ha un battito cardiaco basso: {pulse} bpm"
-            #r+=[[8, ID_P, pulse]]
+            alarm+=self.__alarm_Pl[0]+ID_P+self.__alarm_Pl[1]+pulse+" bpm"
+            #alarm+= f"ATTENZIONE, il paziente {ID_P} ha un battito cardiaco basso: {pulse} bpm"
         elif pulse>100:
-            r+=f"ATTENZIONE, il paziente {ID_P} ha un battito cardiaco alto: {pulse} bpm"
-            #r+=[[9, ID_P, pulse]]
+            alarm+=self.__alarm_Ph[0]+ID_P+self.__alarm_Ph[1]+pulse+" bpm"
+            #alarm+=f"ATTENZIONE, il paziente {ID_P} ha un battito cardiaco alto: {pulse} bpm"
             
-        if len(r)>2:
-            return r
+        if len(alarm)>2:
+            return alarm

@@ -2,5 +2,17 @@
     "host" : "http://cdrsi:8080/catalog",
     "serviceID" : 2,
     "name": "Patient-monitor-service2",
-    "template_alarm": {"allert":"","time":null}
+    "template_alarm": {"allert":"","time":null},
+    "alarm_messages":
+    {
+        "alarm_Tbattery": "ATTENZIONE, il paziente {} ha il termometro quasi scarico",
+        "alarm_Tplace": "ATTENZIONE, il paziente {} ha il termometro mal posizionato o l'ha rimosso",
+        "alarm_Th": "ATTENZIONE, il paziente {} ha febbre, con temperatura pari a {}",
+        "alarm_Tl": "ATTENZIONE, il paziente {} ha una temperatura bassa, pari a {}",
+        "alarm_Pbattery": "ATTENZIONE, il paziente {} ha il pulsossimetro quasi scarico",
+        "alarm_Pplace": "ATTENZIONE, il paziente {} ha il pulsossimetro mal posizionato o l'ha rimosso",
+        "alarm_Ph": "ATTENZIONE, il paziente {} ha un battito cardiaco alto: {}",
+        "alarm_Pl": "ATTENZIONE, il paziente {} ha un battito cardiaco basso: {}",
+        "alarm_Sl": "ATTENZIONE, il paziente {} è in ipossia. Saturazione al {}"
+    }
 }

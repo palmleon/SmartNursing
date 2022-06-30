@@ -2,5 +2,11 @@
     "host" : "http://cdrsi:8080/catalog",
     "serviceID" : 3,
     "name": "Fibrillation-monitor-service3",
-    "template_alarm": {"alert":"","time":null}
+    "template_alarm": {"alert":"","time":null},
+    "alarm_messages":
+    {
+        "alarm_battery": "ATTENZIONE, il paziente {} ha il pulsossimetro quasi scarico",
+        "alarm_place": "ATTENZIONE, il paziente {} ha il pulsossimetro mal posizionato o l'ha rimosso",
+        "alarm_fibrillation": "ATTENZIONE, il paziente {} è in fibrillazione"
+    }
 }
