@@ -10,14 +10,14 @@ class PatientDeviceAnalyzer():
     fp=open('PatientDeviceAnalyzer_config.json')
     conf_file = json.load(fp)
     fp.close
-    #Acquisizione ID, nome e url registro
+    # Acquisizione ID, nome e url registro
     self.__clientID=conf_file["serviceID"]
     self.__name=conf_file["name"]
     self.__register=conf_file["host"]
     # Generazione template alert
     self.__alert=conf_file["template_alarm"]
     # Iscrizione al registro
-    r = requests.post(self.__register+"/add-service",data= json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
+    r=requests.post(self.__register+"/add-service",data= json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
     
     # Richiesta dati broker al registro
     r = requests.get(self.__register+"/message-broker")
@@ -46,44 +46,33 @@ class PatientDeviceAnalyzer():
       time.sleep(20)
       #Controllo su orario (è notte?)
       if time.localtime()[3]>=self.__hours[0] or time.localtime()[3]<=self.__hours[1]:
-        """
-        if self.__flag==0:
-          # E' appena iniziata la notte
-          self.__flag=1
-          # Richiesta della lista dei device a inizio notte
-          r = requests.get(self.__register+"/devices")
-          devices=r.json()
-          # devices è una lista di dizionari, estraggo solo gli ID
-          for device in devices:
-            self.__devices.append(device["deviceID"])"""
-
+        # Richiesta dell'attuale lista dei pazienti (possibile uscita durante la notte)
+        r = requests.get(self.__register+"/patients")
+        patient_list=r.json()
+        patient_IDs=[]
+        for patient in patient_list:
+          patient_IDs.append(patient["patientID"])
         # Richiesta dell'attuale lista dei device
         r = requests.get(self.__register+"/devices")
-        actual_devices=r.json()
-        actual=[]
-        for device in actual_devices: # Creazione lista di soli ID attualmente presenti nel registro
-            actual.append(device["deviceID"])
-        # Confronto
-        for device in self.__devices:
-          if device not in actual:
-            ID_miss=device[:-1] #Prende l'Id del solo paziente
-            if device[-1]=="o":
-              sensor="saturimetro"
-            else:
-              sensor="termometro"
-            r=f"Il {sensor} del paziente {ID_miss} è stato scollegato"
-            print(r)
+        all_devices=r.json()
+        for patient in patient_IDs: #Si cerca l'ID del paziente nella lista dei device
+          sensors=[]
+          for device in all_devices:
+            if "patientID" in device: #Verifica del tipo di sensore (se del paziente o della stanza)
+              if patient==device["patientID"]:
+                sensors.append(device["name"])
+          if "patient temperature sensor" not in sensors:
+            r=f"Il termometro del paziente {patient} è offline"
+          elif "patient oximeter sensor" not in sensors:
+            r=f"Il pulsossimetro del paziente {patient} è offline"
+          print(r) #print di DEBUG
+          if len(r)>1:
             #Creazione messaggio
             to_pub=self.__alert
             to_pub["alert"]=r
             to_pub["time"]=time.localtime()
             # Publicazione alert
-            self.client.myPublish(self.__base_topic_pub+ID_miss,to_pub)
-        # Aggiornamento lista attuale dei dispositivi
-        self.__devices=actual
-      else: # E' giorno
-        #self.__flag=0
-        self.__devices=[]
+            self.client.myPublish(self.__base_topic_pub+patient,to_pub)
   
   def updateService(self) :
     while True :
