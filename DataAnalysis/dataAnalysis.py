@@ -69,49 +69,55 @@ class dataAnalysis():
         print('Calculating Average Temperature')
         sum = 0
         count = 0
-        for i in range(0,len(temperatureList)):
-            if float(temperatureList[i]) >= 35:
-                sum = sum + float(temperatureList[i])
-                count = count + 1
-        if count != 0:
-            print(sum/count)
-            return sum/count
+        if len(temperatureList) >= 1:
+            for i in range(0,len(temperatureList)):
+                if float(temperatureList[i]) >= 35:
+                    sum = sum + float(temperatureList[i])
+                    count = count + 1
+            if count != 0:
+                print(sum/count)
+                return sum/count
+            else:
+                return 0
         else:
-            return 0
+            return None
     def averagePi(self,pi,saturation,pulse):
         print('Calculating Averate Pulse rate and Saturation')
         sumSat = 0
         countSat = 0
         countPulse = 0
         sumPulse = 0
-        if len(pi) >= len(saturation) or len(pi) >= len(pulse):
-            if len(saturation) >= len(pulse):
-                l = len(pulse)
-            else:
-                l = len(saturation)
-        else:
-            l = len(pi)
-        for i in range(0,l):
-            if float(pi[i]) >= 4:
-                sumSat = sumSat + float(saturation[i])
-                countSat = countSat + 1
-                sumPulse = sumPulse + float(pulse[i])
-                countPulse = countPulse + 1
-        if countSat !=0:
-            avgSat = sumSat/countSat
-        else:
-            avgSat = 0
-        if countPulse !=0:
-            avgPulse = sumPulse/countPulse
-        else:
-            avgPulse = 0
-        return avgPulse,avgSat
+        if len(pi) >= 1:
+            if len(saturation) >= 1:
+                if len(pulse) >= 1:
+                    if len(pi) >= len(saturation) or len(pi) >= len(pulse):
+                        if len(saturation) >= len(pulse):
+                            l = len(pulse)
+                        else:
+                            l = len(saturation)
+                    else:
+                        l = len(pi)
+                    for i in range(0,l):
+                        if float(pi[i]) >= 4:
+                            sumSat = sumSat + float(saturation[i])
+                            countSat = countSat + 1
+                            sumPulse = sumPulse + float(pulse[i])
+                            countPulse = countPulse + 1
+                    if countSat !=0:
+                        avgSat = sumSat/countSat
+                    else:
+                        avgSat = 0
+                    if countPulse !=0:
+                        avgPulse = sumPulse/countPulse
+                    else:
+                        avgPulse = 0
+                    print('avgSat: ' + str(avgSat) + '  avgPulse: ' + str(avgPulse))
+                    return avgPulse,avgSat
+        return None,None
 def perform():
     conf_file = json.load(open('config.json'))
     c = channelManager(conf_file['host'])
     d = dataAnalysis()
-    time.sleep(60) #######TEST########
-    #time.sleep(60*50)
     flag_time = 1
     lastTimeExec = 0
     while True:
@@ -123,6 +129,7 @@ def perform():
                 if now.hour >= d.timeInterval[1]:
                     if now.hour <= d.timeInterval[0]:
                         flag_time = 1
+                        lastTimeExec = now
             else:
                 flag_time = 0
         if lastTimeExec == 0:
@@ -137,24 +144,30 @@ def perform():
                     piList = []
                     satList = []
                     pulseList = []
+                    print('Checking patient ' + str(keys) + ' data')
                     for i in range(0,len(latestDate[keys])):
                         check = d.checkDate(d.convertData(\
                             latestDate[keys][i]['created_at']))
-                        check = True ########## TEST ###########
+                        #check = True ########## TEST ###########
                         if check == True:
-                            if latestDate[keys][i]['field6'] != None:
-                                tempList.append(latestDate[keys][i]['field6'])
-                            if latestDate[keys][i]['field2'] != None:
-                                piList.append(latestDate[keys][i]['field2'])
+                            if latestDate[keys][i]['field5'] != None:
+                                tempList.append(latestDate[keys][i]['field5'])
+                            if latestDate[keys][i]['field7'] != None:
+                                piList.append(latestDate[keys][i]['field7'])
+                            if latestDate[keys][i]['field1'] != None:
+                                satList.append(latestDate[keys][i]['field1'])
                             if latestDate[keys][i]['field3'] != None:
-                                satList.append(latestDate[keys][i]['field3'])
-                            if latestDate[keys][i]['field4'] != None:
-                                pulseList.append(latestDate[keys][i]['field4'])
+                                pulseList.append(latestDate[keys][i]['field3'])
                     temperature = d.averageTemp(tempList)
                     pulse,saturation = d.averagePi(piList,satList,pulseList)
-                    d.uploadAVG(keys,c.channelList,temperature,'average temperature')
-                    d.uploadAVG(keys,c.channelList,pulse,'average pulse rate')
-                    d.uploadAVG(keys,c.channelList,saturation,'average saturation')
+                    if temperature != None:
+                        d.uploadAVG(keys,c.channelList,temperature,'average temperature')
+                    if pulse != None:
+                        d.uploadAVG(keys,c.channelList,pulse,'average pulse rate')
+                    if saturation != None:
+                        d.uploadAVG(keys,c.channelList,saturation,'average saturation')
+                    print('\n')
+        time.sleep(60*2)
         
 if __name__ == '__main__':
     perform()
