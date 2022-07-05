@@ -7,6 +7,7 @@ import requests
 class Fibrillation_Monitor_client():
   def __init__(self):
     # Apertura file di configurazione
+    print("Lettura file config\n")
     fp=open('Fibrillation_config.json')
     conf_file = json.load(fp)
     fp.close
@@ -18,9 +19,12 @@ class Fibrillation_Monitor_client():
     self.__alert=conf_file["template_alarm"]
     messagesdict=conf_file["alarm_messages"]
     # Iscrizione al registro
+    print("iscrizione al registro\n")
     r = requests.post(self.__register+"/add-service",data= json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
+    print(r)
 
     # Richiesta dati broker al registro
+    print("Richiesta dati al registro\n")
     r = requests.get(self.__register+"/message-broker")
     mb = r.json()
     self.__broker=mb['name']
@@ -40,6 +44,7 @@ class Fibrillation_Monitor_client():
     self.analyzer=Fibrillation_Monitor(messagesdict)
 
     # Creating client
+    print("Istanziamento Client\n")
     self.client = MyMQTT(self.__name, self.__broker, self.__port, self)
 
     # Starting client
@@ -47,14 +52,17 @@ class Fibrillation_Monitor_client():
     time.sleep(2)
 
     # Subscribing
+    print(f"Sottoscrizione al topic: {self.__topic_sub}\n")
     self.client.mySubscribe(self.__topic_sub)
   
   def updateService(self) :
     while True :
       time.sleep(100)
       r = requests.put(self.__register+"/update-service",data = json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
+      print(r)
 
   def notify(self,topic,msg): # Metodo che analizza i dati arrivati utilizzando i metodi dell'analyzer e, in caso, pubblica i warning
+    print(f"messaggio arrivato da topic: {topic}\n")
     msg=json.loads(msg)
     ID_P=topic.split("/")[-1] # Prendo l'ID del PZ alla fine del topic
 
@@ -78,6 +86,7 @@ class Fibrillation_Monitor_client():
         pulse=ev["v"]
     
     if len(Pi)>1:
+      print(f"Ottenuti: batteria={battery} e liste dei parametri\n")
       r=self.analyzer.fibrillation(ID_P,Pi,pulse,battery)
       if r!=None:
         to_pub=self.__alert
@@ -85,6 +94,11 @@ class Fibrillation_Monitor_client():
         to_pub["alert"]=r
         to_pub["time"]=time.localtime()
         # Publish alert
+        print("Invio allarme per oximeter\n")
+        print(f"Topic:{self.__base_topic_pub+ID_P}\n")
+        print("Messaggio:")
+        print(to_pub)
+        print("\n")
         self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
         print("DEBUG : pubblico allarme per fibrillation ")
         #print(f"Published: {to_pub}\nat topic: {self.__base_topic_pub}{ID_P}")
