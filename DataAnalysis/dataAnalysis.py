@@ -85,20 +85,13 @@ class dataAnalysis():
         return date
     def checkDate(self,dicData):
         today = date.today()
-        print(dicData)
         if int(dicData['year']) == today.year:
-            print('year')
             if int(dicData['month']) == today.month:
-                print('month')
                 if int(dicData['day']) == today.day - 1:
-                    print('day1')
                     if int(dicData['hour']) >= self.timeInterval[0]:
-                        print('hour1')
                         return True
                 elif int(dicData['day']) == today.day:
-                    print('day2')
                     if int(dicData['hour']) <= self.timeInterval[1]:
-                        print('hour2')
                         return True
             elif int(dicData['month']) == today.month - 1:
                 if int(dicData['hour']) >= self.timeInterval[0]:
@@ -163,6 +156,7 @@ def perform():
     flag_time = 1
     print('Starting data analysis')
     lastTimeExec = datetime.fromtimestamp(time.time())
+    #lastTimeExec = datetime.fromtimestamp(1657017306) ###### TEST ######
     lastTimeExec = d.convertData(str(lastTimeExec))
     while True:
         now = datetime.fromtimestamp(time.time())
@@ -182,10 +176,6 @@ def perform():
                         print('A day has passed, time to check data\n')
             else:
                 flag_time = 0
-        count = 0 ########### TEST ########
-        if count == 0: ########### TEST ########
-            flag_time = 1 ########### TEST ########
-            count = 1 ########### TEST ########
         if flag_time == 1:
             c.listChannels()
             if len(c.channelList) > 0:
@@ -203,7 +193,6 @@ def perform():
                         check = d.checkDate(d.convertData(\
                             latestDate[keys][i]['created_at']))
                         #check = True ########## TEST ###########
-                        print(check)
                         if check == True:
                             if latestDate[keys][i]['field5'] != None:
                                 tempList.append(latestDate[keys][i]['field5'])
