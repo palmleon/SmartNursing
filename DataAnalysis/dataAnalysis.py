@@ -17,7 +17,7 @@ class dataAnalysis():
         r = requests.get(self.conf_file['host']+"/patient-room-hourly-scheduling")
         r = r.json()
         self.timeInterval = r['night']
-        self.timeInterval = [18,22] ######### TEST #######
+        #self.timeInterval = [18,4] ######### TEST #######
         self.watingTime = 60*2
     def retriveData(self,channelList):
         dataDict = dict()
@@ -226,7 +226,7 @@ def perform():
                     if saturation != None:
                         d.uploadAVG(keys,c.channelList,saturation,'average saturation')
                     print('\n')
-        print('Repeating check after ' + str(d.watingTime) + ' minutes')
+        print('Repeating check after ' + str(d.watingTime) + ' seconds')
         time.sleep(d.watingTime)
         
 if __name__ == '__main__':
