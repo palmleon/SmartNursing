@@ -112,10 +112,7 @@ class dataAnalysis():
             if count != 0:
                 print(sum/count)
                 return sum/count
-            else:
-                return 0
-        else:
-            return None
+        return None
     def averagePi(self,pi,saturation,pulse):
         print('Calculating Averate Pulse rate and Saturation')
         sumSat = 0
