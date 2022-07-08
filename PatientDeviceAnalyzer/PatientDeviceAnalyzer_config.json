@@ -1,7 +1,7 @@
 {
     "host" : "http://cdrsi:8080/catalog",
-    "serviceID" : 4,
-    "name": "Fibrillation-monitor-service4",
+    "serviceID" : 10,
+    "name": "PatientDevice-monitor-service10",
     "template_alarm": {"alert":"","time":null},
     "alarm_messages":
     {
