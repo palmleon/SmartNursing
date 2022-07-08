@@ -115,10 +115,10 @@ class Patient_Monitor_client():
     if len(Pi)>1:
       print(f"Ottenuti: batteria={battery} e liste dei parametri\n")
       r=self.analyzer.Pulse(ID_P,Pi,pulse,sat,battery)
-      if r!=None:
+      for alert in r:
         to_pub=self.__alert
         #to_pub["ID_PZ"]=ID_P
-        to_pub["alert"]=r
+        to_pub["alert"]=alert
         to_pub["time"]=time.localtime()
         # Publish alert
         print("Invio allarme per oximeter\n")
