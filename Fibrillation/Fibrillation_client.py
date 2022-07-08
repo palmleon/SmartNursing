@@ -21,7 +21,7 @@ class Fibrillation_Monitor_client():
     # Iscrizione al registro
     print("iscrizione al registro\n")
     r = requests.post(self.__register+"/add-service",data= json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
-    print(r)
+    #print(r)
 
     # Richiesta dati broker al registro
     print("Richiesta dati al registro\n")
@@ -59,7 +59,7 @@ class Fibrillation_Monitor_client():
     while True :
       time.sleep(100)
       r = requests.put(self.__register+"/update-service",data = json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
-      print(r)
+      #print(r)
 
   def notify(self,topic,msg): # Metodo che analizza i dati arrivati utilizzando i metodi dell'analyzer e, in caso, pubblica i warning
     print(f"messaggio arrivato da topic: {topic}\n")
