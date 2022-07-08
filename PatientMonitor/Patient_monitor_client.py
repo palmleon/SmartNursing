@@ -110,10 +110,6 @@ class Patient_Monitor_client():
         to_pub["time"]=time.time()
         # Publish alert
         print("Invio allarme per temperature\n")
-        print(f"Topic:{self.__base_topic_pub+ID_P}\n")
-        print("Messaggio:")
-        print(to_pub)
-        print("\n")
         self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
     
     if len(Pi)>1:
@@ -126,10 +122,6 @@ class Patient_Monitor_client():
         to_pub["time"]=time.localtime()
         # Publish alert
         print("Invio allarme per oximeter\n")
-        print(f"Topic:{self.__base_topic_pub+ID_P}\n")
-        print("Messaggio:")
-        print(to_pub)
-        print("\n")
         self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
 
 if __name__=="__main__":

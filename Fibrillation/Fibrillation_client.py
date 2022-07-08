@@ -95,13 +95,7 @@ class Fibrillation_Monitor_client():
         to_pub["time"]=time.localtime()
         # Publish alert
         print("Invio allarme per oximeter\n")
-        print(f"Topic:{self.__base_topic_pub+ID_P}\n")
-        print("Messaggio:")
-        print(to_pub)
-        print("\n")
         self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
-        print("DEBUG : pubblico allarme per fibrillation ")
-        #print(f"Published: {to_pub}\nat topic: {self.__base_topic_pub}{ID_P}")
 
 if __name__=="__main__":
   F=Fibrillation_Monitor_client()
