@@ -79,5 +79,4 @@ class Patient_Monitor():
             #alarm+=f"ATTENZIONE, il paziente {ID_P} ha un battito cardiaco alto: {pulse} bpm"
             
         #if len(alarm)>2:
-        if alarm!=[]:
-            return alarm
+        return alarm
