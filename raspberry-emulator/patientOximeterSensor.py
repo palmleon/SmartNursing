@@ -28,7 +28,7 @@ class Oximeter_sensor():
         elif ID_P==4:
             # Paziente con pulsossimetro messo male (solo per fibrillation)
             self.__baseMessage["e"][0]["v"]=random.uniform(low=2.81,high=3.0)
-            self.__baseMessage["e"][1]["v"]= (random.uniform(low=0,high=4,size=6)+random.uniform(low=4,high=20,size=4))
+            self.__baseMessage["e"][1]["v"]= (random.uniform(low=0,high=4,size=6).tolist()+random.uniform(low=4,high=20,size=4).tolist())
             self.__baseMessage["e"][2]["v"]= (random.randint(low=96,high=100,size= 10).tolist())
             self.__baseMessage["e"][3]["v"]= (random.randint(low=70,high=74,size= 10).tolist())
         elif ID_P==5:
