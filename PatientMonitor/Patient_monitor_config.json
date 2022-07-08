@@ -2,7 +2,7 @@
     "host" : "http://cdrsi:8080/catalog",
     "serviceID" : 2,
     "name": "Patient-monitor-service2",
-    "template_alarm": {"allert":"","time":null},
+    "template_alarm": {"alert":"","time":null},
     "alarm_messages":
     {
         "alarm_Tbattery": "ATTENZIONE, il paziente {} ha il termometro quasi scarico",
