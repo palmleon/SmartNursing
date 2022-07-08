@@ -28,11 +28,11 @@ class Patient_Monitor():
             #return f"ATTENZIONE, il paziente {ID_P} ha il termometro mal posizionato"
             return alarm
         if incoming<36:
-            alarm=self.__alarm_Tl[0]+ID_P+self.__alarm_Tl[1]+incoming+" C"
+            alarm=self.__alarm_Tl[0]+ID_P+self.__alarm_Tl[1]+str(incoming)+" C"
             #return f"ATTENZIONE, il paziente {ID_P} ha una temperatura bassa, pari a {incoming}"
             return alarm
         if incoming>=37:
-            alarm=self.__alarm_Th[0]+ID_P+self.__alarm_Th[1]+incoming+" C"
+            alarm=self.__alarm_Th[0]+ID_P+self.__alarm_Th[1]+str(incoming)+" C"
             #return f"ATTENZIONE, il paziente {ID_P} ha febbre, con temperatura pari a {incoming}"
             return alarm
 
@@ -70,13 +70,13 @@ class Patient_Monitor():
 
         alarm=""
         if sat<=95:
-            alarm=self.__alarm_Sl[0]+ID_P+self.__alarm_Sl[1]+sat+" %\n"
+            alarm=self.__alarm_Sl[0]+ID_P+self.__alarm_Sl[1]+str(sat)+" %\n"
             #alarm=f"ATTENZIONE, il paziente {ID_P} è in ipossia. Saturazione al {sat} % \n"
         if pulse<55:
-            alarm+=self.__alarm_Pl[0]+ID_P+self.__alarm_Pl[1]+pulse+" bpm"
+            alarm+=self.__alarm_Pl[0]+ID_P+self.__alarm_Pl[1]+str(pulse)+" bpm"
             #alarm+= f"ATTENZIONE, il paziente {ID_P} ha un battito cardiaco basso: {pulse} bpm"
         elif pulse>100:
-            alarm+=self.__alarm_Ph[0]+ID_P+self.__alarm_Ph[1]+pulse+" bpm"
+            alarm+=self.__alarm_Ph[0]+ID_P+self.__alarm_Ph[1]+str(pulse)+" bpm"
             #alarm+=f"ATTENZIONE, il paziente {ID_P} ha un battito cardiaco alto: {pulse} bpm"
             
         if len(alarm)>2:
