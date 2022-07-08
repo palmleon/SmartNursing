@@ -57,10 +57,10 @@ class Patient_Monitor_client():
     time.sleep(2)
 
     # Subscribing
-    print(f"Sottoscrizione al topic: {self.__topic_sub_T}\n")
+    #print(f"Sottoscrizione al topic: {self.__topic_sub_T}\n")
     self.client.mySubscribe(self.__topic_sub_T)
 
-    print(f"Sottoscrizione al topic: {self.__topic_sub_P}\n")
+    #print(f"Sottoscrizione al topic: {self.__topic_sub_P}\n")
     self.client.mySubscribe(self.__topic_sub_P)
   
   def updateService(self) :

@@ -52,7 +52,7 @@ class Fibrillation_Monitor_client():
     time.sleep(2)
 
     # Subscribing
-    print(f"Sottoscrizione al topic: {self.__topic_sub}\n")
+    #print(f"Sottoscrizione al topic: {self.__topic_sub}\n")
     self.client.mySubscribe(self.__topic_sub)
   
   def updateService(self) :
