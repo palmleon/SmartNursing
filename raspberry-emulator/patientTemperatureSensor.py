@@ -11,11 +11,11 @@ class Temperature_sensor():
             # Paziente sano con batteria di buon livello
             self.__baseMessage["e"][0]["v"]=random.uniform(low=2.81,high=3.0)
             self.__baseMessage["e"][1]["v"]=random.uniform(low=36.45,high=36.55)
-        elif ID_P%2==0:
+        elif ID_P==2:
             # Paziente sano con batteria scarica
             self.__baseMessage["e"][0]["v"]=random.uniform(low=2.77,high=2.79)
             self.__baseMessage["e"][1]["v"]=random.uniform(low=36.45,high=36.55)
-        elif ID_P%3==0:
+        elif ID_P==3:
             # Paziente con termometro spostato e con batteria carica (non faccio entrambi i casi, in quanto l'analizzatore si ferma prima mandando solo batteria scarica)
             self.__baseMessage["e"][0]["v"]=random.uniform(low=2.81,high=3.0)
             self.__baseMessage["e"][1]["v"]=random.uniform(low=34,high=35)
