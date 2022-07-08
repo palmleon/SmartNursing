@@ -35,7 +35,7 @@ class Oximeter_sensor():
             # Paziente con saturazione bassa
             self.__baseMessage["e"][0]["v"]=random.uniform(low=2.81,high=3.0)
             self.__baseMessage["e"][1]["v"]= (random.uniform(low=4,high=20,size= 10).tolist())
-            self.__baseMessage["e"][2]["v"]= (random.randint(low=93,high=95,size= 10).tolist())
+            self.__baseMessage["e"][2]["v"]= (random.randint(low=90,high=95,size= 10).tolist())
             self.__baseMessage["e"][3]["v"]= (random.randint(low=70,high=74,size= 10).tolist())
         elif ID_P==6:
             # Paziente con battito cardiaco basso
@@ -59,13 +59,13 @@ class Oximeter_sensor():
             # Paziente combinato saturazione bassa e battito alto
             self.__baseMessage["e"][0]["v"]=random.uniform(low=2.81,high=3.0)
             self.__baseMessage["e"][1]["v"]= (random.uniform(low=4,high=20,size= 10).tolist())
-            self.__baseMessage["e"][2]["v"]= (random.randint(low=93,high=95,size= 10).tolist())
+            self.__baseMessage["e"][2]["v"]= (random.randint(low=90,high=95,size= 10).tolist())
             self.__baseMessage["e"][3]["v"]= (random.randint(low=100,high=104,size= 10).tolist())
         else:
             # Paziente combinato saturazione bassa e battito basso
             self.__baseMessage["e"][0]["v"]=random.uniform(low=2.81,high=3.0)
             self.__baseMessage["e"][1]["v"]= (random.uniform(low=4,high=20,size= 10).tolist())
-            self.__baseMessage["e"][2]["v"]= (random.randint(low=93,high=95,size= 10).tolist())
+            self.__baseMessage["e"][2]["v"]= (random.randint(low=90,high=95,size= 10).tolist())
             self.__baseMessage["e"][3]["v"]= (random.randint(low=50,high=55,size= 10).tolist())
 
         #self.__baseMessage["bn"]=ID_P
