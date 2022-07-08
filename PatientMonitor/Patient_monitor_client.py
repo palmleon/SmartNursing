@@ -107,7 +107,7 @@ class Patient_Monitor_client():
         to_pub=self.__alert
         #to_pub["ID_PZ"]=ID_P
         to_pub["alert"]=r
-        to_pub["time"]=time.time()
+        to_pub["time"]=time.localtime()
         # Publish alert
         print("Invio allarme per temperature\n")
         self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
