@@ -1,8 +1,10 @@
-version: "3"
-name: "smartclinic"
+version: 3
+name: smartclinic
 services:
+
   #device registry system
   cdrsi:
+
     image: smartclinic-drsi
     build: ./device-registry-system
     ports:
@@ -13,6 +15,7 @@ services:
 
   #Telegram
   ct:
+    
     image: smartclinic-ti
     build: ./TelegramBot
     links:
