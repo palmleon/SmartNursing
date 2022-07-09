@@ -12,8 +12,8 @@ class RaspberryEmulator :
   
 
     def __init__(self) :
-        self.patientMonitorEmulatorIntervalMinute = 0.5
-        self.patientTemperatureEmulatorIntervalMinute = 5
+        self.patientMonitorEmulatorIntervalMinute = 0.16
+        self.patientTemperatureEmulatorIntervalMinute = 0.5
         self.patientRoomEmulatorIntervalMinute = 0.5
         self.commonRoomEmulatorIntervalMinute = 0.3
         self.updateIntervalMinute = 3
@@ -52,7 +52,7 @@ class RaspberryEmulator :
         self.mqttClient.mySubscribe(self.patientRoomCommandTopic)
         for room in self.commonRoomList :
              r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
-                                                                    'deviceID' : str(room)+'tc',
+                                                                    'deviceID' : str(room["roomID"])+'tc',
                                                                     'name' : 'common-room-temperature'
         }))
 
@@ -67,9 +67,9 @@ class RaspberryEmulator :
         while True :
             time.sleep(self.commonRoomEmulatorIntervalMinute*60)
             for room in self.commonRoomList :
-                dataEmulated = self.roomSensor.emulateData(room)
-                self.mqttClient.myPublish(self.commonRoomTopic+str(room),dataEmulated)
-                print("simulo per stanza ",room," al seguente topic ",self.commonRoomTopic+str(room))
+                dataEmulated = self.roomSensor.emulateData(room["roomID"])
+                self.mqttClient.myPublish(self.commonRoomTopic+str(room["roomID"]),dataEmulated)
+                print("simulo per stanza ",room["roomID"]," al seguente topic ",self.commonRoomTopic+str(room["roomID"]))
                 #print("stanza emulata "+str(self.roomSensor.emulateData(room)))
 
     def emulatePatientRoomData(self) :
@@ -91,11 +91,11 @@ class RaspberryEmulator :
                 for id in self.rooms[room] :
                     dataEmulated = self.patientOximeterSensor.emulate(id)
                     self.mqttClient.myPublish(self.patientSaturationTopic+str(id),dataEmulated)
-                    print("simulo ossimetro per paziente ",id," al seguente topic ",self.patientSaturationTopic+str(id))
+                    print("simulo Pulsossimetro per paziente ",id," al seguente topic ",self.patientSaturationTopic+str(id))
     
     def emulatePatientTemperatureData(self) :
         while True :
-            time.sleep(self.patientTemperatureEmulatorIntervalMinute)
+            time.sleep(self.patientTemperatureEmulatorIntervalMinute*60)
             for room in list(self.rooms.keys()) :
                 for id in self.rooms[room] :
                     dataEmulated = self.patientTemperatureSensor.emulate(id)
@@ -107,7 +107,7 @@ class RaspberryEmulator :
             time.sleep(self.updateIntervalMinute*60)
             for commonRoom in self.commonRoomList :
                 r = requests.put(self.conf_file['host']+"/update-device",data = json.dumps({
-                            'deviceID' : str(commonRoom)+'tc',
+                            'deviceID' : str(commonRoom["roomID"])+'tc',
                             'name' : 'common-room-temperature'
                         }))
 
