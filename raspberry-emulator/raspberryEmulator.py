@@ -129,11 +129,14 @@ class RaspberryEmulator :
 
                         r = requests.put(self.conf_file['host']+"/update-device",data = json.dumps({
                             'deviceID' : str(id)+'tp',
+                            'patientID' : str(id),
                             'name' : 'patient-temperature-sensor'
                         }))
                         r = requests.put(self.conf_file['host']+"/update-device",data = json.dumps({
                             'deviceID' : str(id)+'o',
+                            'patientID' : str(id),
                             'name' : 'patient-oximeter-sensor'
+
                         }))
             
     def listenUserCommand(self) :
@@ -175,10 +178,12 @@ class RaspberryEmulator :
                     
                     r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
                                                                             'deviceID' : str(patientId)+'tp',
+                                                                            'patientID' : str(patientId),
                                                                             'name' : 'patient-temperature-sensor'
         }))
                     r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
                                                                                             'deviceID' : str(patientId)+'o',
+                                                                                            'patientID' : str(patientId),
                                                                                             'name' : 'patient-oximeter-sensor'
         }))
             if choice == 0 :
