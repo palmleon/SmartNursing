@@ -46,8 +46,8 @@ class PatientDeviceAnalyzer():
     while True:
       time.sleep(20)
       #Controllo su orario (è notte?)
-      #if time.localtime()[3]>=self.__hours[0] or time.localtime()[3]<=self.__hours[1]:
-      if True:
+      if time.localtime()[3]>=self.__hours[0] or time.localtime()[3]<=self.__hours[1]:
+      #if True:
         # Richiesta dell'attuale lista dei pazienti
         r = requests.get(self.__register+"/patients")
         patient_dict=r.json()
