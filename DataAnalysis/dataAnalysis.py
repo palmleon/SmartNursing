@@ -137,12 +137,8 @@ class dataAnalysis():
                             countPulse = countPulse + 1
                     if countSat !=0:
                         avgSat = sumSat/countSat
-                    else:
-                        avgSat = 0
                     if countPulse !=0:
                         avgPulse = sumPulse/countPulse
-                    else:
-                        avgPulse = 0
                     print('avgSat: ' + str(avgSat) + '  avgPulse: ' + str(avgPulse))
                     return avgPulse,avgSat
         return None,None
