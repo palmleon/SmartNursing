@@ -9,7 +9,7 @@ class PatientDeviceAnalyzer():
     # Apertura file di configurazione
     fp=open('PatientDeviceAnalyzer_config.json')
     conf_file = json.load(fp)
-    fp.close
+    fp.close()
     # Acquisizione ID, nome e url registro
     self.__clientID=conf_file["serviceID"]
     self.__name=conf_file["name"]

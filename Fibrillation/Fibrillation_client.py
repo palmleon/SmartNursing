@@ -10,7 +10,7 @@ class Fibrillation_Monitor_client():
     print("Lettura file config\n")
     fp=open('Fibrillation_config.json')
     conf_file = json.load(fp)
-    fp.close
+    fp.close()
     #Acquisizione ID, nome e url registro
     self.__clientID=conf_file["serviceID"]
     self.__name=conf_file["name"]
