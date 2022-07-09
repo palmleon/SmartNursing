@@ -46,37 +46,40 @@ class PatientDeviceAnalyzer():
     while True:
       time.sleep(20)
       #Controllo su orario (è notte?)
-      if time.localtime()[3]>=self.__hours[0] or time.localtime()[3]<=self.__hours[1]:
+      #if time.localtime()[3]>=self.__hours[0] or time.localtime()[3]<=self.__hours[1]:
+      if True:
         # Richiesta dell'attuale lista dei pazienti
         r = requests.get(self.__register+"/patients")
         patient_dict=r.json()
+        print(patient_dict)
         patient_IDs=[]
         for patient in patient_dict:
           patient_IDs.append(patient["patientID"])
         # Richiesta dell'attuale lista dei device
         r = requests.get(self.__register+"/devices")
         all_devices=r.json()
+        print(all_devices)
         for patient in patient_IDs: #Si cerca l'ID del paziente nella lista dei device
           sensors=[]
-          alarm=""
+          alarm=[]
           for device in all_devices:
             if "patientID" in device: #Verifica del tipo di sensore (se del paziente o della stanza)
               if patient==device["patientID"]:
                 sensors.append(device["name"])
           if "patient temperature sensor" not in sensors:
-            alarm=self.__alarm_T[0]+patient+self.__alarm_T[1]+"\n"
+            alarm.append(self.__alarm_T[0]+str(patient)+self.__alarm_T[1])
             #alarm=f"Il termometro del paziente {patient} è offline"
           if "patient oximeter sensor" not in sensors:
-            alarm+=self.__alarm_P[0]+patient+self.__alarm_P[1]
+            alarm.append(self.__alarm_P[0]+str(patient)+self.__alarm_P[1])
             #alarm+=f"Il pulsossimetro del paziente {patient} è offline"
           print(alarm) #print di DEBUG
-          if len(alarm)>1:
+          for alert in alarm:
             #Creazione messaggio
             to_pub=self.__alert
-            to_pub["alert"]=alarm
+            to_pub["alert"]=alert
             to_pub["time"]=time.localtime()
             # Publicazione alert
-            self.client.myPublish(self.__base_topic_pub+patient,to_pub)
+            self.client.myPublish(self.__base_topic_pub+str(patient),to_pub)
   
   def updateService(self) :
     while True :
