@@ -7,7 +7,7 @@ import requests
 
 class light_patient_room_monitor() :
     def __init__(self) :
-
+        print("Starting constructor")
         self.conf_file = json.load(open('config.json'))
         r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
             'serviceID' : 1,
@@ -30,6 +30,7 @@ class light_patient_room_monitor() :
         c = r.json()
         self.commandTopic = c
         self.__baseMessage={"bn" : "light-patient-room-monitor","bt":0,"r":0,"c" : {"n":"luminosity","u":"/","v":0}}
+        print("Ready to start")
         self.mqttClient.start()
         self.mqttClient.mySubscribe(self.subscribeTopic)
 
@@ -73,7 +74,9 @@ class light_patient_room_monitor() :
         
 
 if __name__ == "__main__" :
+    print("Starting main")
     light_patient_room_monitor_istnace = light_patient_room_monitor()
+    print("Instance")
     #invocare thread che esegue la registrazione del servizio, che forse è opzionale
     light_patient_room_monitor_istnace.updateService()
     #while True :
