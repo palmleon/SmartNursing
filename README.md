@@ -30,7 +30,7 @@ The following services are supported:
 - telegram : 7
 - data-analysis : 8
 - system terminal: 9
-- patient-devive-analyzer : 10
+- patient-device-analyzer : 10
 
 
 
