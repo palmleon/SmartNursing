@@ -8,10 +8,12 @@ class temperature_patient_room_monitor() :
     def __init__(self) :
         
         self.conf_file = json.load(open('config.json'))
-
+        self.__serviceId = int(self.conf_file['serviceId'])
+        self.__serviceName = self.conf_file['serviceName']
+        self.__updateTimeInSecond = int(self.conf_file['updateTimeInSecond'])
         r = requests.post(self.conf_file['host']+"/add-service",data = json.dumps({
-            'serviceID' : 5,
-            'name' : 'temperature-patient-room-monitor'
+            'serviceID' : self.__serviceId,
+            'name' : self.__serviceName
         }))
         r = requests.get(self.conf_file['host']+"/message-broker")
         mb = r.json()
@@ -26,18 +28,18 @@ class temperature_patient_room_monitor() :
         r = requests.get(self.conf_file['host']+"/patient-room-command-base-topic")
         c = r.json()
         self.commandTopic = c
-        self.__baseMessage={"bn" : "temperature-common-room-monitor","bt":0,"r":0,"c" : {"n":"switch","u":"/","v":0}}
+        self.__baseMessage={"bn" : self.__serviceName,"bt":0,"r":0,"c" : {"n":"switch","u":"/","v":0}}
 
         self.mqttClient.start()
         self.mqttClient.mySubscribe(self.subscribeTopic)
-        print('starta')
+        #print('start')
 
     def updateService(self) :
         while True :
-            time.sleep(100)
+            time.sleep(self.__updateTimeInSecond)
             r = requests.put(self.conf_file['host']+"/update-service",data = json.dumps({
-                'serviceID' : 3,
-                'name' : 'temperature-patient-room-monitor'
+                'serviceID' : self.__serviceId,
+                'name' : self.__serviceName
             }))
     
 
@@ -75,7 +77,6 @@ class temperature_patient_room_monitor() :
 
 
     def setTemperature(self,room,presence,currentTemperature) :
-        #migliorare questo calcolo
         currentHour =  datetime.datetime.now().hour
         season = self.getSeason()
         r = requests.get(self.conf_file['host']+"/room-temperature/"+room)
@@ -109,7 +110,7 @@ class temperature_patient_room_monitor() :
         self.__baseMessage['r'] = room
         self.__baseMessage['c']['v'] = command
         self.mqttClient.myPublish(self.commandTopic,self.__baseMessage)     
-        print("command "+str({'switch' : command, 'room' : room }))#rimuoevere
+        print("command "+str({'switch' : command, 'room' : room }))
     
         
 
@@ -117,7 +118,6 @@ class temperature_patient_room_monitor() :
 
 if __name__ == "__main__" :
     temperature_patient_room_monitor_istnace = temperature_patient_room_monitor()
-    #invocare thread che esegue la registrazione del servizio, che forse è opzionale
     temperature_patient_room_monitor_istnace.updateService()
     #while True :
     #    pass
