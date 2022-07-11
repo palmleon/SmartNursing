@@ -182,7 +182,7 @@ class channelManager():
             for i in range(0, len(self.channelList)):
                 cData = self.channelData
                 cData['name'] = self.channelList[i]['name']
-                requests.delete(self.thinkspeakChannelUrl'/{}/feeds.json'.format(
+                requests.delete(self.thinkspeakChannelUrl+'/{}/feeds.json'.format(
                     self.channelList[i]['id']), json=cData)
             print('All channels fields cleared')
     def retriveChannelID(self, channelName):
