@@ -12,16 +12,17 @@ class RaspberryEmulator :
   
 
     def __init__(self) :
-        self.patientMonitorEmulatorIntervalMinute = 0.16
-        self.patientTemperatureEmulatorIntervalMinute = 0.5
-        self.patientRoomEmulatorIntervalMinute = 0.5
-        self.commonRoomEmulatorIntervalMinute = 0.3
-        self.updateIntervalMinute = 3
+        
         self.rooms = {}
         self.roomSensor = RoomSensor()
         self.patientOximeterSensor = Oximeter_sensor()
         self.patientTemperatureSensor = Temperature_sensor()
         self.conf_file = json.load(open('config.json'))
+        self.patientMonitorEmulatorIntervalMinute = self.conf_file['patientMonitorEmulatorIntervalMinute']
+        self.patientTemperatureEmulatorIntervalMinute = self.conf_file['patientTemperatureEmulatorIntervalMinute']
+        self.patientRoomEmulatorIntervalMinute = self.conf_file['patientRoomEmulatorIntervalMinute']
+        self.commonRoomEmulatorIntervalMinute = self.conf_file['commonRoomEmulatorIntervalMinute']
+        self.updateIntervalMinute = self.conf_file['updateIntervalMinute']
         r = requests.get(self.conf_file['host']+"/message-broker")
         mb = r.json()
         self.mqttClient = MyMQTT('raspberry-emulator',mb['name'],mb['port'],self)
@@ -34,7 +35,7 @@ class RaspberryEmulator :
         r = requests.get(self.conf_file['host']+"/common-room-list")
         c = r.json()
         self.commonRoomList = c
-        print('stanze comuni',r.json()) 
+        #print('stanze comuni',r.json()) 
         r = requests.get(self.conf_file['host']+"/patient-room-base-topic")
         c = r.json()
         self.patientRoomTopic = c
@@ -61,7 +62,7 @@ class RaspberryEmulator :
         #self.fp = open("actuation_command.json","a")
         #json.dump(command,self.fp)
         #self.fp.close()
-        print('ricevuto comando '+str(command))#rimuovere 
+        print('Actuation command received: '+str(command)) 
 
     def emulateCommonRoomData(self) :
         while True :
@@ -69,20 +70,20 @@ class RaspberryEmulator :
             for room in self.commonRoomList :
                 dataEmulated = self.roomSensor.emulateData(room["roomID"])
                 self.mqttClient.myPublish(self.commonRoomTopic+str(room["roomID"]),dataEmulated)
-                print("simulo per stanza ",room["roomID"]," al seguente topic ",self.commonRoomTopic+str(room["roomID"]))
+                #print("simulo per stanza ",room["roomID"]," al seguente topic ",self.commonRoomTopic+str(room["roomID"]))
                 #print("stanza emulata "+str(self.roomSensor.emulateData(room)))
 
     def emulatePatientRoomData(self) :
         while True :
             time.sleep(self.patientRoomEmulatorIntervalMinute*60)
-            print("simulo per le seguenti stanze ",str(list(self.rooms.keys())))
+            #print("simulo per le seguenti stanze ",str(list(self.rooms.keys())))
             for room in list(self.rooms.keys()) :
                 if len(self.rooms[room]) != 0 :
                     #self.roomEmulator.emulateData()
                     #fare publish
                     dataEmulated = self.roomSensor.emulateData(room)
                     self.mqttClient.myPublish(self.patientRoomTopic+str(room),dataEmulated)
-                    print("simulo per stanza ",room," al seguente topic ",self.patientRoomTopic+str(room))
+                    #print("simulo per stanza ",room," al seguente topic ",self.patientRoomTopic+str(room))
                     
     def emulatePatientSaturationData(self) :
         while True :
@@ -91,7 +92,7 @@ class RaspberryEmulator :
                 for id in self.rooms[room] :
                     dataEmulated = self.patientOximeterSensor.emulate(id)
                     self.mqttClient.myPublish(self.patientSaturationTopic+str(id),dataEmulated)
-                    print("simulo Pulsossimetro per paziente ",id," al seguente topic ",self.patientSaturationTopic+str(id))
+                    #print("simulo Pulsossimetro per paziente ",id," al seguente topic ",self.patientSaturationTopic+str(id))
     
     def emulatePatientTemperatureData(self) :
         while True :
@@ -100,7 +101,7 @@ class RaspberryEmulator :
                 for id in self.rooms[room] :
                     dataEmulated = self.patientTemperatureSensor.emulate(id)
                     self.mqttClient.myPublish(self.patientTemperatureTopic+str(id),dataEmulated)
-                    print("simulo temperatura per paziente ",id," al seguente topic ",self.patientTemperatureTopic+str(id))
+                    #print("simulo temperatura per paziente ",id," al seguente topic ",self.patientTemperatureTopic+str(id))
             
     def updateServices(self) :
         while True :
@@ -140,15 +141,15 @@ class RaspberryEmulator :
                         }))
             
     def listenUserCommand(self) :
-        choice = int(input("Inserisci 1 per aggiungere paziente, 0 per rimuovere paziente, 2 per terminare "))
+        choice = int(input("Enter 1 to add a patient, 0 to remove a patient, 2 to exit "))
         #lanciare thread che registra i device relativi a stanze e pazienti
     
         while choice != 2 :
             room = 0
             patientId = 0
             if choice == 1 :
-                patientId = int(input("Inserisci id paziente da aggiungere "))
-                roomId = int(input("Inserisci numero stanza "))
+                patientId = int(input("Insert patient's id "))
+                roomId = int(input("Insert room number "))
 
                 if roomId in self.rooms :
                     if patientId not in self.rooms[roomId] :
@@ -187,13 +188,13 @@ class RaspberryEmulator :
                                                                                             'name' : 'patient-oximeter-sensor'
         }))
             if choice == 0 :
-                patientId = int(input("Inserisci id paziente da rimuvere "))
+                patientId = int(input("Insert the id of the patient to remove "))
                 for room in list(self.rooms.keys()) :
                     for id in self.rooms[room] :
                         if id == patientId :
                             self.rooms[room].remove(id)
             print(self.rooms)
-            choice = int(input("Inserisci 1 per aggiungere paziente, 0 per rimuovere paziente, 2 per terminare "))
+            choice = int(input("Enter 1 to add a patient, 0 to remove a patient, 2 to exit "))
 
 def alarm_handler(signum, frame):
     raise TimeoutError
