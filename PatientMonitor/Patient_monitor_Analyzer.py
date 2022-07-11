@@ -58,12 +58,12 @@ class Patient_Monitor():
                 # Rimuovo dalla stringa eventuali valori non attendibili
                 to_remove.append(i)
         to_remove.sort(reverse=True)
-        print(f"Indici rimossi: {to_remove}")
+        #print(f"Indici rimossi: {to_remove}")
         for rm in to_remove:
             pulse.pop(rm)
             sat.pop(rm)
-        print(f"Lista pulse ottenuta in patient: {pulse}")
-        print(f"Lista sat ottenuta in patient: {sat}")
+        #print(f"Lista pulse ottenuta in patient: {pulse}")
+        #print(f"Lista sat ottenuta in patient: {sat}")
         
         pulse=np.mean(pulse)
         sat=np.mean(sat)

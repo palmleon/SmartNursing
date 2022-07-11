@@ -5,14 +5,14 @@
     "template_alarm": {"alert":"","time":null},
     "alarm_messages":
     {
-        "alarm_Tbattery": "ATTENZIONE, il paziente {} ha il termometro quasi scarico",
-        "alarm_Tplace": "ATTENZIONE, il paziente {} ha il termometro mal posizionato o l'ha rimosso",
-        "alarm_Th": "ATTENZIONE, il paziente {} ha febbre, con temperatura pari a {}",
-        "alarm_Tl": "ATTENZIONE, il paziente {} ha una temperatura bassa, pari a {}",
-        "alarm_Pbattery": "ATTENZIONE, il paziente {} ha il pulsossimetro quasi scarico",
-        "alarm_Pplace": "ATTENZIONE, il paziente {} ha il pulsossimetro mal posizionato o l'ha rimosso",
-        "alarm_Ph": "ATTENZIONE, il paziente {} ha un battito cardiaco alto: {}",
-        "alarm_Pl": "ATTENZIONE, il paziente {} ha un battito cardiaco basso: {}",
-        "alarm_Sl": "ATTENZIONE, il paziente {} è in ipossia. Saturazione al {}"
+        "alarm_Tbattery": "ATTENTION, the patient {} has the thermometer's battery low",
+        "alarm_Tplace": "ATTENTION, the patient {} has the thermomether bad positioned or removed",
+        "alarm_Th": "ATTENTION, the patient {} has fever, with a body temperatur of {}",
+        "alarm_Tl": "ATTENTION, the patient {} has low body temperature, of {}",
+        "alarm_Pbattery": "ATTENTION, the patient {} has the pulse oximeter's battery low",
+        "alarm_Pplace": "ATTENTION, the patient {} has the pulse oximeter bad positioned or removed",
+        "alarm_Ph": "ATTENTION, the patient {} has a high heart rate: {}",
+        "alarm_Pl": "ATTENTION, the patient {} has a low heart rate: {}",
+        "alarm_Sl": "ATTENTION, the patient {} is in hypoxia. Saturation at {}"
     }
 }
