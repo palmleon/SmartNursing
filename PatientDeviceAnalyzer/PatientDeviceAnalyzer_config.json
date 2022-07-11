@@ -5,7 +5,7 @@
     "template_alarm": {"alert":"","time":null},
     "alarm_messages":
     {
-        "alarm_T": "ATTENZIONE, il paziente {} ha il Termometro offline",
-        "alarm_P": "ATTENZIONE, il paziente {} ha il Pulsossimetro offline"
+        "alarm_T": "ATTENTION, the patient {} has the thermometer offline",
+        "alarm_P": "ATTENTION, the patient {} has the pulse oximeter offline"
     }
 }
