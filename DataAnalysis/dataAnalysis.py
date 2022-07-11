@@ -8,8 +8,10 @@ from datetime import datetime
 class dataAnalysis():
     def __init__(self):
         self.conf_file = json.load(open('config.json'))
+        self.thinkspeakchannel = self.conf_file['thinkspeakchannel']
+        self.thinkspeakUrl = self.conf_file['thinkspeakUrl']
         r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
-            'serviceID' : 8,
+            'serviceID' : int(self.conf_file["serviceId"]),
             'name' : 'data-analysis'
         }))
         r = requests.get(self.conf_file['host']+"/channel-data")
@@ -18,14 +20,14 @@ class dataAnalysis():
         r = r.json()
         self.timeInterval = r['night']
         #self.timeInterval = [18,4] ######### TEST #######
-        self.watingTime = 60*2
+        self.watingTime = 60*int(self.conf_file['waitingTimeMinutes'])
     def retriveData(self,channelList):
         dataDict = dict()
         for i in range(0,len(channelList)):
             channelID = channelList[i]['id']
             read_api = channelList[i]['api_keys'][1]['api_key']
             r = requests.get(
-                'https://api.thingspeak.com/channels/{}/feeds.json?api_key={}'.format(channelID, read_api))
+                self.thinkspeakUrl+'/{}/feeds.json?api_key={}'.format(channelID, read_api))
             data = r.json()
             dataDict[data['channel']['name']] = data['feeds']
         return dataDict
@@ -38,7 +40,7 @@ class dataAnalysis():
                 read_api = channelList[i]['api_keys'][1]['api_key']
                 if stringField in self.fields.values():
                     field_number = int(str(self.get_key(stringField,self.fields)).replace('field',''))
-                    requests.get('https://api.thingspeak.com/update?api_key={}&field{}={}'.format(
+                    requests.get(self.thinkspeakchannel+'?api_key={}&field{}={}'.format(
                             write_api, field_number,avgdata))
                     print('...')
                     time.sleep(16)
@@ -144,7 +146,7 @@ class dataAnalysis():
         return None,None
 def perform():
     conf_file = json.load(open('config.json'))
-    c = channelManager(conf_file['host'])
+    c = channelManager(conf_file['host'],conf_file['thinkspeakchannel'],conf_file['thinkSpeakChannelJson'],conf_file['thinkspeakUrl'])
     d = dataAnalysis()
     flag_time = 1
     print('Starting data analysis')
