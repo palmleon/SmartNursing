@@ -7,5 +7,6 @@
     {
         "alarm_T": "ATTENTION, the patient {} has the thermometer offline",
         "alarm_P": "ATTENTION, the patient {} has the pulse oximeter offline"
-    }
+    },
+    "updateTimeInSecond" : 100
 }

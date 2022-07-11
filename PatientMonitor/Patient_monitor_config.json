@@ -14,5 +14,13 @@
         "alarm_Ph": "ATTENTION, the patient {} has a high heart rate: {}",
         "alarm_Pl": "ATTENTION, the patient {} has a low heart rate: {}",
         "alarm_Sl": "ATTENTION, the patient {} is in hypoxia. Saturation at {}"
-    }
+    },
+    "saturation-theresold" : 95,
+    "pulse-lower-theresold" : 55,
+    "pulse-upper-theresold" : 100,
+    "attendability-theresold" : 4,
+    "battery-theresold" : 2.8,
+    "wrong-body-temperature" : 35,
+    "low-body-temperature" : 36,
+    "high-body-temperautre" : 37
 }

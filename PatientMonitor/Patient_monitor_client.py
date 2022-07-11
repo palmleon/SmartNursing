@@ -46,7 +46,7 @@ class Patient_Monitor_client():
     self.__base_topic_pub=mb
     
     # Creating analyzer
-    self.analyzer=Patient_Monitor(messagesdict)
+    self.analyzer=Patient_Monitor(messagesdict,int(conf_file['high-body-temperautre']),int(conf_file['low-body-temperature']),int(conf_file['wrong-body-temperature']),int(conf_file['battery-theresold']),int(conf_file['attendability-theresold']),int(conf_file['pulse-upper-theresold']),int(conf_file['pulse-lower-theresold']),int(conf_file['saturation-theresold']))
 
     # Creating client
     #print("Istanziamento Client\n")

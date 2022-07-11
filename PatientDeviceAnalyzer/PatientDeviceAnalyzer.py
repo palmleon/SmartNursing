@@ -11,6 +11,7 @@ class PatientDeviceAnalyzer():
     conf_file = json.load(fp)
     fp.close()
     # Acquisizione ID, nome e url registro
+    self.__updateTimeInSecond=conf_file['updateTimeInSecond']
     self.__clientID=conf_file["serviceID"]
     self.__name=conf_file["name"]
     self.__register=conf_file["host"]
@@ -83,7 +84,7 @@ class PatientDeviceAnalyzer():
   
   def updateService(self) :
     while True :
-      time.sleep(100)
+      time.sleep(self.__updateTimeInSecond)
       r = requests.put(self.__register+"/update-service",data = json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
 
 if __name__ == "__main__" :

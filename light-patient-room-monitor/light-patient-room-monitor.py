@@ -13,8 +13,11 @@ class light_patient_room_monitor() :
             'serviceID' : self.serviceId,
             'name' : self.serviceName
         }))
-        if r.ok == False :
-            print('Error adding the service')
+        while r.ok != True :
+            r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
+            'serviceID' : self.serviceId,
+            'name' : self.serviceName
+        }))
         r = requests.get(self.conf_file['host']+"/city")
         c = r.json()
         r = requests.get(self.conf_file['host']+"/api-weather")
@@ -32,6 +35,8 @@ class light_patient_room_monitor() :
         self.__baseMessage={"bn" : self.serviceName,"bt":0,"r":0,"c" : {"n":"luminosity","u":"/","v":0}}
         self.mqttClient.start()
         self.mqttClient.mySubscribe(self.subscribeTopic)
+        self.cloudCoverTheresold = self.conf_file['cloud-cover-theresold']
+        self.visibilityTheresold = self.conf_file['visibility-theresold']
 
     def updateService(self) :
         while True :
@@ -46,9 +51,9 @@ class light_patient_room_monitor() :
         files = dict(r.json())
         if files['current']['is_day'] == 'no' :
             return 100
-        elif files['current']['cloudcover'] > 60 : #cloud cover è la percentuale di nuvolosità
+        elif files['current']['cloudcover'] > self.cloudCoverTheresold : #cloud cover è la percentuale di nuvolosità
             return 75
-        elif  files['current']['visibility'] < 5 : #visibility è la visibilita in km 
+        elif  files['current']['visibility'] < self.visibilityTheresold : #visibility è la visibilita in km 
             return 60
         else : 
             return 15

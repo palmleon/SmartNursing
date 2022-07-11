@@ -1,5 +1,7 @@
 {
     "host": "http://cdrsi:8080/catalog",
     "serviceId" : 1,
-    "serviceName" : "light-patient-room-monitor"
+    "serviceName" : "light-patient-room-monitor",
+    "cloud-cover-theresold" : 60,
+    "visibility-theresold" : 5
 }
