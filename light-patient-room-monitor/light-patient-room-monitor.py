@@ -1,4 +1,3 @@
-from pydoc import doc
 import time
 from MyMQTT import *
 import json
@@ -7,11 +6,12 @@ import requests
 
 class light_patient_room_monitor() :
     def __init__(self) :
-        print("Starting constructor")
         self.conf_file = json.load(open('config.json'))
+        self.serviceId = int(self.conf_file['serviceId'])
+        self.serviceName = int(self.conf_file['serviceName'])
         r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
-            'serviceID' : 1,
-            'name' : 'light-patient-room-monitor'
+            'serviceID' : self.serviceId,
+            'name' : self.serviceName
         }))
         if r.ok == False :
             print('Error adding the service')
@@ -22,15 +22,14 @@ class light_patient_room_monitor() :
         self.urlApi = a+c
         r = requests.get(self.conf_file['host']+"/message-broker")
         mb = r.json()
-        self.mqttClient = MyMQTT('light-patient-room-monitor-service1',mb['name'],mb['port'],self)
+        self.mqttClient = MyMQTT(self.serviceName,mb['name'],mb['port'],self)
         r = requests.get(self.conf_file['host']+"/patient-room-base-topic")
         t = r.json()
         self.subscribeTopic = t+"+"
         r = requests.get(self.conf_file['host']+"/patient-room-command-base-topic")
         c = r.json()
         self.commandTopic = c
-        self.__baseMessage={"bn" : "light-patient-room-monitor","bt":0,"r":0,"c" : {"n":"luminosity","u":"/","v":0}}
-        print("Ready to start")
+        self.__baseMessage={"bn" : self.serviceName,"bt":0,"r":0,"c" : {"n":"luminosity","u":"/","v":0}}
         self.mqttClient.start()
         self.mqttClient.mySubscribe(self.subscribeTopic)
 
@@ -38,12 +37,11 @@ class light_patient_room_monitor() :
         while True :
             time.sleep(100)
             r = requests.put(self.conf_file['host']+"/update-service",data = json.dumps({
-                'serviceID' : 1,
-                'name' : 'light-patient-room-monitor'
+                'serviceID' : self.serviceId,
+                'name' :self.serviceName
             }))
     
     def setLuminosity(self) :
-        #migliorare questo calcolo
         r = requests.get(self.urlApi)
         files = dict(r.json())
         if files['current']['is_day'] == 'no' :
@@ -57,11 +55,8 @@ class light_patient_room_monitor() :
     
     def notify(self,topic,payload) :
         message = dict(json.loads(payload))
-        #prendere room id dal topic
         room = topic.split("/")[-1]
-        if message['e'][0]['v'] == 1 :
-            #fai la richiesta 
-            # invoca funzione che ritorna  
+        if message['e'][0]['v'] == 1 : 
             luminosity = self.setLuminosity()  
             self.__baseMessage['bt'] = time.time()
             self.__baseMessage['r'] = room
@@ -74,10 +69,7 @@ class light_patient_room_monitor() :
         
 
 if __name__ == "__main__" :
-    print("Starting main")
     light_patient_room_monitor_istnace = light_patient_room_monitor()
-    print("Instance")
-    #invocare thread che esegue la registrazione del servizio, che forse è opzionale
     light_patient_room_monitor_istnace.updateService()
     #while True :
     #    pass

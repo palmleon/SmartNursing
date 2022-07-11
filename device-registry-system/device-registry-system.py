@@ -166,7 +166,7 @@ class Catalog(object) :
             raise cherrypy.HTTPError(400,'room not found')
 
         else : 
-            raise cherrypy.HTTPError(400,'operation not found')
+            raise cherrypy.HTTPError(404,'operation not found')
 
 
     def POST(self,*uri,**path):
@@ -238,7 +238,7 @@ class Catalog(object) :
             self.catalogList['services'].append(newService)
             return 
         else : 
-            raise cherrypy.HTTPError(400,'operation not found')
+            raise cherrypy.HTTPError(404,'operation not found')
 
         
 
@@ -334,7 +334,7 @@ class Catalog(object) :
             return
         
         else : 
-            raise cherrypy.HTTPError(400,'operation not found')
+            raise cherrypy.HTTPError(404,'operation not found')
 
     
     def DELETE(self,*uri,**path) :
@@ -399,7 +399,7 @@ class Catalog(object) :
                 raise cherrypy.HTTPError(400,'user not found')
         
         else :
-            raise cherrypy.HTTPError(400,'operation not found')
+            raise cherrypy.HTTPError(404,'operation not found')
 
 
 
