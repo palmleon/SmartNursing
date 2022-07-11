@@ -5,8 +5,9 @@
     "template_alarm": {"alert":"","time":null},
     "alarm_messages":
     {
-        "alarm_battery": "ATTENZIONE, il paziente {} ha il pulsossimetro quasi scarico",
-        "alarm_place": "ATTENZIONE, il paziente {} ha il pulsossimetro mal posizionato o l'ha rimosso",
-        "alarm_fibrillation": "ATTENZIONE, il paziente {} è in fibrillazione"
-    }
+        "alarm_battery": "ATTENTION, patient {} has the pulse oximeter's battery low",
+        "alarm_place": "ATTENTION, patient {} has a the pulse oximeter removed or bad positioned",
+        "alarm_fibrillation": "ATTENTION, patient {} has a fibrillation state"
+    },
+    "update_service_time_seconds" : 100 
 }
