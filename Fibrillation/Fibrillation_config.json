@@ -9,5 +9,8 @@
         "alarm_place": "ATTENTION, patient {} has a the pulse oximeter removed or bad positioned",
         "alarm_fibrillation": "ATTENTION, patient {} has a fibrillation state"
     },
-    "update_service_time_seconds" : 100 
+    "update_service_time_seconds" : 100,
+    "voltage-theresold" : 2.8,
+    "fibrillation-state" : 5,
+    "attendability-theresold" : 4
 }

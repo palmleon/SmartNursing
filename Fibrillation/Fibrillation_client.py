@@ -13,6 +13,9 @@ class Fibrillation_Monitor_client():
     fp.close()
     #Acquisizione ID, nome e url registro
     self.__clientID=conf_file["serviceID"]
+    voltageTheresold = int(conf_file['voltage-theresold'])
+    fibrillationState = int(conf_file['fibrillation-state'])
+    attendabilityTheresold = int(conf_file['attendability-theresold'])
     self.__name=conf_file["name"]
     self.__update_service_time_seconds = conf_file['update_service_time_seconds']
 
@@ -43,7 +46,7 @@ class Fibrillation_Monitor_client():
     self.__base_topic_pub=mb
 
     # Creating analyzer
-    self.analyzer=Fibrillation_Monitor(messagesdict)
+    self.analyzer=Fibrillation_Monitor(messagesdict,voltageTheresold,fibrillationState,attendabilityTheresold)
 
     # Creating client
     # print("Istanziamento Client\n")
