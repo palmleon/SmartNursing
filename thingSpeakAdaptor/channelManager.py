@@ -5,11 +5,14 @@ import time
 
 class channelManager():
     """Class containing all methods related to ThingSpeak channels"""
-    def __init__(self,hostUrl):
+    def __init__(self,hostUrl,thinkspeakJsonUrl,thinkspeakChannelUrl,thinkspeakUpdateUrl):
         """Init\n
         channelData -> default ThingSpeak channel configuration\n
         mainApiKey -> ThingSpeak account API\n
         channelList -> local list of ThingSpeak channels"""
+        self.thinkspeakJsonUrl = thinkspeakJsonUrl
+        self.thinkspeakUpdateUrl = thinkspeakUpdateUrl
+        self.thinkspeakChannelUrl = thinkspeakChannelUrl
         r = requests.get(hostUrl+"/channel-data")
         channel_data = r.json()
         self.channelData = channel_data
@@ -18,7 +21,7 @@ class channelManager():
     def listChannels(self):
         """All ThingSpeak channels will be added to the local channel list with rest API"""
         thingSpeakList = requests.get(
-            'https://api.thingspeak.com/channels.json?api_key={}'.format(self.mainApiKey))
+            self.thinkspeakJsonUrl+'?api_key={}'.format(self.mainApiKey))
         thingSpeakList = json.loads(thingSpeakList.text)
         for i in range(len(thingSpeakList)):
             self.channelList.append(thingSpeakList[i])
@@ -51,13 +54,13 @@ class channelManager():
         if cJson == None:
             print('Adding new channel with default configuration')
             requests.post(
-                'https://api.thingspeak.com/channels.json', json=cData)
+                self.thinkspeakJsonUrl, json=cData)
         else:
             cData['name'] = topic
             print('Adding {} as a new channel'.format(cData['name']))
             if self.isChannelinList(cData['name']) == 0:
                 requests.post(
-                    'https://api.thingspeak.com/channels.json', json=cData)
+                    self.thinkspeakJsonUrl, json=cData)
                 self.listChannels()
             else:
                 print('This channel already exists!')
@@ -88,7 +91,7 @@ class channelManager():
         -------
             Field Number: int (1-8)"""
         feed = requests.get(
-            'https://api.thingspeak.com/channels/{}/feeds.json?api_key={}&results=2'.format(channelID, read_api))
+            self.thinkspeakChannelUrl+'/{}/feeds.json?api_key={}&results=2'.format(channelID, read_api))
         feed = feed.json()
         feed = feed['channel']
         for i in range(1, 9):
@@ -119,13 +122,13 @@ class channelManager():
                 perc = (100/(len(update_value['v'])*len(cJson['e'])))
                 for j in range(0, len(update_value['v'])):
                     print('{}%...'.format(perc*(i+counter)))
-                    requests.get('https://api.thingspeak.com/update?api_key={}&field{}={}'.format(
+                    requests.get(self.thinkspeakUpdateUrl+'?api_key={}&field{}={}'.format(
                         write_api, field_number, update_value['v'][j]))
                     counter = counter + 1
                     time.sleep(16)
             else:
                 print('{}%...'.format(i*(100/len(cJson['e']))))
-                requests.get('https://api.thingspeak.com/update?api_key={}&field{}={}'.format(
+                requests.get(self.thinkspeakUpdateUrl+'?api_key={}&field{}={}'.format(
                     write_api, field_number, update_value['v']))
                 time.sleep(16)
         print('Upload concluded')
@@ -144,7 +147,7 @@ class channelManager():
                     cData = self.channelData
                     cData['name'] == channelID
                     requests.delete(
-                        'https://api.thingspeak.com/channels/{}.json'.format(cID), json=cData)
+                        self.thinkspeakChannelUrl+'/{}.json'.format(cID), json=cData)
                     print('{} was deleted'.format(channelID))
             else:
                 print('The provided channel does not exist')
@@ -154,7 +157,7 @@ class channelManager():
                 cData = self.channelData
                 cData['name'] = self.channelList[i]['name']
                 requests.delete(
-                    'https://api.thingspeak.com/channels/{}.json'.format(self.channelList[i]['id']), json=cData)
+                    self.thinkspeakChannelUrl+'/{}.json'.format(self.channelList[i]['id']), json=cData)
             print('Delete Complete')
     def clearChannel(self, channelID=None):
         """Clear channel all channel field\n
@@ -170,7 +173,7 @@ class channelManager():
                     cData = self.channelData
                     cData['name'] = channelID
                     requests.delete(
-                        'https://api.thingspeak.com/channels/{}/feeds.json'.format(cID), json=cData)
+                        self.thinkspeakChannelUrl+'/{}/feeds.json'.format(cID), json=cData)
                     print("{} 's fields cleared".format(channelID))
             else:
                 print('The provided channel does not exist')
@@ -179,7 +182,7 @@ class channelManager():
             for i in range(0, len(self.channelList)):
                 cData = self.channelData
                 cData['name'] = self.channelList[i]['name']
-                requests.delete('https://api.thingspeak.com/channels/{}/feeds.json'.format(
+                requests.delete(self.thinkspeakChannelUrl'/{}/feeds.json'.format(
                     self.channelList[i]['id']), json=cData)
             print('All channels fields cleared')
     def retriveChannelID(self, channelName):
@@ -203,7 +206,7 @@ class channelManager():
             write_api = channels['api_keys'][0]['api_key']
             print('{}%...'.format(channels*(100/len(self.channelList))))
             requests.get(
-                'https://api.thingspeak.com/update?api_key={}&field{}={}'.format(write_api, 7, 1))
+                self.thinkspeakUpdateUrl+'?api_key={}&field{}={}'.format(write_api, 7, 1))
             time.sleep(16)
     def updateList(self, patientList):
         channelID = []

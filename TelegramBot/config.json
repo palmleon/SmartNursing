@@ -3,5 +3,6 @@
     "serviceID" : 7,
     "name" : "telegram-bot",
     "mqttClientName-Patient": "Smart-Clinic-Telegram-Bot-Patient",
-    "mqttClientName-Room": "Smart-Clinic-Telegram-Bot-Room"
+    "mqttClientName-Room": "Smart-Clinic-Telegram-Bot-Room",
+    "updateTimeInSecond" : 100
 }

@@ -26,7 +26,7 @@ class SmartClinicBot(object):
         config_file = open('config.json')
         self.__config_settings = json.load(config_file)
         config_file.close()
-
+        self.__updateTimeInSecond = int(self.__config_settings['updateTimeInSecond'])
         r = requests.get(self.__config_settings['host']+"/bot-token")
         while r.status_code != requests.codes.ok:
             r = requests.get(self.__config_settings['host']+"/bot-token")
@@ -952,7 +952,7 @@ class SmartClinicBot(object):
 
     def updateService(self) :
         while True :
-            sleep(100)
+            sleep(self.__updateTimeInSecond)
             nattempts = 1
             r = requests.put(self.__config_settings['host'] + "/update-service",data = json.dumps({
             'serviceID' : self.__config_settings['serviceID'],

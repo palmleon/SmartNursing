@@ -7,22 +7,30 @@ class thingSpeakAdaptor():
     """Class dedit to the interaction with ThingSpeak from MQTT messages"""
     def __init__(self):
         self.conf_file = json.load(open('config.json'))
+        self.__serviceId = self.conf_file['serviceId']
+        self.__serviceName = self.conf_file['serviceName']
+        self.__thinkspeakJson = self.conf_file['thinkspeakJson']
+        self.__thinkspeakChannels = self.conf_file['thinkspeakChannels']
+        self.__thinkspeakUpdate = self.conf_file['thinkspeakUpdate']
+        self.__updatePatientListInSecond = self.conf_file['updatePatientListInSecond']
+        self.__updateServiceInSecond = self.conf_file['updateServiceInSecond']
         r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
-            'serviceID' : 6,
-            'name' : 'thingspeak-adaptor'
+            'serviceID' : self.__serviceId,
+            'name' : self.__serviceName
         }))
         if r.ok == False :
             print('Error adding the service')
         r = requests.get(self.conf_file['host']+"/message-broker")
         mb = r.json()
-        self.clientID = 'ThingSpeakAdaptor'
+        self.clientID = self.__serviceName
+        self.mqttInterval = int(self.conf_file['mqtt-interval'])
         r = requests.get(self.conf_file['host']+"/patient-temperature-base-topic")
         self.topic=[]
         self.topic.append(r.json() + '+')
         r = requests.get(self.conf_file['host']+"/patient-saturation-base-topic")
         self.topic.append(r.json() + '+')
-        self.client=MyMQTT(self.clientID,mb['name'],mb['port'],self,600)
-        self.c = channelManager(self.conf_file['host'])
+        self.client=MyMQTT(self.clientID,mb['name'],mb['port'],self,self.mqttInterval)
+        self.c = channelManager(self.conf_file['host'],self.__thinkspeakJson,self.__thinkspeakChannels,self.__thinkspeakUpdate)
     def thingSpeakAdaptorSetUp(self):
         self.start()
         self.subscribe()
@@ -41,14 +49,14 @@ class thingSpeakAdaptor():
         self.c.cManager(json_received,topic)
     def updateService(self) :
         while True :
-            time.sleep(100)
+            time.sleep(self.__updateServiceInSecond)
             r = requests.put(self.conf_file['host']+"/update-service",data = json.dumps({
-                'serviceID' : 6,
-                'name' : 'thingspeak-adaptor'
+                'serviceID' : self.__serviceId,
+                'name' : self.__serviceName
             }))
     def updatePatientList(self):
         while True:
-            time.sleep(60*60)
+            time.sleep(60*self.__updatePatientListInSecond)
             r = requests.get(self.conf_file['host']+"/patients")
             patients = r.json()
             self.c.updateList(patients)
