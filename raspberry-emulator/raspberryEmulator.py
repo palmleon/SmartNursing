@@ -179,12 +179,12 @@ class RaspberryEmulator :
                     
                     r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
                                                                             'deviceID' : str(patientId)+'tp',
-                                                                            'patientID' : str(patientId),
+                                                                            'patientID' : int(patientId),
                                                                             'name' : 'patient-temperature-sensor'
         }))
                     r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
                                                                                             'deviceID' : str(patientId)+'o',
-                                                                                            'patientID' : str(patientId),
+                                                                                            'patientID' : int(patientId),
                                                                                             'name' : 'patient-oximeter-sensor'
         }))
             if choice == 0 :
