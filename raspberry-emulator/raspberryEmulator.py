@@ -130,12 +130,12 @@ class RaspberryEmulator :
 
                         r = requests.put(self.conf_file['host']+"/update-device",data = json.dumps({
                             'deviceID' : str(id)+'tp',
-                            'patientID' : str(id),
+                            'patientID' : id,
                             'name' : 'patient-temperature-sensor'
                         }))
                         r = requests.put(self.conf_file['host']+"/update-device",data = json.dumps({
                             'deviceID' : str(id)+'o',
-                            'patientID' : str(id),
+                            'patientID' : id,
                             'name' : 'patient-oximeter-sensor'
 
                         }))
