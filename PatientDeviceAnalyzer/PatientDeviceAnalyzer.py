@@ -56,14 +56,14 @@ class PatientDeviceAnalyzer():
         # Richiesta dell'attuale lista dei pazienti
         r = requests.get(self.__register+"/patients")
         patient_dict=r.json()
-        print(patient_dict)
+        #print(patient_dict)
         patient_IDs=[]
         for patient in patient_dict:
           patient_IDs.append(patient["patientID"])
         # Richiesta dell'attuale lista dei device
         r = requests.get(self.__register+"/devices")
         all_devices=r.json()
-        print(all_devices)
+        #print(all_devices)
         for patient in patient_IDs: #Si cerca l'ID del paziente nella lista dei device
           sensors=[]
           alarm=[]
@@ -77,7 +77,7 @@ class PatientDeviceAnalyzer():
           if "patient-oximeter-sensor" not in sensors:
             alarm.append(self.__alarm_P[0]+str(patient)+self.__alarm_P[1])
             #alarm+=f"Il pulsossimetro del paziente {patient} è offline"
-          print(alarm) #print di DEBUG
+          #print(alarm)
           for alert in alarm:
             #Creazione messaggio
             to_pub=self.__alert

@@ -16,7 +16,7 @@ class Fibrillation_Monitor_client():
     self.__name=conf_file["name"]
     self.__register=conf_file["host"]
     # Acquisizione tempo update
-    self.__update_service_time_seconds = conf_file['update_service_time_seconds']
+    self.__update_service_time_seconds = conf_file["update_service_time_seconds"]
     # Acquisizione template alert e i vari alert
     self.__alert=conf_file["template_alarm"]
     messagesdict=conf_file["alarm_messages"]
