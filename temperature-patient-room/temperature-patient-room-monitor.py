@@ -78,6 +78,7 @@ class temperature_patient_room_monitor() :
 
     def setTemperature(self,room,presence,currentTemperature) :
         currentHour =  datetime.datetime.now().hour
+        print('ora corrente',currentHour)
         season = self.getSeason()
         r = requests.get(self.conf_file['host']+"/room-temperature/"+room)
         t = r.json()
@@ -100,6 +101,7 @@ class temperature_patient_room_monitor() :
             
     
     def notify(self,topic,payload) :
+        print("ricevuto un dato")
         message = dict(json.loads(payload))
         #suppongo di ricevere nel messaggio id room sotto la chiave room ed sotto la chiave presence  l info se utente c'è o meno e sotto la chiave temperature la temperatue corrente
         room = topic.split("/")[-1]

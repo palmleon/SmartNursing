@@ -61,7 +61,7 @@
     ],
     "room-list": [
         {
-            "roomID": 2,
+            "roomID": 1,
             "patients": [],
             "desired-temperature": 23
         }
@@ -79,7 +79,7 @@
         "field7" : "perfusion index",
         "field8" : null
       },
-    "api-weather": "http://api.weatherstack.com/current?access_key=36fcb02003026b9fae56e4c0a5a228fe&query=",
+    "api-weather": "http://api.weatherstack.com/current?access_key=354a8fd8d83e78359700032ca93ff485&query=",
     "bot-token" : "5553441519:AAFX3I2ooeeb0hER05cRsDN5ZYnFHw-EJlU",
     "common-room-list": [
         {

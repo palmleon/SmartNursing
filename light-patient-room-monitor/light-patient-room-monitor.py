@@ -62,6 +62,7 @@ class light_patient_room_monitor() :
     def notify(self,topic,payload) :
         message = dict(json.loads(payload))
         room = topic.split("/")[-1]
+        print('ricevo darto',message['e'][0]['v'])
         if message['e'][0]['v'] == 1 : 
             luminosity = self.setLuminosity()  
             self.__baseMessage['bt'] = time.time()
