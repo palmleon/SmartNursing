@@ -20,7 +20,7 @@ class Patient_Monitor_client():
     # Acquisizione template alert e i vari alert
     self.__alert=conf_file["template_alarm"]
     messagesDict=conf_file["alarm_messages"]
-    # Acuisizione soglie
+    # Acquisizione soglie
     ThresholdsDict=conf_file["Thresholds"]
     # Iscrizione al registro
     #print("iscrizione al registro\n")
