@@ -11,10 +11,12 @@ class Patient_Monitor_client():
     fp=open('Patient_monitor_config.json')
     conf_file = json.load(fp)
     fp.close()
-    #Acquisizione ID,nome e url registro
+    # Acquisizione ID,nome e url registro
     self.__clientID=conf_file["serviceID"]
     self.__name=conf_file["name"]
     self.__register=conf_file["host"]
+    # Acquisizione tempo update
+    self.__update_service_time_seconds = conf_file['update_service_time_seconds']
     # Acquisizione template alert e i vari alert
     self.__alert=conf_file["template_alarm"]
     messagesdict=conf_file["alarm_messages"]
@@ -75,7 +77,7 @@ class Patient_Monitor_client():
   
   def updateService(self) :
     while True :
-      time.sleep(40)
+      time.sleep(self.__update_service_time_seconds)
       r = requests.put(self.__register+"/update-service",data = json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
       #print(r)
 

@@ -15,6 +15,7 @@
         "alarm_low_Pulse": "WARNING, the patient {} has a low heart rate: {}",
         "alarm_Saturation_Threshold": "WARNING, the patient {} is in hypoxia. Blood saturation at {}"
     },
+    "update_service_time_seconds" : 20,
     "saturation_threshold" : 95,
     "pulse_lower_threshold" : 55,
     "pulse_upper_threshold" : 100,
