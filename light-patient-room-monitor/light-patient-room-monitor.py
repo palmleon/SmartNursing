@@ -34,6 +34,7 @@ class light_patient_room_monitor() :
         self.commandTopic = c
         self.__baseMessage={"bn" : self.serviceName,"bt":0,"r":0,"c" : {"n":"luminosity","u":"/","v":0}}
         self.mqttClient.start()
+        time.sleep(2)
         self.mqttClient.mySubscribe(self.subscribeTopic)
         self.cloudCoverTheresold = self.conf_file['cloud-cover-theresold']
         self.visibilityTheresold = self.conf_file['visibility-theresold']
