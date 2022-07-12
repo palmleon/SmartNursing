@@ -7,7 +7,7 @@ class Catalog(object) :
     exposed = True
     def __init__(self) :
         self.conf_file = json.load(open('config.json'))
-        self.refreshCatalogIntervalMinute = self.conf_file['refreshCatalogIntervalMinute']
+        self.refreshCatalogIntervalMinute = int(self.conf_file['refreshCatalogIntervalMinute'])
         self.fp = open("catalog.json","r")
         self.catalogList = json.load(self.fp)
         self.fp.close()
