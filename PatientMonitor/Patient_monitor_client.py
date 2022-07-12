@@ -19,7 +19,9 @@ class Patient_Monitor_client():
     self.__update_service_time_seconds = conf_file['update_service_time_seconds']
     # Acquisizione template alert e i vari alert
     self.__alert=conf_file["template_alarm"]
-    messagesdict=conf_file["alarm_messages"]
+    messagesDict=conf_file["alarm_messages"]
+    # Acuisizione soglie
+    ThresholdsDict=conf_file["Thresholds"]
     # Iscrizione al registro
     #print("iscrizione al registro\n")
     r = requests.post(self.__register+"/add-service",data = json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
@@ -46,20 +48,9 @@ class Patient_Monitor_client():
     mb = r.json()
     # In mb abbiamo direttamente il topic, non coppia key/value
     self.__base_topic_pub=mb
-    
-    # Estrazione soglie
-    bTt=conf_file['battery_Thermometer_threshold']
-    hT=conf_file['high_body_temperature']
-    lT=conf_file['low_body_temperature']
-    wT=conf_file['wrong_body_temperature']
-    bPt=conf_file['battery_PulseOximeter_threshold']
-    at=conf_file['attendability_threshold']
-    uP=conf_file['pulse_upper_threshold']
-    lP=conf_file['pulse_lower_threshold']
-    St=conf_file['saturation_threshold']
 
     # Creating analyzer
-    self.analyzer=Patient_Monitor(messagesdict,bTt,hT,lT,wT,bPt,at,uP,lP,St)
+    self.analyzer=Patient_Monitor(messagesDict,ThresholdsDict)
 
     # Creating client
     #print("Istanziamento Client\n")

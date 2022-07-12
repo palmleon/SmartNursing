@@ -1,7 +1,7 @@
 import numpy as np
 
 class Patient_Monitor():
-    def __init__(self,messagesdict,batteryTThreshold,highBodyTemperature,lowBodyTemperature,wrongBodyTemperature,batteryPThreshold,attendabilityThreshold,pulseUpper,pulseLower,saturationThreshold):
+    def __init__(self,messagesdict,thresholdsDict):
         # Estrazione messaggi di allarme
         self.__alarm_Tbattery=messagesdict["alarm_Temperature_battery"].split("{}")
         self.__alarm_Tplace=messagesdict["alarm_Temperature_place"].split("{}")
@@ -13,15 +13,15 @@ class Patient_Monitor():
         self.__alarm_Ph=messagesdict["alarm_high_Pulse"].split("{}")
         self.__alarm_Sl=messagesdict["alarm_Saturation_Threshold"].split("{}")
         # Assegnazione soglie
-        self.__batteryTThreshold = batteryTThreshold
-        self.__highBodyTemperature = highBodyTemperature
-        self.__lowBodyTemperature = lowBodyTemperature
-        self.__wrongBodyTemperature = wrongBodyTemperature
-        self.__batteryPThreshold = batteryPThreshold
-        self.__attendabilityThreshold = attendabilityThreshold 
-        self.__pulseUpper = pulseUpper
-        self.__pulseLower = pulseLower
-        self.__saturationThreshold = saturationThreshold
+        self.__batteryTThreshold = thresholdsDict['battery_Thermometer_threshold']
+        self.__highBodyTemperature = thresholdsDict['high_body_temperature']
+        self.__lowBodyTemperature = thresholdsDict['low_body_temperature']
+        self.__wrongBodyTemperature = thresholdsDict['wrong_body_temperature']
+        self.__batteryPThreshold = thresholdsDict['battery_PulseOximeter_threshold']
+        self.__attendabilityThreshold = thresholdsDict['attendability_threshold']
+        self.__pulseUpper = thresholdsDict['pulse_upper_threshold']
+        self.__pulseLower = thresholdsDict['pulse_lower_threshold']
+        self.__saturationThreshold = thresholdsDict['saturation_threshold']
 
 
     def Temperature(self,ID_P,incoming,battery):

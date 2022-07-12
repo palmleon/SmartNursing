@@ -15,14 +15,17 @@
         "alarm_low_Pulse": "WARNING, the patient {} has a low heart rate: {}",
         "alarm_Saturation_Threshold": "WARNING, the patient {} is in hypoxia. Blood saturation at {}"
     },
-    "update_service_time_seconds" : 20,
-    "battery_PulseOximeter_threshold" : 2.8,
-    "saturation_threshold" : 95,
-    "pulse_lower_threshold" : 55,
-    "pulse_upper_threshold" : 100,
-    "attendability_threshold" : 4,
-    "battery_Thermometer_threshold" : 2.8,
-    "wrong_body_temperature" : 35,
-    "low_body_temperature" : 36,
-    "high_body_temperature" : 37
+    "update_service_time_seconds" : 100,
+    "Thresholds":
+    {
+        "battery_PulseOximeter_threshold" : 2.8,
+        "saturation_threshold" : 95,
+        "pulse_lower_threshold" : 55,
+        "pulse_upper_threshold" : 100,
+        "attendability_threshold" : 4,
+        "battery_Thermometer_threshold" : 2.8,
+        "wrong_body_temperature" : 35,
+        "low_body_temperature" : 36,
+        "high_body_temperature" : 37
+    }
 }
