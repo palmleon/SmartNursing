@@ -48,17 +48,18 @@ class Patient_Monitor_client():
     self.__base_topic_pub=mb
     
     # Estrazione soglie
+    bTt=conf_file['battery_Thermometer_threshold']
     hT=conf_file['high_body_temperature']
     lT=conf_file['low_body_temperature']
     wT=conf_file['wrong_body_temperature']
-    bt=conf_file['battery_threshold']
+    bPt=conf_file['battery_PulseOximeter_threshold']
     at=conf_file['attendability_threshold']
     uP=conf_file['pulse_upper_threshold']
     lP=conf_file['pulse_lower_threshold']
     St=conf_file['saturation_threshold']
 
     # Creating analyzer
-    self.analyzer=Patient_Monitor(messagesdict,hT,lT,wT,bt,at,uP,lP,St)
+    self.analyzer=Patient_Monitor(messagesdict,bTt,hT,lT,wT,bPt,at,uP,lP,St)
 
     # Creating client
     #print("Istanziamento Client\n")

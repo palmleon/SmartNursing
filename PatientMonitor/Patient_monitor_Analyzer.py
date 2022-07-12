@@ -1,7 +1,7 @@
 import numpy as np
 
 class Patient_Monitor():
-    def __init__(self,messagesdict,highBodyTemperature,lowBodyTemperature,wrongBodyTemperature,batteryThreshold,attendabilityThreshold,pulseUpper,pulseLower,saturationThreshold):
+    def __init__(self,messagesdict,batteryTThreshold,highBodyTemperature,lowBodyTemperature,wrongBodyTemperature,batteryPThreshold,attendabilityThreshold,pulseUpper,pulseLower,saturationThreshold):
         # Estrazione messaggi di allarme
         self.__alarm_Tbattery=messagesdict["alarm_Temperature_battery"].split("{}")
         self.__alarm_Tplace=messagesdict["alarm_Temperature_place"].split("{}")
@@ -13,10 +13,11 @@ class Patient_Monitor():
         self.__alarm_Ph=messagesdict["alarm_high_Pulse"].split("{}")
         self.__alarm_Sl=messagesdict["alarm_Saturation_Threshold"].split("{}")
         # Assegnazione soglie
+        self.__batteryTThreshold = batteryTThreshold
         self.__highBodyTemperature = highBodyTemperature
         self.__lowBodyTemperature = lowBodyTemperature
         self.__wrongBodyTemperature = wrongBodyTemperature
-        self.__batteryThreshold = batteryThreshold
+        self.__batteryPThreshold = batteryPThreshold
         self.__attendabilityThreshold = attendabilityThreshold 
         self.__pulseUpper = pulseUpper
         self.__pulseLower = pulseLower
@@ -27,7 +28,7 @@ class Patient_Monitor():
         # Suppongo arrivi un valore ogni 1m (1 solo valore, niente lista, quindi niente media)
 
         # battery è la sola tensione di batteria
-        if battery<self.__batteryThreshold: # Per informare che il termometro si sta scaricando (es. suppongo sia scarico a 2.5V)
+        if battery<self.__batteryTThreshold: # Per informare che il termometro si sta scaricando (es. suppongo sia scarico a 2.5V)
             alarm=self.__alarm_Tbattery[0]+ID_P+self.__alarm_Tbattery[1]
             #return f"ATTENZIONE, il paziente {ID_P} ha il termometro quasi scarico"
             return alarm
@@ -51,7 +52,7 @@ class Patient_Monitor():
         # Battery invece un solo valore (ad es. l'ultimo dei 10 registrati dal sensore)
         alarm=[]
         # battery è la sola tensione di batteria
-        if battery<self.__batteryThreshold:# Per informare che il pulsossimetro si sta scaricando (es. suppongo sia scarico a 2.5V)
+        if battery<self.__batteryPThreshold:# Per informare che il pulsossimetro si sta scaricando (es. suppongo sia scarico a 2.5V)
             alarm.append(self.__alarm_Pbattery[0]+ID_P+self.__alarm_Pbattery[1])
             #return f"ATTENZIONE, il paziente {ID_P} ha il pulsossimetro quasi scarico"
             return alarm
