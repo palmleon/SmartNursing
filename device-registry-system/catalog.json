@@ -2,7 +2,7 @@
     "services": [],
     "message-broker": {
         "port": 1883,
-        "name": "test.mosquitto.org"
+        "name": "mqtt.eclipseprojects.io"
     },
     "city": "Turin",
     "telegram-user-id-list": [{
@@ -62,7 +62,7 @@
     "room-list": [
         {
             "roomID": 2,
-            "patients": [{"patientID":5}],
+            "patients": [],
             "desired-temperature": 23
         }
     ],
@@ -138,13 +138,5 @@
     "alarm-base-topic": "group01/IoTProject/PatientAlarm/",
     "patient-room-command-base-topic": "group01/IoTProject/PatientRoomCommand/",
     "common-room-command-base-topic": "group01/IoTProject/CommonRoomCommand/",
-    "devices": [{
-        "sensorID":"skajgsdhf4351jklh",
-        "name":"patient temperature sensor",
-        "patientID":5
-    },{
-        "sensorID":"skajgsdhf4351jklh",
-        "name":"patient oximeter sensor",
-        "patientID":5
-    }]
+    "devices": []
 }
