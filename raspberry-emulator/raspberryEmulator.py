@@ -127,7 +127,6 @@ class RaspberryEmulator :
                             'name' : 'room-light-sensor'
                         }))
                     for id in self.rooms[room] :
-
                         r = requests.put(self.conf_file['host']+"/update-device",data = json.dumps({
                             'deviceID' : str(id)+'tp',
                             'patientID' : int(id),
@@ -155,11 +154,13 @@ class RaspberryEmulator :
                     if patientId not in self.rooms[roomId] :
                         self.rooms[roomId].append(patientId)
                         r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
-                                                                            'deviceID' : str(patientId)+'t',
+                                                                            'deviceID' : str(patientId)+'tp',
+                                                                            'patientID' : int(patientId),
                                                                             'name' : 'patient-temperature-sensor'
         }))
                         r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
                                                                                             'deviceID' : str(patientId)+'o',
+                                                                                            'patientID' : int(patientId),
                                                                                             'name' : 'patient-oximeter-sensor'
         }))
                 else :

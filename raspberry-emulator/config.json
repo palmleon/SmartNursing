@@ -4,5 +4,5 @@
     "patientTemperatureEmulatorIntervalMinute" : 0.5,
     "patientRoomEmulatorIntervalMinute" : 0.5,
     "commonRoomEmulatorIntervalMinute" : 0.3,
-    "updateIntervalMinute" : 3
+    "updateIntervalMinute" : 0.3
 }
