@@ -5,12 +5,15 @@
     "template_alarm": {"alert":"","time":null},
     "alarm_messages":
     {
-        "alarm_battery": "ATTENTION, patient {} has the pulse oximeter's battery low",
-        "alarm_place": "ATTENTION, patient {} has a the pulse oximeter removed or bad positioned",
-        "alarm_fibrillation": "ATTENTION, patient {} has a fibrillation state"
+        "alarm_battery": "WARNING, patient {} has the pulse oximeter's battery low",
+        "alarm_place": "WARNING, patient {} has the pulse oximeter bad positioned or removed",
+        "alarm_fibrillation": "WARNING, patient {} is in fibrillation condition"
     },
     "update_service_time_seconds" : 100,
-    "voltage-theresold" : 2.8,
-    "fibrillation-state" : 5,
-    "attendability-theresold" : 4
+    "Thresholds":
+    {
+        "battery_threshold" : 2.8,
+        "fibrillation_std_threshold" : 5,
+        "attendability_threshold" : 4
+    }
 }

@@ -13,16 +13,15 @@ class Fibrillation_Monitor_client():
     fp.close()
     #Acquisizione ID, nome e url registro
     self.__clientID=conf_file["serviceID"]
-    voltageTheresold = int(conf_file['voltage-theresold'])
-    fibrillationState = int(conf_file['fibrillation-state'])
-    attendabilityTheresold = int(conf_file['attendability-theresold'])
     self.__name=conf_file["name"]
-    self.__update_service_time_seconds = conf_file['update_service_time_seconds']
-
     self.__register=conf_file["host"]
+    # Acquisizione tempo update
+    self.__update_service_time_seconds = conf_file['update_service_time_seconds']
     # Acquisizione template alert e i vari alert
     self.__alert=conf_file["template_alarm"]
     messagesdict=conf_file["alarm_messages"]
+    # Acquisizione soglie
+    ThresholdsDict=conf_file["Thresholds"]
     # Iscrizione al registro
     # print("iscrizione al registro\n")
     r = requests.post(self.__register+"/add-service",data= json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
@@ -46,7 +45,7 @@ class Fibrillation_Monitor_client():
     self.__base_topic_pub=mb
 
     # Creating analyzer
-    self.analyzer=Fibrillation_Monitor(messagesdict,voltageTheresold,fibrillationState,attendabilityTheresold)
+    self.analyzer=Fibrillation_Monitor(messagesdict,ThresholdsDict)
 
     # Creating client
     # print("Istanziamento Client\n")
@@ -64,10 +63,11 @@ class Fibrillation_Monitor_client():
     while True :
       time.sleep(self.__update_service_time_seconds)
       r = requests.put(self.__register+"/update-service",data = json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
+      #print("Updating service")
       #print(r)
 
   def notify(self,topic,msg): # Metodo che analizza i dati arrivati utilizzando i metodi dell'analyzer e, in caso, pubblica i warning
-    # print(f"messaggio arrivato da topic: {topic}\n")
+    print(f"\nIncoming message from topic: {topic}\n")
     msg=json.loads(msg)
     ID_P=topic.split("/")[-1] # Prendo l'ID del PZ alla fine del topic
 
