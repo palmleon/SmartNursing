@@ -8,7 +8,7 @@ class light_patient_room_monitor() :
     def __init__(self) :
         self.conf_file = json.load(open('config.json'))
         self.serviceId = int(self.conf_file['serviceId'])
-        self.serviceName = int(self.conf_file['serviceName'])
+        self.serviceName = self.conf_file['serviceName']
         r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
             'serviceID' : self.serviceId,
             'name' : self.serviceName
