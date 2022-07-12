@@ -37,16 +37,26 @@ class Patient_Monitor_client():
 
     r = requests.get(self.__register+"/patient-temperature-base-topic")
     mb = r.json()
-    # Per ora, in mb abbiamo direttamente il topic, non coppia key/value
+    # In mb abbiamo direttamente il topic, non coppia key/value
     self.__topic_sub_T=mb+"+"
 
     r = requests.get(self.__register+"/alarm-base-topic")
     mb = r.json()
-    # Per ora, in mb abbiamo direttamente il topic, non coppia key/value
+    # In mb abbiamo direttamente il topic, non coppia key/value
     self.__base_topic_pub=mb
     
+    # Estrazione soglie
+    hT=conf_file['high_body_temperature']
+    lT=conf_file['low_body_temperature']
+    wT=conf_file['wrong_body_temperature']
+    bt=conf_file['battery_threshold']
+    at=conf_file['attendability_threshold']
+    uP=conf_file['pulse_upper_threshold']
+    lP=conf_file['pulse_lower_threshold']
+    St=conf_file['saturation_threshold']
+
     # Creating analyzer
-    self.analyzer=Patient_Monitor(messagesdict,int(conf_file['high-body-temperautre']),int(conf_file['low-body-temperature']),int(conf_file['wrong-body-temperature']),int(conf_file['battery-theresold']),int(conf_file['attendability-theresold']),int(conf_file['pulse-upper-theresold']),int(conf_file['pulse-lower-theresold']),int(conf_file['saturation-theresold']))
+    self.analyzer=Patient_Monitor(messagesdict,hT,lT,wT,bt,at,uP,lP,St)
 
     # Creating client
     #print("Istanziamento Client\n")
@@ -71,7 +81,7 @@ class Patient_Monitor_client():
 
 
   def notify(self,topic,msg): # Metodo che analizza i dati arrivati utilizzando i metodi dell'analyzer e, in caso, pubblica i warning
-    print(f"messaggio arrivato da topic: {topic}\n")
+    print(f"\nIncoming message from topic: {topic}\n")
     msg=json.loads(msg)
     ID_P=topic.split("/")[-1] # Prendo l'ID del PZ alla fine del topic
 

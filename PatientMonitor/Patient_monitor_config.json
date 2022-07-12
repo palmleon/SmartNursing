@@ -5,22 +5,22 @@
     "template_alarm": {"alert":"","time":null},
     "alarm_messages":
     {
-        "alarm_Tbattery": "ATTENTION, the patient {} has the thermometer's battery low",
-        "alarm_Tplace": "ATTENTION, the patient {} has the thermomether bad positioned or removed",
-        "alarm_Th": "ATTENTION, the patient {} has fever, with a body temperatur of {}",
-        "alarm_Tl": "ATTENTION, the patient {} has low body temperature, of {}",
-        "alarm_Pbattery": "ATTENTION, the patient {} has the pulse oximeter's battery low",
-        "alarm_Pplace": "ATTENTION, the patient {} has the pulse oximeter bad positioned or removed",
-        "alarm_Ph": "ATTENTION, the patient {} has a high heart rate: {}",
-        "alarm_Pl": "ATTENTION, the patient {} has a low heart rate: {}",
-        "alarm_Sl": "ATTENTION, the patient {} is in hypoxia. Saturation at {}"
+        "alarm_Temperature_battery": "WARNING, the patient {} has the thermometer's battery low",
+        "alarm_Temperature_place": "WARNING, the patient {} has the thermomether bad positioned or removed",
+        "alarm_high_Temperature": "WARNING, the patient {} has fever, with a body temperatur of {}",
+        "alarm_low_Temperature": "WARNING, the patient {} has low body temperature, of {}",
+        "alarm_Pulse_battery": "WARNING, the patient {} has the pulse oximeter's battery low",
+        "alarm_Pulse_place": "WARNING, the patient {} has the pulse oximeter bad positioned or removed",
+        "alarm_high_Pulse": "WARNING, the patient {} has a high heart rate: {}",
+        "alarm_low_Pulse": "WARNING, the patient {} has a low heart rate: {}",
+        "alarm_Saturation_Threshold": "WARNING, the patient {} is in hypoxia. Blood saturation at {}"
     },
-    "saturation-theresold" : 95,
-    "pulse-lower-theresold" : 55,
-    "pulse-upper-theresold" : 100,
-    "attendability-theresold" : 4,
-    "battery-theresold" : 2.8,
-    "wrong-body-temperature" : 35,
-    "low-body-temperature" : 36,
-    "high-body-temperautre" : 37
+    "saturation_threshold" : 95,
+    "pulse_lower_threshold" : 55,
+    "pulse_upper_threshold" : 100,
+    "attendability_threshold" : 4,
+    "battery_threshold" : 2.8,
+    "wrong_body_temperature" : 35,
+    "low_body_temperature" : 36,
+    "high_body_temperature" : 37
 }
