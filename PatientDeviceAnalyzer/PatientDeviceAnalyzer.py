@@ -11,10 +11,11 @@ class PatientDeviceAnalyzer():
     conf_file = json.load(fp)
     fp.close()
     # Acquisizione ID, nome e url registro
-    self.__updateTimeInSecond=conf_file['updateTimeInSecond']
     self.__clientID=conf_file["serviceID"]
     self.__name=conf_file["name"]
     self.__register=conf_file["host"]
+    # Acquisizione tempo update
+    self.__updateTimeInSecond=conf_file['update_service_time_seconds']
     # Acquisizione template alert e i vari alert
     self.__alert=conf_file["template_alarm"]
     messagesdict=conf_file["alarm_messages"]
@@ -47,8 +48,8 @@ class PatientDeviceAnalyzer():
     while True:
       time.sleep(20)
       #Controllo su orario (è notte?)
-      if time.localtime()[3]>=self.__hours[0] or time.localtime()[3]<=self.__hours[1]:
-      #if True:
+      #if time.localtime()[3]>=self.__hours[0] or time.localtime()[3]<=self.__hours[1]:
+      if True:
         # Richiesta dell'attuale lista dei pazienti
         r = requests.get(self.__register+"/patients")
         patient_dict=r.json()
@@ -65,12 +66,12 @@ class PatientDeviceAnalyzer():
           alarm=[]
           for device in all_devices:
             if "patientID" in device: #Verifica del tipo di sensore (se del paziente o della stanza)
-              if patient==device["patientID"]:
+              if str(patient)==str(device["patientID"]):
                 sensors.append(device["name"])
-          if "patient temperature sensor" not in sensors:
+          if "patient-temperature-sensor" not in sensors:
             alarm.append(self.__alarm_T[0]+str(patient)+self.__alarm_T[1])
             #alarm=f"Il termometro del paziente {patient} è offline"
-          if "patient oximeter sensor" not in sensors:
+          if "patient-oximeter-sensor" not in sensors:
             alarm.append(self.__alarm_P[0]+str(patient)+self.__alarm_P[1])
             #alarm+=f"Il pulsossimetro del paziente {patient} è offline"
           print(alarm) #print di DEBUG
