@@ -15,7 +15,9 @@ class PatientDeviceAnalyzer():
     self.__name=conf_file["name"]
     self.__register=conf_file["host"]
     # Acquisizione tempo update
-    self.__updateTimeInSecond=conf_file['update_service_time_seconds']
+    self.__updateTimeInSecond=conf_file["update_service_time_seconds"]
+    # Acquisizione tempo di attesa controllo
+    self.__controlTimeInSecond=conf_file["control_time_seconds"]
     # Acquisizione template alert e i vari alert
     self.__alert=conf_file["template_alarm"]
     messagesdict=conf_file["alarm_messages"]
@@ -42,12 +44,13 @@ class PatientDeviceAnalyzer():
     # Richiesta table oraria
     r = requests.get(self.__register+"/patient-room-hourly-scheduling")
     d=r.json()
-    self.__hours=d["night"] #carica una lista con d[0]=21 e d[1]=10
+    self.__hours=d["night"] #carica una lista con d[0]=ORARIO INIZIO (SERA) e d[1]=ORARIO FINE (GIORNO)
   
   def control(self):
     while True:
-      time.sleep(20)
+      time.sleep(self.__controlTimeInSecond)
       #Controllo su orario (è notte?)
+      ###TODO###: REMOVE AFTER DEBUG
       #if time.localtime()[3]>=self.__hours[0] or time.localtime()[3]<=self.__hours[1]:
       if True:
         # Richiesta dell'attuale lista dei pazienti
