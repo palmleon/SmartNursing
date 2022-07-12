@@ -15,9 +15,9 @@ class PatientDeviceAnalyzer():
     self.__name=conf_file["name"]
     self.__register=conf_file["host"]
     # Acquisizione tempo update
-    self.__updateTimeInSecond=conf_file["update_service_time_seconds"]
+    self.__update_service_time_seconds=conf_file["update_service_time_seconds"]
     # Acquisizione tempo di attesa controllo
-    self.__controlTimeInSecond=conf_file["control_time_seconds"]
+    self.__control_time_seconds=conf_file["control_time_seconds"]
     # Acquisizione template alert e i vari alert
     self.__alert=conf_file["template_alarm"]
     messagesdict=conf_file["alarm_messages"]
@@ -48,7 +48,7 @@ class PatientDeviceAnalyzer():
   
   def control(self):
     while True:
-      time.sleep(self.__controlTimeInSecond)
+      time.sleep(self.__control_time_seconds)
       #Controllo su orario (è notte?)
       ###TODO###: REMOVE AFTER DEBUG
       #if time.localtime()[3]>=self.__hours[0] or time.localtime()[3]<=self.__hours[1]:
@@ -88,7 +88,7 @@ class PatientDeviceAnalyzer():
   
   def updateService(self) :
     while True :
-      time.sleep(self.__updateTimeInSecond)
+      time.sleep(self.__update_service_time_seconds)
       r = requests.put(self.__register+"/update-service",data = json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
 
 if __name__ == "__main__" :
