@@ -1,3 +1,8 @@
 {
-    "host": "http://cdrsi:8080/catalog"
+    "host": "http://cdrsi:8080/catalog",
+    "thinkspeakchannel": "https://api.thingspeak.com/update",
+    "thinkSpeakChannelJson": "https://api.thingspeak.com/channels.json",
+    "thinkspeakUrl" : "https://api.thingspeak.com/channels",
+    "waitingTimeMinutes" : 2,
+    "serviceId" : 8
 }

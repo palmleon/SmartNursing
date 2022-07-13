@@ -2,5 +2,18 @@
     "host" : "http://cdrsi:8080/catalog",
     "serviceID" : 3,
     "name": "Fibrillation-monitor-service3",
-    "template_alarm": {"alert":"","time":null}
+    "template_alarm": {"alert":"","time":null},
+    "alarm_messages":
+    {
+        "alarm_battery": "WARNING, patient {} has the pulse oximeter's battery low",
+        "alarm_place": "WARNING, patient {} has the pulse oximeter bad positioned or removed",
+        "alarm_fibrillation": "WARNING, patient {} is in fibrillation condition"
+    },
+    "update_service_time_seconds" : 100,
+    "Thresholds":
+    {
+        "battery_threshold" : 2.8,
+        "fibrillation_std_threshold" : 5,
+        "attendability_threshold" : 4
+    }
 }

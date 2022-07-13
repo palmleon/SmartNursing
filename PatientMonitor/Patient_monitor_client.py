@@ -7,19 +7,28 @@ import requests
 class Patient_Monitor_client():
   def __init__(self):
     # Apertura file di configurazione
+    #print("Lettura file config\n")
     fp=open('Patient_monitor_config.json')
     conf_file = json.load(fp)
-    fp.close
-    #Acquisizione ID,nome e url registro
+    fp.close()
+    # Acquisizione ID,nome e url registro
     self.__clientID=conf_file["serviceID"]
     self.__name=conf_file["name"]
     self.__register=conf_file["host"]
-    # Generazione template alert
+    # Acquisizione tempo update
+    self.__update_service_time_seconds = conf_file['update_service_time_seconds']
+    # Acquisizione template alert e i vari alert
     self.__alert=conf_file["template_alarm"]
+    messagesDict=conf_file["alarm_messages"]
+    # Acquisizione soglie
+    ThresholdsDict=conf_file["Thresholds"]
     # Iscrizione al registro
+    #print("iscrizione al registro\n")
     r = requests.post(self.__register+"/add-service",data = json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
+    #print(r)
     
     # Richiesta dati broker al registro
+    #print("Richiesta dati al registro\n")
     r = requests.get(self.__register+"/message-broker")
     mb = r.json()
     self.__broker=mb['name']
@@ -32,18 +41,19 @@ class Patient_Monitor_client():
 
     r = requests.get(self.__register+"/patient-temperature-base-topic")
     mb = r.json()
-    # Per ora, in mb abbiamo direttamente il topic, non coppia key/value
+    # In mb abbiamo direttamente il topic, non coppia key/value
     self.__topic_sub_T=mb+"+"
 
     r = requests.get(self.__register+"/alarm-base-topic")
     mb = r.json()
-    # Per ora, in mb abbiamo direttamente il topic, non coppia key/value
+    # In mb abbiamo direttamente il topic, non coppia key/value
     self.__base_topic_pub=mb
-    
+
     # Creating analyzer
-    self.analyzer=Patient_Monitor()
+    self.analyzer=Patient_Monitor(messagesDict,ThresholdsDict)
 
     # Creating client
+    #print("Istanziamento Client\n")
     self.client = MyMQTT(self.__name, self.__broker, self.__port, self)
 
     # Starting client
@@ -51,21 +61,25 @@ class Patient_Monitor_client():
     time.sleep(2)
 
     # Subscribing
+    #print(f"Sottoscrizione al topic: {self.__topic_sub_T}\n")
     self.client.mySubscribe(self.__topic_sub_T)
+
+    #print(f"Sottoscrizione al topic: {self.__topic_sub_P}\n")
     self.client.mySubscribe(self.__topic_sub_P)
   
   def updateService(self) :
     while True :
-      time.sleep(40)
+      time.sleep(self.__update_service_time_seconds)
       r = requests.put(self.__register+"/update-service",data = json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
+      #print(r)
 
 
   def notify(self,topic,msg): # Metodo che analizza i dati arrivati utilizzando i metodi dell'analyzer e, in caso, pubblica i warning
-    print("arriva in pm")
+    print(f"\nIncoming message from topic: {topic}\n")
     msg=json.loads(msg)
     ID_P=topic.split("/")[-1] # Prendo l'ID del PZ alla fine del topic
 
-    #DEBUG : telegram receives alerts ? 
+    
     evento=msg["e"] # Prendo la lista degli eventi
     
     # Inizializzazioni
@@ -90,24 +104,28 @@ class Patient_Monitor_client():
         temp=ev["v"]
     
     if temp>-1:
+      #print(f"Ottenuti: batteria={battery} e temperatura:{temp}\n")
       r=self.analyzer.Temperature(ID_P,temp,battery)
-      if r!=None:
-        to_pub=self.__alert
-        to_pub["ID_PZ"]=ID_P
-        to_pub["alert"]=r
-        to_pub["time"]=time.time()
-        # Publish alert
-        print("DEBUG : Invio allarme per temperature")
-        self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
-    
-    if len(Pi)>1:
-      r=self.analyzer.Pulse(ID_P,Pi,pulse,sat,battery)
+      #print(f"Risposta ottenuta:{r}\n")
       if r!=None:
         to_pub=self.__alert
         #to_pub["ID_PZ"]=ID_P
         to_pub["alert"]=r
         to_pub["time"]=time.localtime()
         # Publish alert
+        #print("Invio allarme per temperature\n")
+        self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
+    
+    if len(Pi)>1:
+      #print(f"Ottenuti: batteria={battery} e liste dei parametri\n")
+      r=self.analyzer.Pulse(ID_P,Pi,pulse,sat,battery)
+      for alert in r:
+        to_pub=self.__alert
+        #to_pub["ID_PZ"]=ID_P
+        to_pub["alert"]=alert
+        to_pub["time"]=time.localtime()
+        # Publish alert
+        #print("Invio allarme per oximeter\n")
         self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
 
 if __name__=="__main__":

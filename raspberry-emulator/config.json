@@ -1,3 +1,8 @@
 {
-    "host" : "http://cdrsi:8080/catalog"
+    "host" : "http://cdrsi:8080/catalog",
+    "patientMonitorEmulatorIntervalMinute" : 0.16,
+    "patientTemperatureEmulatorIntervalMinute" : 0.5,
+    "patientRoomEmulatorIntervalMinute" : 0.5,
+    "commonRoomEmulatorIntervalMinute" : 0.3,
+    "updateIntervalMinute" : 0.3
 }

@@ -2,7 +2,7 @@
     "services": [],
     "message-broker": {
         "port": 1883,
-        "name": "test.mosquitto.org"
+        "name": "mqtt.eclipseprojects.io"
     },
     "city": "Turin",
     "telegram-user-id-list": [{
@@ -61,7 +61,7 @@
     ],
     "room-list": [
         {
-            "roomID": 2,
+            "roomID": 1,
             "patients": [],
             "desired-temperature": 23
         }
@@ -70,16 +70,16 @@
         "api_key" : "YTN43QRA4IWIEBIN",
         "name" : "Patient",
         "public_flag" : false,
-        "field1" : "average saturation",
-        "field2" : "perfusion index",
-        "field3" : "saturation",
-        "field4" : "pulse rate",
-        "field5" : "average pulse rate",
-        "field6" : "temperature",
-        "field7" : "average temperature",
+        "field1" : "saturation",
+        "field2" : "average saturation",
+        "field3" : "pulse rate",
+        "field4" : "average pulse rate",
+        "field5" : "temperature",
+        "field6" : "average temperature",
+        "field7" : "perfusion index",
         "field8" : null
       },
-    "api-weather": "http://api.weatherstack.com/current?access_key=36fcb02003026b9fae56e4c0a5a228fe&query=",
+    "api-weather": "http://api.weatherstack.com/current?access_key=354a8fd8d83e78359700032ca93ff485&query=",
     "bot-token" : "5553441519:AAFX3I2ooeeb0hER05cRsDN5ZYnFHw-EJlU",
     "common-room-list": [
         {
@@ -138,12 +138,5 @@
     "alarm-base-topic": "group01/IoTProject/PatientAlarm/",
     "patient-room-command-base-topic": "group01/IoTProject/PatientRoomCommand/",
     "common-room-command-base-topic": "group01/IoTProject/CommonRoomCommand/",
-    "devices": [{
-        "deviceID" : 1,
-        "timestamp" : "2022-05-15 22:53:40.844402"
-    },
-    {
-        "deviceID" : 2,
-        "timestamp" : "2022-05-15 22:53:40.844402"
-    }]
+    "devices": []
 }
