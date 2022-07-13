@@ -192,7 +192,7 @@ class SmartClinicBot(object):
     # The topic contains the ID of the Patient/Room
     # The Payload is a raw string, encoded in utf-8
     def notify(self, topic, payload):
-        
+        print("Message received")
         try:
             # Extract the kind of topic and the ID
             topics = topic.split('/')

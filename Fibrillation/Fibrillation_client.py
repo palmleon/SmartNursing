@@ -97,7 +97,7 @@ class Fibrillation_Monitor_client():
         to_pub=self.__alert
         #to_pub["ID_PZ"]=ID_P
         to_pub["alert"]=r
-        to_pub["time"]=time.localtime()
+        to_pub["time"]=time.strftime('%Y/%m/%d %H:%M:%S', time.localtime())
         # Publish alert
         # print("Invio allarme per oximeter\n")
         self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)

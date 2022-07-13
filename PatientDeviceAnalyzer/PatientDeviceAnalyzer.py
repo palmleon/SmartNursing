@@ -82,7 +82,7 @@ class PatientDeviceAnalyzer():
             #Creazione messaggio
             to_pub=self.__alert
             to_pub["alert"]=alert
-            to_pub["time"]=time.localtime()
+            to_pub["time"]=time.strftime('%Y/%m/%d %H:%M:%S', time.localtime())
             # Publicazione alert
             self.client.myPublish(self.__base_topic_pub+str(patient),to_pub)
   
