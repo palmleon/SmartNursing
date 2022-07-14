@@ -3,16 +3,8 @@
     "serviceID" : 10,
     "name": "PatientDevice-monitor-service10",
     "template_alarm": {"alert":"","time":null},
-    "alarm_messages":
-    {
-        "alarm_T": "WARNING, the patient {} has the thermometer offline",
-        "alarm_P": "WARNING, the patient {} has the pulse oximeter offline"
-    },
-    "sensor_names":
-    {
-        "thermometer":"patient-temperature-sensor",
-        "pulse_oximeter":"patient-oximeter-sensor"
-    },
+    "alarm_message_base": "WARNING, the patient {} has the {} offline",
+    "sensor_names":["thermometer","pulse oximeter"],
     "update_service_time_seconds" : 100,
     "control_time_seconds" : 30
 }

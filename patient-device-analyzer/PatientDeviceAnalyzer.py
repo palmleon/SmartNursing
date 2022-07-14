@@ -19,13 +19,10 @@ class PatientDeviceAnalyzer():
     # Getting service waiting time
     self.__control_time_seconds=conf_file["control_time_seconds"]
     # Getting sensor names
-    self.__T_sensor_name=conf_file["sensor_names"]["thermometer"]
-    self.__P_sensor_name=conf_file["sensor_names"]["pulse_oximeter"]
+    self.__sensor_name_list=conf_file["sensor_names"]
     # Getting alarm template and messages
     self.__alert=conf_file["template_alarm"]
-    messagesdict=conf_file["alarm_messages"]
-    self.__alarm_T=messagesdict["alarm_T"].split("{}")
-    self.__alarm_P=messagesdict["alarm_P"].split("{}")
+    self.__alarm_message=conf_file["alarm_message_base"].split("{}")
     # Registration
     r=requests.post(self.__register+"/add-service",data= json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
     
@@ -69,24 +66,27 @@ class PatientDeviceAnalyzer():
         #print(all_devices)
         for patient in patient_IDs: #Checking one patient each time
           sensors=[]
-          alarm=[]
+          alarm=""
           for device in all_devices:
             if "patientID" in device: # Checking if it's a room or patient device
               if str(patient)==str(device["patientID"]):
                 sensors.append(device["name"]) # Sensor found
 
-          if self.__T_sensor_name not in sensors: # Checking if thermometer was found
-            alarm.append(self.__alarm_T[0]+str(patient)+self.__alarm_T[1])
-
-          if self.__P_sensor_name not in sensors: # Checking if pulse oximeter was found
-            alarm.append(self.__alarm_P[0]+str(patient)+self.__alarm_P[1])
+          for name in self.__sensor_name_list:
+            if name not in sensors: # Checking if the "name" sensor was found
+              alarm=self.__alarm_message[0]+str(patient)+self.__alarm_message[1]+name+self.__alarm_message[2]
+              to_pub=self.__alert
+              to_pub["alert"]=alarm
+              to_pub["time"]=time.strftime('%Y/%m/%d %H:%M:%S', time.localtime())
+              self.client.myPublish(self.__base_topic_pub+str(patient),to_pub)
+          
           #print(alarm)
-          for alert in alarm:
+          """for alert in alarm:
             # Publish a message for each sensor not found
             to_pub=self.__alert
             to_pub["alert"]=alert
             to_pub["time"]=time.strftime('%Y/%m/%d %H:%M:%S', time.localtime())
-            self.client.myPublish(self.__base_topic_pub+str(patient),to_pub)
+            self.client.myPublish(self.__base_topic_pub+str(patient),to_pub)"""
   
   def updateService(self) :
     while True :

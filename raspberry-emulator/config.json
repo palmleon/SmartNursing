@@ -75,8 +75,8 @@
     },
     "oximeter-sample-number": 10,
     "patient_sensors": [
-        "patient-temperature-sensor",
-        "patient-oximeter-sensor"
+        "thermometer",
+        "pulse oximeter"
     ],
     "common_room_sensors": [
         "common-room-temperature-sensor",
