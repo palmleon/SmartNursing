@@ -2,6 +2,10 @@
 #name: smartclinic
 services:
 
+  volumes:
+    drsi-data:
+
+
   #device registry system
   cdrsi:
 
@@ -11,6 +15,9 @@ services:
       - 8080:8080
     expose:
       - 8080
+    volumes : 
+      - drsi-data:/var/app/data
+
     #container_name: cdrsi
 
   #Telegram
