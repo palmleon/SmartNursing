@@ -3,6 +3,6 @@
     "thinkspeakchannel": "https://api.thingspeak.com/update",
     "thinkSpeakChannelJson": "https://api.thingspeak.com/channels.json",
     "thinkspeakUrl" : "https://api.thingspeak.com/channels",
-    "waitingTimeMinutes" : 2,
+    "waitingTimeMinutes" : 120,
     "serviceId" : 8
 }

@@ -19,7 +19,6 @@ class dataAnalysis():
         r = requests.get(self.conf_file['host']+"/patient-room-hourly-scheduling")
         r = r.json()
         self.timeInterval = r['night']
-        #self.timeInterval = [18,4] ######### TEST #######
         self.watingTime = 60*int(self.conf_file['waitingTimeMinutes'])
     def retriveData(self,channelList):
         dataDict = dict()
@@ -151,7 +150,8 @@ def perform():
     flag_time = 1
     print('Starting data analysis')
     lastTimeExec = datetime.fromtimestamp(time.time())
-    #lastTimeExec = datetime.fromtimestamp(1657017306) ###### TEST ######
+    #TODO remove for the real implementation, this is just for test to compute the average
+    lastTimeExec = datetime.fromtimestamp(1657017306) ###### TEST ######
     lastTimeExec = d.convertData(str(lastTimeExec))
     while True:
         now = datetime.fromtimestamp(time.time())
