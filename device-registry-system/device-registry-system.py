@@ -17,13 +17,14 @@ class Catalog(object) :
             self.catalogList = json.load(self.fp)
         self.fp.close()
         
-
+    #compute the differences in minutes to determine which services or devices are not updated
     def computeDifference(self,t2,t1) :
         t1 = datetime.datetime.strptime(t1, "%Y-%m-%d %H:%M:%S.%f")
         diff = t2-t1
         diff = diff.total_seconds()
         return diff/60
 
+    #refresh the catalog, deleting services and devices not updated
     def refreshList(self) :
         while True :
             time.sleep(60*self.refreshCatalogIntervalMinute)
@@ -35,7 +36,8 @@ class Catalog(object) :
             self.fp.close()
 
     def GET(self,*uri):
-        
+        if len(uri) == 0 :
+            raise cherrypy.HTTPError(400,'Wrong parameters number')
 
         if uri[0] == 'message-broker' :
             return json.dumps(self.catalogList["message-broker"])
@@ -180,7 +182,7 @@ class Catalog(object) :
             raise cherrypy.HTTPError(404,'operation not found')
 
 
-    def POST(self,*uri,**path):
+    def POST(self,*uri):
         if len(uri) != 1 :
             raise cherrypy.HTTPError(400,'Wrong parameters number')
 

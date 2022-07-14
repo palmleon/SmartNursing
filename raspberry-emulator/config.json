@@ -1,9 +1,90 @@
 {
-    "host" : "http://cdrsi:8080/catalog",
-    "patientOximeterEmulatorIntervalMinute" : 5,
-    "patientTemperatureEmulatorIntervalMinute" : 5,
-    "patientTemperatureRoomEmulatorIntervalMinute" : 0.5,
-    "patientLightRoomEmulatorIntervalMinute" : 0.3,
-    "commonRoomEmulatorIntervalMinute" : 5,
-    "updateIntervalMinute" : 0.3
+    "host": "http://cdrsi:8080/catalog",
+    "patientOximeterEmulatorIntervalMinute": 5,
+    "patientTemperatureEmulatorIntervalMinute": 5,
+    "patientTemperatureRoomEmulatorIntervalMinute": 0.5,
+    "patientLightRoomEmulatorIntervalMinute": 0.3,
+    "commonRoomEmulatorIntervalMinute": 5,
+    "updateIntervalMinute": 0.3,
+    "oximeter-sensor-base-message": {
+        "bn": "",
+        "bt": 0,
+        "e": [
+            {
+                "n": "battery",
+                "u": "V",
+                "v": 0
+            },
+            {
+                "n": "perfusion index",
+                "u": "perc",
+                "v": []
+            },
+            {
+                "n": "saturation",
+                "u": "perc",
+                "v": []
+            },
+            {
+                "n": "pulse rate",
+                "u": "bpm",
+                "v": []
+            }
+        ]
+    },
+    "patient-temperature-sensor-base-message": {
+        "bn": "",
+        "bt": 0,
+        "e": [
+            {
+                "n": "battery",
+                "u": "V",
+                "v": 0
+            },
+            {
+                "n": "temperature",
+                "u": "cel",
+                "v": 0
+            }
+        ]
+    },
+    "room-light-sensor-base-message": {
+        "bn": "",
+        "bt": 0,
+        "e": {
+            "n": "light",
+            "u": "bool",
+            "v": 0
+        }
+    },
+    "room-temperature-motion-sensor-base-message": {
+        "bn": "",
+        "bt": 0,
+        "e": [
+            {
+                "n": "presence",
+                "u": "bool",
+                "v": 0
+            },
+            {
+                "n": "temperature",
+                "u": "cel",
+                "v": 0
+            }
+        ]
+    },
+    "oximeter-sample-number": 10,
+    "patient_sensors": [
+        "patient-temperature-sensor",
+        "patient-oximeter-sensor"
+    ],
+    "common_room_sensors": [
+        "common-room-temperature-sensor",
+        "common-room-presence-sensor"
+    ],
+    "patient-room-sensors": [
+        "patient-room-light-sensor",
+        "patient-room-temperature-sensor",
+        "patient-room-presence-sensor"
+    ]
 }
