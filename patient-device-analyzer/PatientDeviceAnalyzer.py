@@ -81,12 +81,6 @@ class PatientDeviceAnalyzer():
               self.client.myPublish(self.__base_topic_pub+str(patient),to_pub)
           
           #print(alarm)
-          """for alert in alarm:
-            # Publish a message for each sensor not found
-            to_pub=self.__alert
-            to_pub["alert"]=alert
-            to_pub["time"]=time.strftime('%Y/%m/%d %H:%M:%S', time.localtime())
-            self.client.myPublish(self.__base_topic_pub+str(patient),to_pub)"""
   
   def updateService(self) :
     while True :
