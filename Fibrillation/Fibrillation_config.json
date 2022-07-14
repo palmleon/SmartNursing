@@ -5,9 +5,9 @@
     "template_alarm": {"alert":"","time":null},
     "alarm_messages":
     {
-        "alarm_battery": "WARNING, patient {} has the pulse oximeter's battery low",
-        "alarm_place": "WARNING, patient {} has the pulse oximeter bad positioned or removed",
-        "alarm_fibrillation": "WARNING, patient {} is in fibrillation condition"
+        "alarm_battery": "WARNING, the patient {} has the pulse oximeter's battery low",
+        "alarm_place": "WARNING, the patient {} has the pulse oximeter bad positioned or removed",
+        "alarm_fibrillation": "WARNING, the patient {} is in fibrillation condition"
     },
     "update_service_time_seconds" : 100,
     "Thresholds":
