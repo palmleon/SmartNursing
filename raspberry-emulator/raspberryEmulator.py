@@ -150,7 +150,7 @@ class RaspberryEmulator :
                     
                     
                     for id in self.rooms[room] :
-                        for sensor in self.patientRoomSensorsList :
+                        for sensor in self.patientSensorsList :
                             r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
                                                                                 'deviceID' : str(id)+sensor,
                                                                                 'patientID' : int(id),
@@ -170,7 +170,7 @@ class RaspberryEmulator :
                 if roomId in self.rooms :
                     if patientId not in self.rooms[roomId] :
                         self.rooms[roomId].append(patientId)
-                        for sensor in self.patientRoomSensorsList :
+                        for sensor in self.patientSensorsList :
                             r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
                                                                                 'deviceID' : str(patientId)+sensor,
                                                                                 'patientID' : int(patientId),
@@ -178,6 +178,10 @@ class RaspberryEmulator :
             }))
                         
                 else :
+                    print("ENTRO QUI")
+                    print(self.patientSensorsList)
+                    print(self.patientRoomSensorsList)
+                    print(self.commonRoomSensorsList)
                     self.rooms[roomId] = [patientId]
                     for sensor in self.patientRoomSensorsList :
                         r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
@@ -185,7 +189,7 @@ class RaspberryEmulator :
                                                                         'name' : sensor
                                                                     }))
                     
-                    for sensor in self.patientRoomSensorsList :
+                    for sensor in self.patientSensorsList :
                         r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
                                                                                 'deviceID' : str(patientId)+sensor,
                                                                                 'patientID' : int(patientId),
