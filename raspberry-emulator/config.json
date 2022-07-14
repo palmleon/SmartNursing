@@ -2,8 +2,8 @@
     "host": "http://cdrsi:8080/catalog",
     "patientOximeterEmulatorIntervalMinute": 5,
     "patientTemperatureEmulatorIntervalMinute": 5,
-    "patientTemperatureRoomEmulatorIntervalMinute": 0.5,
-    "patientLightRoomEmulatorIntervalMinute": 0.3,
+    "patientTemperatureRoomEmulatorIntervalMinute": 5,
+    "patientLightRoomEmulatorIntervalMinute": 5,
     "commonRoomEmulatorIntervalMinute": 5,
     "updateIntervalMinute": 0.3,
     "oximeter-sensor-base-message": {
@@ -75,8 +75,8 @@
     },
     "oximeter-sample-number": 10,
     "patient_sensors": [
-        "patient-temperature-sensor",
-        "patient-oximeter-sensor"
+        "thermometer",
+        "pulse oximeter"
     ],
     "common_room_sensors": [
         "common-room-temperature-sensor",

@@ -100,7 +100,6 @@ class RaspberryEmulator :
                     #self.roomEmulator.emulateData()
                     #fare publish
                     dataEmulated = self.temperatureRoomSensor.emulateData(room)
-                    print('pubblico temperasturas per stanza paziente',dataEmulated)
                     self.mqttClient.myPublish(self.patientTemperatureRoomTopic+str(room),dataEmulated)
                     #print("simulo per stanza ",room," al seguente topic ",self.patientRoomTopic+str(room))
     def emulatePatientRoomLightData(self) :
@@ -139,7 +138,7 @@ class RaspberryEmulator :
             for commonRoom in self.commonRoomList :
                 for sensor in self.commonRoomSensorsList :
                     r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
-                                                                    'deviceID' : str(room["roomID"])+sensor,
+                                                                    'deviceID' : str(commonRoom)+sensor,
                                                                     'name' : sensor}))
             for room in list(self.rooms.keys()) :
                 if len(self.rooms[room]) != 0:
@@ -151,7 +150,7 @@ class RaspberryEmulator :
                     
                     
                     for id in self.rooms[room] :
-                        for sensor in self.patientRoomSensorsList :
+                        for sensor in self.patientSensorsList :
                             r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
                                                                                 'deviceID' : str(id)+sensor,
                                                                                 'patientID' : int(id),
@@ -171,7 +170,7 @@ class RaspberryEmulator :
                 if roomId in self.rooms :
                     if patientId not in self.rooms[roomId] :
                         self.rooms[roomId].append(patientId)
-                        for sensor in self.patientRoomSensorsList :
+                        for sensor in self.patientSensorsList :
                             r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
                                                                                 'deviceID' : str(patientId)+sensor,
                                                                                 'patientID' : int(patientId),
@@ -179,6 +178,10 @@ class RaspberryEmulator :
             }))
                         
                 else :
+                    print("ENTRO QUI")
+                    print(self.patientSensorsList)
+                    print(self.patientRoomSensorsList)
+                    print(self.commonRoomSensorsList)
                     self.rooms[roomId] = [patientId]
                     for sensor in self.patientRoomSensorsList :
                         r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
@@ -186,7 +189,7 @@ class RaspberryEmulator :
                                                                         'name' : sensor
                                                                     }))
                     
-                    for sensor in self.patientRoomSensorsList :
+                    for sensor in self.patientSensorsList :
                         r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
                                                                                 'deviceID' : str(patientId)+sensor,
                                                                                 'patientID' : int(patientId),
