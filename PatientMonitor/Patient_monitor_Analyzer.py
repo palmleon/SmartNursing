@@ -78,7 +78,7 @@ class Patient_Monitor():
         
         pulse=np.mean(pulse)
         sat=np.mean(sat)
-        print(pulse,'pulse computed')
+        #print(pulse,'pulse computed')
 
         if sat<=self.__saturationThreshold:
             alarm.append(self.__alarm_Sl[0]+ID_P+self.__alarm_Sl[1]+str(sat)+" %")
