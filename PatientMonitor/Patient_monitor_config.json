@@ -8,7 +8,7 @@
         "alarm_Temperature_battery": "WARNING, the patient {} has the thermometer's battery low",
         "alarm_Temperature_place": "WARNING, the patient {} has the thermomether bad positioned or removed",
         "alarm_high_Temperature": "WARNING, the patient {} has fever, with a body temperatur of {}",
-        "alarm_low_Temperature": "WARNING, the patient {} has low body temperature, of {}",
+        "alarm_low_Temperature": "WARNING, the patient {} is in hypothermia, of {}",
         "alarm_Pulse_battery": "WARNING, the patient {} has the pulse oximeter's battery low",
         "alarm_Pulse_place": "WARNING, the patient {} has the pulse oximeter bad positioned or removed",
         "alarm_high_Pulse": "WARNING, the patient {} has a high heart rate: {}",
