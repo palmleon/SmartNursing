@@ -18,6 +18,9 @@ class PatientDeviceAnalyzer():
     self.__update_service_time_seconds=conf_file["update_service_time_seconds"]
     # Acquisizione tempo di attesa controllo
     self.__control_time_seconds=conf_file["control_time_seconds"]
+    # Acquisizione nomi dei sensori
+    self.__T_sensor_name=conf_file["sensor_names"]["thermometer"]
+    self.__P_sensor_name=conf_file["sensor_names"]["pulse_oximeter"]
     # Acquisizione template alert e i vari alert
     self.__alert=conf_file["template_alarm"]
     messagesdict=conf_file["alarm_messages"]
@@ -71,10 +74,10 @@ class PatientDeviceAnalyzer():
             if "patientID" in device: #Verifica del tipo di sensore (se del paziente o della stanza)
               if str(patient)==str(device["patientID"]):
                 sensors.append(device["name"])
-          if "patient-temperature-sensor" not in sensors:
+          if self.__T_sensor_name not in sensors:
             alarm.append(self.__alarm_T[0]+str(patient)+self.__alarm_T[1])
             #alarm=f"Il termometro del paziente {patient} è offline"
-          if "patient-oximeter-sensor" not in sensors:
+          if self.__P_sensor_name not in sensors:
             alarm.append(self.__alarm_P[0]+str(patient)+self.__alarm_P[1])
             #alarm+=f"Il pulsossimetro del paziente {patient} è offline"
           #print(alarm)
