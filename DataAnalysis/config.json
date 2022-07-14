@@ -4,5 +4,5 @@
     "thinkSpeakChannelJson": "https://api.thingspeak.com/channels.json",
     "thinkspeakUrl" : "https://api.thingspeak.com/channels",
     "waitingTimeMinutes" : 120,
-    "serviceId" : 8
-}
+    "serviceId" : 8,
+    "attendability_threshold" : 4}

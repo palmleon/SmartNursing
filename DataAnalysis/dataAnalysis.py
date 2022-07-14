@@ -10,6 +10,7 @@ class dataAnalysis():
         self.conf_file = json.load(open('config.json'))
         self.thinkspeakchannel = self.conf_file['thinkspeakchannel']
         self.thinkspeakUrl = self.conf_file['thinkspeakUrl']
+        self.attendabilityThreshold = self.conf_file['attendability_threshold']
         r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
             'serviceID' : int(self.conf_file["serviceId"]),
             'name' : 'data-analysis'
@@ -131,7 +132,7 @@ class dataAnalysis():
                     else:
                         l = len(pi)
                     for i in range(0,l):
-                        if float(pi[i]) >= 4:
+                        if float(pi[i]) >= self.attendabilityThreshold:
                             sumSat = sumSat + float(saturation[i])
                             countSat = countSat + 1
                             sumPulse = sumPulse + float(pulse[i])
