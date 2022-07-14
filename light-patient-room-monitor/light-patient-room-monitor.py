@@ -26,7 +26,7 @@ class light_patient_room_monitor() :
         r = requests.get(self.conf_file['host']+"/message-broker")
         mb = r.json()
         self.mqttClient = MyMQTT(self.serviceName,mb['name'],mb['port'],self)
-        r = requests.get(self.conf_file['host']+"/patient-room-base-topic")
+        r = requests.get(self.conf_file['host']+"/patient-room-light-base-topic")
         t = r.json()
         self.subscribeTopic = t+"+"
         r = requests.get(self.conf_file['host']+"/patient-room-command-base-topic")
@@ -62,7 +62,7 @@ class light_patient_room_monitor() :
     def notify(self,topic,payload) :
         message = dict(json.loads(payload))
         room = topic.split("/")[-1]
-        print('ricevo darto',message['e'][0]['v'])
+        print('ricevo dato',message['e']['v'])
         if message['e']['v'] == 1 : 
             luminosity = self.setLuminosity()  
             self.__baseMessage['bt'] = time.time()

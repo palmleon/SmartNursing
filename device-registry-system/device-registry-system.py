@@ -91,9 +91,13 @@ class Catalog(object) :
         elif uri[0] == 'patient-saturation-base-topic' :
             return json.dumps(self.catalogList['patient-saturation-base-topic'])
 
-        elif uri[0] == 'patient-room-base-topic' :
-            return json.dumps(self.catalogList['patient-room-base-topic'])
+        elif uri[0] == 'patient-room-temperature-base-topic' :
+            return json.dumps(self.catalogList['patient-room-temperature-base-topic'])
         
+        elif uri[0] == 'patient-room-light-base-topic' :
+            return json.dumps(self.catalogList['patient-room-light-base-topic'])
+        
+
         elif uri[0] == 'common-room-base-topic' :
             return json.dumps(self.catalogList['common-room-base-topic'])
 

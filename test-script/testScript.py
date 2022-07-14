@@ -14,15 +14,15 @@ class TestScript():
         while choice != 0:
             if choice == 1 :
                 # expect on if runned at 21h
-                self.mqttClient.myPublish("group01/IoTProject/PatientRoom/1",{"bn" : "test","bt":0,"e" : [{"n":"presence","u":"bool","v":0},{"n":"temperature","u":"cel","v":27}]})
+                self.mqttClient.myPublish("group01/IoTProject/PatientRoom/Temperature/1",{"bn" : "test","bt":0,"e" : [{"n":"presence","u":"bool","v":0},{"n":"temperature","u":"cel","v":27}]})
             elif choice == 0:
                 return
             elif choice == 2:
                 # expected off if runned at 21h
-                self.mqttClient.myPublish("group01/IoTProject/CommonRoom/3",{"bn" : "test","bt":0,"e" : [{"n":"presence","u":"bool","v":0},{"n":"temperature","u":"cel","v":24}]})
+                self.mqttClient.myPublish("group01/IoTProject/PatientRoom/Temperature/3",{"bn" : "test","bt":0,"e" : [{"n":"presence","u":"bool","v":0},{"n":"temperature","u":"cel","v":24}]})
             elif choice == 3:
                 # expected 100 if runned at 22
-                self.mqttClient.myPublish("group01/IoTProject/PatientRoom/1",{"bn" : "test","bt":0,"e" : {"n":"light","u":"bool","v":1}})
+                self.mqttClient.myPublish("group01/IoTProject/PatientRoom/Light/1",{"bn" : "test","bt":0,"e" : {"n":"light","u":"bool","v":1}})
             elif choice == 4:
                 # low battery
                 self.mqttClient.myPublish("group01/IoTProject/Patient/Temperature/1",{"bn" : "testTemperature","bt":0,"e" : [{"n":"battery","u":"V","v":2}, {"n":"temperature","u":"cel","v":37}]})

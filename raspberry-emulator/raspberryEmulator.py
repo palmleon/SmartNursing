@@ -38,9 +38,12 @@ class RaspberryEmulator :
         r = requests.get(self.conf_file['host']+"/common-room-list")
         c = r.json()
         self.commonRoomList = c
-        r = requests.get(self.conf_file['host']+"/patient-room-base-topic")
+        r = requests.get(self.conf_file['host']+"/patient-room-temperature-base-topic")
         c = r.json()
-        self.patientRoomTopic = c
+        self.patientTemperatureRoomTopic = c
+        r = requests.get(self.conf_file['host']+"/patient-room-light-base-topic")
+        c = r.json()
+        self.patientLightRoomTopic = c
         r = requests.get(self.conf_file['host']+"/common-room-base-topic")
         c = r.json()
         self.commonRoomTopic = c
@@ -84,7 +87,8 @@ class RaspberryEmulator :
                     #self.roomEmulator.emulateData()
                     #fare publish
                     dataEmulated = self.temperatureRoomSensor.emulateData(room)
-                    self.mqttClient.myPublish(self.patientRoomTopic+str(room),dataEmulated)
+                    print('pubblico temperasturas per stanza paziente',dataEmulated)
+                    self.mqttClient.myPublish(self.patientTemperatureRoomTopic+str(room),dataEmulated)
                     #print("simulo per stanza ",room," al seguente topic ",self.patientRoomTopic+str(room))
     def emulatePatientRoomLightData(self) :
         while True :
@@ -95,7 +99,7 @@ class RaspberryEmulator :
                     #self.roomEmulator.emulateData()
                     #fare publish
                     dataEmulated = self.lightSensor.emulateData(room)
-                    self.mqttClient.myPublish(self.patientRoomTopic+str(room),dataEmulated)
+                    self.mqttClient.myPublish(self.patientLightRoomTopic+str(room),dataEmulated)
                     #print("simulo per stanza ",room," al seguente topic ",self.patientRoomTopic+str(room))
                     
     def emulatePatientSaturationData(self) :

@@ -18,7 +18,7 @@ class temperature_patient_room_monitor() :
         r = requests.get(self.conf_file['host']+"/message-broker")
         mb = r.json()
         self.mqttClient = MyMQTT('temperature-patient-room-monitor',mb['name'],mb['port'],self)
-        r = requests.get(self.conf_file['host']+"/patient-room-base-topic")
+        r = requests.get(self.conf_file['host']+"/patient-room-temperature-base-topic")
         t = r.json()
         self.subscribeTopic = t+"+"
         
@@ -101,12 +101,11 @@ class temperature_patient_room_monitor() :
             
     
     def notify(self,topic,payload) :
-        print("ricevuto un dato")
         message = dict(json.loads(payload))
         #suppongo di ricevere nel messaggio id room sotto la chiave room ed sotto la chiave presence  l info se utente c'è o meno e sotto la chiave temperature la temperatue corrente
         room = topic.split("/")[-1]
         
-        
+        print("ricevuto un dato",message)
         command = self.setTemperature(room,message['e'][0]['v'],message['e'][1]['v'])  
         self.__baseMessage['bt'] = time.time()
         self.__baseMessage['r'] = room
