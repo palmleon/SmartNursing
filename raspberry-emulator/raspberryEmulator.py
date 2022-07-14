@@ -139,7 +139,7 @@ class RaspberryEmulator :
             for commonRoom in self.commonRoomList :
                 for sensor in self.commonRoomSensorsList :
                     r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
-                                                                    'deviceID' : str(room["roomID"])+sensor,
+                                                                    'deviceID' : str(commonRoom)+sensor,
                                                                     'name' : sensor}))
             for room in list(self.rooms.keys()) :
                 if len(self.rooms[room]) != 0:
