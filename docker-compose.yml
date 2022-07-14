@@ -4,10 +4,6 @@ volumes:
   drs:
 
 services:
-
-  
-
-
   #device registry system
   cdrsi:
 
@@ -26,7 +22,7 @@ services:
   ct:
     
     image: smartclinic-ti
-    build: ./TelegramBot
+    build: ./telegram-bot
     links:
       - cdrsi
     depends_on:
@@ -34,7 +30,7 @@ services:
 
   #Patient monitor
   cpm:
-    build: ./PatientMonitor
+    build: ./patient-monitor
     image: smartclinic-pmi
     links:
       - cdrsi
@@ -46,7 +42,7 @@ services:
   #Patient device analyzer
   cpai:
     image: smartclinic-pdai
-    build: ./PatientDeviceAnalyzer
+    build: ./patient-device-analyzer
     links:
       - cdrsi
     depends_on:
@@ -90,7 +86,7 @@ services:
   #fibrillation
   cf:
     image: smartclinic-fi
-    build: ./Fibrillation
+    build: ./fibrillation
     links:
       - cdrsi
     depends_on:
@@ -100,7 +96,7 @@ services:
   
   #data analysis
   cda:
-    build: ./DataAnalysis
+    build: ./data-analysis
     image: smartclinic-dai
     links:
       - cdrsi
@@ -112,7 +108,7 @@ services:
   #thingspeak adaptor
   ctsai:
     image: smartclinic-tsai
-    build: ./thingSpeakAdaptor
+    build: ./thing-speak-adaptor
     links:
       - cdrsi
     depends_on:
@@ -122,7 +118,7 @@ services:
 
   #system terminal
   csti:
-    build: ./Terminal
+    build: ./terminal
     image: smartclinic-sti
     links:
       - cdrsi
