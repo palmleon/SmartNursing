@@ -20,7 +20,7 @@ class RaspberryEmulator :
         self.patientOximeterSensor = Oximeter_sensor()
         self.patientTemperatureSensor = Temperature_sensor()
         self.conf_file = json.load(open('config.json'))
-        self.patientMonitorEmulatorIntervalMinute = self.conf_file['patientMonitorEmulatorIntervalMinute']
+        self.patientOximeterEmulatorIntervalMinute = self.conf_file['patientOximeterEmulatorIntervalMinute']
         self.patientTemperatureEmulatorIntervalMinute = self.conf_file['patientTemperatureEmulatorIntervalMinute']
         self.patientLightRoomEmulatorIntervalMinute = self.conf_file['patientLightRoomEmulatorIntervalMinute']
         self.patientTemperatureRoomEmulatorIntervalMinute = self.conf_file['patientTemperatureRoomEmulatorIntervalMinute']
@@ -104,7 +104,7 @@ class RaspberryEmulator :
                     
     def emulatePatientSaturationData(self) :
         while True :
-            time.sleep(self.patientMonitorEmulatorIntervalMinute*60) 
+            time.sleep(self.patientOximeterEmulatorIntervalMinute*60) 
             for room in list(self.rooms.keys()) :
                 for id in self.rooms[room] :
                     dataEmulated = self.patientOximeterSensor.emulate(id)
