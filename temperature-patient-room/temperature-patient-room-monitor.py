@@ -107,7 +107,7 @@ class temperature_patient_room_monitor() :
         room = topic.split("/")[-1]
         
         
-        command = self.setTemperature(room,message['e'][1]['v'],message['e'][2]['v'])  
+        command = self.setTemperature(room,message['e'][0]['v'],message['e'][1]['v'])  
         self.__baseMessage['bt'] = time.time()
         self.__baseMessage['r'] = room
         self.__baseMessage['c']['v'] = command

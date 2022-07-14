@@ -3,7 +3,8 @@ import requests
 import threading
 import signal
 from MyMQTT import *
-from roomSensor import *
+from lightSensor import *
+from temperatureSensor import *
 from patientTemperatureSensor import *
 from patientOximeterSensor import *
 import json
@@ -14,13 +15,15 @@ class RaspberryEmulator :
     def __init__(self) :
         
         self.rooms = {}
-        self.roomSensor = RoomSensor()
+        self.lightSensor = LightSensor()
+        self.temperatureRoomSensor = TemperatureRoomSensor()
         self.patientOximeterSensor = Oximeter_sensor()
         self.patientTemperatureSensor = Temperature_sensor()
         self.conf_file = json.load(open('config.json'))
         self.patientMonitorEmulatorIntervalMinute = self.conf_file['patientMonitorEmulatorIntervalMinute']
         self.patientTemperatureEmulatorIntervalMinute = self.conf_file['patientTemperatureEmulatorIntervalMinute']
-        self.patientRoomEmulatorIntervalMinute = self.conf_file['patientRoomEmulatorIntervalMinute']
+        self.patientLightRoomEmulatorIntervalMinute = self.conf_file['patientLightRoomEmulatorIntervalMinute']
+        self.patientTemperatureRoomEmulatorIntervalMinute = self.conf_file['patientTemperatureRoomEmulatorIntervalMinute']
         self.commonRoomEmulatorIntervalMinute = self.conf_file['commonRoomEmulatorIntervalMinute']
         self.updateIntervalMinute = self.conf_file['updateIntervalMinute']
         r = requests.get(self.conf_file['host']+"/message-broker")
@@ -35,7 +38,6 @@ class RaspberryEmulator :
         r = requests.get(self.conf_file['host']+"/common-room-list")
         c = r.json()
         self.commonRoomList = c
-        #print('stanze comuni',r.json()) 
         r = requests.get(self.conf_file['host']+"/patient-room-base-topic")
         c = r.json()
         self.patientRoomTopic = c
@@ -68,20 +70,31 @@ class RaspberryEmulator :
         while True :
             time.sleep(self.commonRoomEmulatorIntervalMinute*60)
             for room in self.commonRoomList :
-                dataEmulated = self.roomSensor.emulateData(room["roomID"])
+                dataEmulated = self.temperatureRoomSensor.emulateData(room["roomID"])
                 self.mqttClient.myPublish(self.commonRoomTopic+str(room["roomID"]),dataEmulated)
                 #print("simulo per stanza ",room["roomID"]," al seguente topic ",self.commonRoomTopic+str(room["roomID"]))
                 #print("stanza emulata "+str(self.roomSensor.emulateData(room)))
 
-    def emulatePatientRoomData(self) :
+    def emulatePatientRoomTemperatureData(self) :
         while True :
-            time.sleep(self.patientRoomEmulatorIntervalMinute*60)
+            time.sleep(self.patientTemperatureRoomEmulatorIntervalMinute*60)
             #print("simulo per le seguenti stanze ",str(list(self.rooms.keys())))
             for room in list(self.rooms.keys()) :
                 if len(self.rooms[room]) != 0 :
                     #self.roomEmulator.emulateData()
                     #fare publish
-                    dataEmulated = self.roomSensor.emulateData(room)
+                    dataEmulated = self.temperatureRoomSensor.emulateData(room)
+                    self.mqttClient.myPublish(self.patientRoomTopic+str(room),dataEmulated)
+                    #print("simulo per stanza ",room," al seguente topic ",self.patientRoomTopic+str(room))
+    def emulatePatientRoomLightData(self) :
+        while True :
+            time.sleep(self.patientLightRoomEmulatorIntervalMinute*60)
+            #print("simulo per le seguenti stanze ",str(list(self.rooms.keys())))
+            for room in list(self.rooms.keys()) :
+                if len(self.rooms[room]) != 0 :
+                    #self.roomEmulator.emulateData()
+                    #fare publish
+                    dataEmulated = self.lightSensor.emulateData(room)
                     self.mqttClient.myPublish(self.patientRoomTopic+str(room),dataEmulated)
                     #print("simulo per stanza ",room," al seguente topic ",self.patientRoomTopic+str(room))
                     
@@ -226,9 +239,10 @@ if __name__ == "__main__" :
     t1 = threading.Thread(target=e.updateServices)
     t2 = threading.Thread(target=e.emulateCommonRoomData)
     t3 = threading.Thread(target=e.emulatePatientSaturationData)
-    t4 = threading.Thread(target=e.emulatePatientRoomData)
+    t4 = threading.Thread(target=e.emulatePatientRoomTemperatureData)
     t5 = threading.Thread(target=e.listenUserCommand)
     t6 = threading.Thread(target=e.emulatePatientTemperatureData)
+    t7 = threading.Thread(target=e.emulatePatientRoomLightData)
 
     t1.start()
     t2.start()
@@ -236,6 +250,7 @@ if __name__ == "__main__" :
     t4.start()
     t5.start()
     t6.start()
+    t7.start()
     
     t1.join()
     t2.join()
@@ -243,6 +258,6 @@ if __name__ == "__main__" :
     t4.join()
     t5.join()
     t6.join()
-    
+    t7.join()
     
     
