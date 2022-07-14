@@ -76,6 +76,8 @@ class temperature_patient_room_monitor() :
 
     def setTemperature(self,room,presence,currentTemperature) :
         currentHour =  datetime.datetime.now().hour
+        print('current hour: ',currentHour,'\n')
+
         season = self.getSeason()
         r = requests.get(self.conf_file['host']+"/common-room/"+room)
         t = r.json()
@@ -112,7 +114,7 @@ class temperature_patient_room_monitor() :
         self.__baseMessage['e']['v'] = command
         self.mqttClient.myPublish(publishTopic,self.__baseMessage)     
 
-        print("command "+str(self.__baseMessage))   
+        print("command sends:\n"+str(self.__baseMessage))   
         
 if __name__ == "__main__" :
     temperature_patient_room_monitor_istnace = temperature_patient_room_monitor()

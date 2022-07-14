@@ -78,7 +78,7 @@ class temperature_patient_room_monitor() :
 
     def setTemperature(self,room,presence,currentTemperature) :
         currentHour =  datetime.datetime.now().hour
-        print('ora corrente',currentHour)
+        print('current hour: ',currentHour,'\n')
         season = self.getSeason()
         r = requests.get(self.conf_file['host']+"/room-temperature/"+room)
         t = r.json()
@@ -105,13 +105,12 @@ class temperature_patient_room_monitor() :
         #suppongo di ricevere nel messaggio id room sotto la chiave room ed sotto la chiave presence  l info se utente c'è o meno e sotto la chiave temperature la temperatue corrente
         room = topic.split("/")[-1]
         
-        print("ricevuto un dato",message)
         command = self.setTemperature(room,message['e'][0]['v'],message['e'][1]['v'])  
         self.__baseMessage['bt'] = time.time()
         topicPublish = self.commandTopic+room
         self.__baseMessage['e']['v'] = command
         self.mqttClient.myPublish(topicPublish,self.__baseMessage)     
-        print("command "+str(self.__baseMessage))
+        print("command sends:\n"+str(self.__baseMessage))
     
         
 

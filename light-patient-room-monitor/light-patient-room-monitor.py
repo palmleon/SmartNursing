@@ -9,6 +9,7 @@ class light_patient_room_monitor() :
         self.conf_file = json.load(open('config.json'))
         self.serviceId = int(self.conf_file['serviceId'])
         self.serviceName = self.conf_file['serviceName']
+        self.updateTimeInMinutes = int(self.conf_file['update-time-in-minutes'])
         r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
             'serviceID' : self.serviceId,
             'name' : self.serviceName
@@ -41,7 +42,7 @@ class light_patient_room_monitor() :
 
     def updateService(self) :
         while True :
-            time.sleep(100)
+            time.sleep(self.updateTimeInMinutes*60)
             r = requests.put(self.conf_file['host']+"/update-service",data = json.dumps({
                 'serviceID' : self.serviceId,
                 'name' :self.serviceName
@@ -52,9 +53,9 @@ class light_patient_room_monitor() :
         files = dict(r.json())
         if files['current']['is_day'] == 'no' :
             return 100
-        elif files['current']['cloudcover'] > self.cloudCoverTheresold : #cloud cover è la percentuale di nuvolosità
+        elif files['current']['cloudcover'] > self.cloudCoverTheresold : #cloud cover 
             return 75
-        elif  files['current']['visibility'] < self.visibilityTheresold : #visibility è la visibilita in km 
+        elif  files['current']['visibility'] < self.visibilityTheresold : #visibility  
             return 60
         else : 
             return 15
@@ -62,14 +63,13 @@ class light_patient_room_monitor() :
     def notify(self,topic,payload) :
         message = dict(json.loads(payload))
         room = topic.split("/")[-1]
-        print('ricevo dato',message['e']['v'])
         if message['e']['v'] == 1 : 
             luminosity = self.setLuminosity()  
             self.__baseMessage['bt'] = time.time()
             publishTopic = self.commandTopic+room
             self.__baseMessage['e']['v'] = luminosity
             self.mqttClient.myPublish(publishTopic,self.__baseMessage)     
-            print("command "+str(self.__baseMessage))#rimuovere
+            print("command sends:\n"+str(self.__baseMessage))
     
         
 
