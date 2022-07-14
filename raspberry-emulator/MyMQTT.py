@@ -20,7 +20,7 @@ class MyMQTT:
         print ("Connected to %s with result code: %d" % (self.broker, rc))
         if self._topic!=[]:
             self._paho_mqtt.subscribe(self._topic)
-            print(f"subscribing to all topics: {self._topic}")
+            print(f"\nsubscribing to all topics: {self._topic}\n")
 
 
 
@@ -32,9 +32,9 @@ class MyMQTT:
     def myPublish (self, topic, msg):
         # publish a message with a certain topic
         self._paho_mqtt.publish(topic, json.dumps(msg), 2)
-        print("Published:")
+        print("\nPublished:")
         print(msg)
-        print(f"At Topic: {topic}")
+        print(f"At Topic: {topic}\n")
 
  
     def mySubscribe (self, topic=None):
@@ -47,7 +47,7 @@ class MyMQTT:
             # just to remember that it works also as a subscriber
             self._isSubscriber = True
             self._topic.append((topic,2)) # Concatena ai topic a cui è sottoscritto (per tenerne traccia)
-            print ("subscribed to %s" % (topic))
+            print ("\nsubscribed to %s\n" % (topic))
  
     def start(self):
         #manage connection to broker

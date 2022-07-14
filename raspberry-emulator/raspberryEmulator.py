@@ -157,7 +157,7 @@ class RaspberryEmulator :
                                                                                 'name' : sensor}))
             
     def listenUserCommand(self) :
-        choice = int(input("Enter 1 to add a patient, 0 to remove a patient, 2 to exit "))
+        choice = int(input("\nEnter 1 to add a patient, 0 to remove a patient, 2 to exit "))
         #lanciare thread che registra i device relativi a stanze e pazienti
     
         while choice != 2 :
@@ -178,7 +178,6 @@ class RaspberryEmulator :
             }))
                         
                 else :
-                    print("ENTRO QUI")
                     print(self.patientSensorsList)
                     print(self.patientRoomSensorsList)
                     print(self.commonRoomSensorsList)
@@ -202,7 +201,7 @@ class RaspberryEmulator :
                         if id == patientId :
                             self.rooms[room].remove(id)
             print(self.rooms)
-            choice = int(input("Enter 1 to add a patient, 0 to remove a patient, 2 to exit "))
+            choice = int(input("\nEnter 1 to add a patient, 0 to remove a patient, 2 to exit "))
 
 def alarm_handler(signum, frame):
     raise TimeoutError

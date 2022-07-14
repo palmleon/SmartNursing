@@ -18,16 +18,14 @@ VARI CASI CON DIAGRAMMI DI FLUSSO
 1 I will simulate a temperature of 27° during summer in a patient room during an expected presence, so I will recevicve the command actuation ....
 2 I will simulate a temperature of 24 °C in a common room in summer during an unexpected presence and without patients in the room. I expect that...
 3 I will simulate a case when the patient is in the room, the actuation command will depend on the wheater condition in the city of the nursing home, in our case Turin. The microservice will receive that data and since ... I expect that the luminosity percentage is...
-4 Now I will start emulate data for a patient with the id 1. Fisrt I will emulate a sensor with a low battery level, in order to recevicve the alert
+4 Now I will start emulate data for a patient with the id 1. Each time a send value, I send the last 10 sample collected from each sensor.  Fisrt I will emulate a sensor with a low battery level, in order to recevicve the alert
 5 Now I will emulate a body temperature for the patient 1 of 39 °C
-6 Now I will emulate a fibrillartion state, fibrillation is computed like this... 
-7 NOw I emulate a bad position sensor, since the perfusion index values are under a certain attendability theresold
-8 I emulatye a low pulse rate, look at the pulse rate
-9 Now I emulate a case of hypoxia, because....
+6 Now I will emulate a fibrillartion state, fibrillation is computed like this, it takes the last n measurments and computing the standard deviation of the attendable measures, check if it is over a certain thereshold 
+7 Now I emulate a bad position sensor, since the perfusion index values are under a certain attendability theresold
+8 I emulatye a low pulse rate, look at the pulse rate, where the mean is under a certain thereshold
+9 Now I emulate a case of hypoxia, the microservices detect it analyzing the values of this vector. 
 
-Untill now, I used data prepared appostely to generate events, 
-
-Now, I will open the raspberry emulator, that allows me to generate data for patients and rooms every n seconds, and that in the real life corresponds to attach sensor to the patient and the raspberry, and start colleting data. I will now add the patient 1 in the room 1, like in the real life, a new patient identified by id 1 is arrived in the room1. now as we can see, this will generate data for that patient and for that room.
+Untill now, I used data prepared appostely to generate events, Now, I will open the raspberry emulator, that allows me to generate data for patients and rooms every n seconds, and that in the real life corresponds to attach sensor to the patient and the raspberry, and start colleting data. I will now add the patient 1 in the room 1, like in the real life, a new patient identified by id 1 is arrived in the room1. now as we can see, this will generate data for that patient and for that room.
 
 The microservices patient device analyzer, that I have not started intentionally, will check if each patient have all the sensors attached, if not will send a notification. To detach sensor to the patient I can remove the patient from the raspberry emulator, that means in the real life, unplug the sensor. Now the device-connector will not update the devices of the patient 1 and the microservices will detect it.
 
