@@ -117,7 +117,7 @@ class Patient_Monitor_client():
         self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
     
     if len(Pi)>1:
-      print(f"Ottenuti: batteria={battery} e liste dei parametri",Pi,pulse,sat,"\n")
+      #print(f"Ottenuti: batteria={battery} e liste dei parametri",Pi,pulse,sat,"\n")
       r=self.analyzer.Pulse(ID_P,Pi,pulse,sat,battery)
       for alert in r:
         to_pub=self.__alert
