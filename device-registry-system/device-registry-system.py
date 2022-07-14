@@ -8,8 +8,13 @@ class Catalog(object) :
     def __init__(self) :
         self.conf_file = json.load(open('config.json'))
         self.refreshCatalogIntervalMinute = int(self.conf_file['refreshCatalogIntervalMinute'])
-        self.fp = open("catalog.json","r")
-        self.catalogList = json.load(self.fp)
+        
+        try : 
+            self.fp = open("/usr/app/catalog.json","r")
+            self.catalogList = json.load(self.fp)
+        except:
+            self.fp = open("catalog.json","r")
+            self.catalogList = json.load(self.fp)
         self.fp.close()
         
 
@@ -25,7 +30,7 @@ class Catalog(object) :
             #Delete devices and services not updated
             self.catalogList['devices'] = list(filter(lambda dev : self.computeDifference(datetime.datetime.today(),dev['timestamp']) < 2,self.catalogList['devices']))
             self.catalogList['services'] = list(filter(lambda dev : self.computeDifference(datetime.datetime.today(),dev['timestamp']) < 2,self.catalogList['services']))
-            self.fp = open("catalog.json","w")
+            self.fp = open("/usr/app/catalog.json","w")
             json.dump(self.catalogList,self.fp)
             self.fp.close()
 

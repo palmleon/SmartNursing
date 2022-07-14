@@ -1,9 +1,11 @@
 #version: 3
 #name: smartclinic
+volumes:
+  drs:
+
 services:
 
-  volumes:
-    drsi-data:
+  
 
 
   #device registry system
@@ -15,8 +17,8 @@ services:
       - 8080:8080
     expose:
       - 8080
-    volumes : 
-      - drsi-data:/var/app/data
+    volumes:
+      - drs:/usr/app/
 
     #container_name: cdrsi
 
