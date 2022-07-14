@@ -26,7 +26,7 @@ class temperature_patient_room_monitor() :
         r = requests.get(self.conf_file['host']+"/common-room-command-base-topic")
         c = r.json()
         self.commandTopic = c
-        self.__baseMessage={"bn" : self.__serviceName,"bt":0,"r":0,"c" : {"n":"switch","u":"/","v":0}}
+        self.__baseMessage={"bn" : self.__serviceName,"bt":0,"e" : {"n":"switch","u":"/","v":0}}
 
         self.mqttClient.start()
         self.mqttClient.mySubscribe(self.subscribeTopic)
@@ -108,11 +108,11 @@ class temperature_patient_room_monitor() :
         room = topic.split("/")[-1]
         command = self.setTemperature(room,message['e'][0]['v'],message['e'][1]['v'])  
         self.__baseMessage['bt'] = time.time()
-        self.__baseMessage['r'] = room
-        self.__baseMessage['c']['v'] = command
-        self.mqttClient.myPublish(self.commandTopic,self.__baseMessage)     
+        publishTopic = self.commandTopic+room
+        self.__baseMessage['e']['v'] = command
+        self.mqttClient.myPublish(publishTopic,self.__baseMessage)     
 
-        print("command "+str({'switch' : command, 'room' : room }))   
+        print("command "+str(self.__baseMessage))   
         
 if __name__ == "__main__" :
     temperature_patient_room_monitor_istnace = temperature_patient_room_monitor()

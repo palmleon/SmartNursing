@@ -103,8 +103,10 @@ class Catalog(object) :
 
         elif uri[0] == 'alarm-base-topic' :
             return json.dumps(self.catalogList['alarm-base-topic'])
-        elif uri[0] == 'patient-room-command-base-topic' :
-            return json.dumps(self.catalogList['patient-room-command-base-topic'])
+        elif uri[0] == 'patient-room-light-command-base-topic' :
+            return json.dumps(self.catalogList['patient-room-light-command-base-topic'])
+        elif uri[0] == 'patient-room-temperature-command-base-topic' :
+            return json.dumps(self.catalogList['patient-room-temperature-command-base-topic'])
         elif uri[0] == 'common-room-command-base-topic' :
             return json.dumps(self.catalogList['common-room-command-base-topic'])
 

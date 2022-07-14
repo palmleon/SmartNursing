@@ -29,9 +29,12 @@ class RaspberryEmulator :
         r = requests.get(self.conf_file['host']+"/message-broker")
         mb = r.json()
         self.mqttClient = MyMQTT('raspberry-emulator',mb['name'],mb['port'],self)
-        r = requests.get(self.conf_file['host']+"/patient-room-command-base-topic")
+        r = requests.get(self.conf_file['host']+"/patient-room-light-command-base-topic")
         c = r.json()  
-        self.patientRoomCommandTopic = c
+        self.patientRoomLightCommandTopic = c
+        r = requests.get(self.conf_file['host']+"/patient-room-temperature-command-base-topic")
+        c = r.json()  
+        self.patientRoomTemperatureCommandTopic = c
         r = requests.get(self.conf_file['host']+"/common-room-command-base-topic")
         c = r.json()
         self.commonRoomCommandTopic = c 
@@ -55,7 +58,9 @@ class RaspberryEmulator :
         self.patientTemperatureTopic = c
         self.mqttClient.start()
         self.mqttClient.mySubscribe(self.commonRoomCommandTopic)
-        self.mqttClient.mySubscribe(self.patientRoomCommandTopic)
+        self.mqttClient.mySubscribe(self.patientRoomTemperatureCommandTopic)
+        self.mqttClient.mySubscribe(self.patientRoomLightCommandTopic)
+
         for room in self.commonRoomList :
              r = requests.post(self.conf_file['host']+"/add-device",data = json.dumps({
                                                                     'deviceID' : str(room["roomID"])+'tc',
@@ -67,7 +72,8 @@ class RaspberryEmulator :
         #self.fp = open("actuation_command.json","a")
         #json.dump(command,self.fp)
         #self.fp.close()
-        print('Actuation command received: '+str(command)) 
+        room = topic.split("/")[-1]
+        print('Actuation command for room' +room+' received: '+str(command)) 
 
     def emulateCommonRoomData(self) :
         while True :

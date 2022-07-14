@@ -29,10 +29,10 @@ class light_patient_room_monitor() :
         r = requests.get(self.conf_file['host']+"/patient-room-light-base-topic")
         t = r.json()
         self.subscribeTopic = t+"+"
-        r = requests.get(self.conf_file['host']+"/patient-room-command-base-topic")
+        r = requests.get(self.conf_file['host']+"/patient-room-light-command-base-topic")
         c = r.json()
         self.commandTopic = c
-        self.__baseMessage={"bn" : self.serviceName,"bt":0,"r":0,"c" : {"n":"luminosity","u":"/","v":0}}
+        self.__baseMessage={"bn" : self.serviceName,"bt" : 0,"e" : {"n":"luminosity","u":"/","v":0}}
         self.mqttClient.start()
         time.sleep(2)
         self.mqttClient.mySubscribe(self.subscribeTopic)
@@ -66,10 +66,10 @@ class light_patient_room_monitor() :
         if message['e']['v'] == 1 : 
             luminosity = self.setLuminosity()  
             self.__baseMessage['bt'] = time.time()
-            self.__baseMessage['r'] = room
-            self.__baseMessage['c']['v'] = luminosity
-            self.mqttClient.myPublish(self.commandTopic,self.__baseMessage)     
-            print("command "+str({'switch' : luminosity, 'room' : room }))#rimuovere
+            publishTopic = self.commandTopic+room
+            self.__baseMessage['e']['v'] = luminosity
+            self.mqttClient.myPublish(publishTopic,self.__baseMessage)     
+            print("command "+str(self.__baseMessage))#rimuovere
     
         
 
