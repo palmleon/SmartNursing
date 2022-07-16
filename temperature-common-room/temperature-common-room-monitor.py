@@ -26,7 +26,7 @@ class temperature_patient_room_monitor() :
         r = requests.get(self.conf_file['host']+"/common-room-command-base-topic")
         c = r.json()
         self.commandTopic = c
-        self.__baseMessage={"bn" : self.__serviceName,"bt":0,"e" : {"n":"switch","u":"/","v":0}}
+        self.__baseMessage=self.conf_file['base-message']
 
         self.mqttClient.start()
         self.mqttClient.mySubscribe(self.subscribeTopic)
@@ -60,11 +60,11 @@ class temperature_patient_room_monitor() :
         return season
 
     def defineCommand(self,desiredTemperature,currentTemperature,season) :
-        command = 'off'
+        command = 0
         if season == 'hot' and  currentTemperature > desiredTemperature :
-                command = 'on'
+                command = 1
         if season == 'cold' and currentTemperature < desiredTemperature : 
-                command = 'on'
+                command = 1
         return command
 
     def expectedPresence(self,currentHour) :
@@ -76,6 +76,8 @@ class temperature_patient_room_monitor() :
 
     def setTemperature(self,room,presence,currentTemperature) :
         currentHour =  datetime.datetime.now().hour
+        print('current hour: ',currentHour,'\n')
+
         season = self.getSeason()
         r = requests.get(self.conf_file['host']+"/common-room/"+room)
         t = r.json()
@@ -112,7 +114,7 @@ class temperature_patient_room_monitor() :
         self.__baseMessage['e']['v'] = command
         self.mqttClient.myPublish(publishTopic,self.__baseMessage)     
 
-        print("command "+str(self.__baseMessage))   
+        print("command sends:\n"+str(self.__baseMessage))   
         
 if __name__ == "__main__" :
     temperature_patient_room_monitor_istnace = temperature_patient_room_monitor()

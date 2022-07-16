@@ -5,7 +5,15 @@
         "name": "mqtt.eclipseprojects.io"
     },
     "city": "Turin",
-    "telegram-user-id-list": [],
+    "telegram-user-id-list": [{
+            "user-id": 190657895, 
+            "role": "SuperUser"
+        },
+        {
+            "user-id": 389414686,
+            "role": "SuperUser"
+        }
+    ],
     "telegram-tasks": [{
             "command": "start",
             "roles": ["Nurse", "Doctor", "SuperUser"]
@@ -51,7 +59,13 @@
             "roles": ["Nurse", "Doctor", "SuperUser"]
         }
     ],
-    "room-list": [],
+    "room-list": [
+        {
+            "roomID": 1,
+            "patients": [],
+            "desired-temperature": 23
+        }
+    ],
     "channel-data" : {
         "api_key" : "YTN43QRA4IWIEBIN",
         "name" : "Patient",
@@ -67,7 +81,24 @@
       },
     "api-weather": "http://api.weatherstack.com/current?access_key=354a8fd8d83e78359700032ca93ff485&query=",
     "bot-token" : "5553441519:AAFX3I2ooeeb0hER05cRsDN5ZYnFHw-EJlU",
-    "common-room-list": [],
+    "common-room-list": [
+        {
+            "roomID": 1,
+            "desired-temperature": 23
+        },
+        {
+            "roomID": 2,
+            "desired-temperature": 23
+        },
+        {
+            "roomID": 3,
+            "desired-temperature": 23
+        },
+        {
+            "roomID": 4,
+            "desired-temperature": 23
+        }
+    ],
     "common-room-hourly-scheduling": {
         "night": [
             21,
@@ -106,8 +137,8 @@
     "patient-room-light-base-topic": "group01/IoTProject/PatientRoom/Light/",
     "common-room-base-topic": "group01/IoTProject/CommonRoom/",
     "alarm-base-topic": "group01/IoTProject/PatientAlarm/",
-    "patient-room-temperature-command-base-topic": "group01/IoTProject/PatientRoomCommand/Temperature",
-    "patient-room-light-command-base-topic": "group01/IoTProject/PatientRoomCommand/Light",
+    "patient-room-temperature-command-base-topic": "group01/IoTProject/PatientRoomCommand/Temperature/",
+    "patient-room-light-command-base-topic": "group01/IoTProject/PatientRoomCommand/Light/",
     "common-room-command-base-topic": "group01/IoTProject/CommonRoomCommand/",
     "devices": []
 }
