@@ -62,11 +62,11 @@ class temperature_patient_room_monitor() :
         return season
 
     def defineCommand(self,desiredTemperature,currentTemperature,season) :
-        command = 'off'
+        command = 0
         if season == 'hot' and  currentTemperature > desiredTemperature :
-                command = 'on'
+                command = 1
         if season == 'cold' and currentTemperature < desiredTemperature : 
-                command = 'on'
+                command = 1
         return command
 
     def expectedPresence(self,currentHour) :
