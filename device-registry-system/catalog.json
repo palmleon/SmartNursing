@@ -137,8 +137,8 @@
     "patient-room-light-base-topic": "group01/IoTProject/PatientRoom/Light/",
     "common-room-base-topic": "group01/IoTProject/CommonRoom/",
     "alarm-base-topic": "group01/IoTProject/PatientAlarm/",
-    "patient-room-temperature-command-base-topic": "group01/IoTProject/PatientRoomCommand/Temperature",
-    "patient-room-light-command-base-topic": "group01/IoTProject/PatientRoomCommand/Light",
+    "patient-room-temperature-command-base-topic": "group01/IoTProject/PatientRoomCommand/Temperature/",
+    "patient-room-light-command-base-topic": "group01/IoTProject/PatientRoomCommand/Light/",
     "common-room-command-base-topic": "group01/IoTProject/CommonRoomCommand/",
     "devices": []
 }
