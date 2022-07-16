@@ -13,7 +13,7 @@
     "Thresholds":
     {
         "battery_threshold" : 2.8,
-        "fibrillation_std_threshold" : 5,
+        "fibrillation_std_threshold" : 4,
         "attendability_threshold" : 4
     }
 }
