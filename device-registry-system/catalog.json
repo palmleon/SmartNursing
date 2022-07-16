@@ -5,15 +5,7 @@
         "name": "mqtt.eclipseprojects.io"
     },
     "city": "Turin",
-    "telegram-user-id-list": [{
-            "user-id": 190657895, 
-            "role": "SuperUser"
-        },
-        {
-            "user-id": 389414686,
-            "role": "SuperUser"
-        }
-    ],
+    "telegram-user-id-list": [],
     "telegram-tasks": [{
             "command": "start",
             "roles": ["Nurse", "Doctor", "SuperUser"]
@@ -59,13 +51,7 @@
             "roles": ["Nurse", "Doctor", "SuperUser"]
         }
     ],
-    "room-list": [
-        {
-            "roomID": 1,
-            "patients": [],
-            "desired-temperature": 23
-        }
-    ],
+    "room-list": [],
     "channel-data" : {
         "api_key" : "YTN43QRA4IWIEBIN",
         "name" : "Patient",
@@ -81,24 +67,7 @@
       },
     "api-weather": "http://api.weatherstack.com/current?access_key=354a8fd8d83e78359700032ca93ff485&query=",
     "bot-token" : "5553441519:AAFX3I2ooeeb0hER05cRsDN5ZYnFHw-EJlU",
-    "common-room-list": [
-        {
-            "roomID": 1,
-            "desired-temperature": 23
-        },
-        {
-            "roomID": 2,
-            "desired-temperature": 23
-        },
-        {
-            "roomID": 3,
-            "desired-temperature": 23
-        },
-        {
-            "roomID": 4,
-            "desired-temperature": 23
-        }
-    ],
+    "common-room-list": [],
     "common-room-hourly-scheduling": {
         "night": [
             21,
