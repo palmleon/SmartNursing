@@ -2,5 +2,6 @@
     "host" : "http://cdrsi:8080/catalog",
     "serviceId" : 4,
     "serviceName" : "temperature-common-room-monitor",
-    "updateTimeInSecond" : 100
+    "updateTimeInSecond" : 100,
+    "base-message" : {"bn" : "temperature-common-room-monitor","bt":0,"e" : {"n":"switch","u":"/","v":0}}
 }

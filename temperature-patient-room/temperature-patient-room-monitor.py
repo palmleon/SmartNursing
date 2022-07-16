@@ -28,7 +28,7 @@ class temperature_patient_room_monitor() :
         r = requests.get(self.conf_file['host']+"/patient-room-temperature-command-base-topic")
         c = r.json()
         self.commandTopic = c
-        self.__baseMessage={"bn" : self.__serviceName,"bt":0,"e" : {"n":"switch","u":"/","v":0}}
+        self.__baseMessage=self.conf_file['base-message']
 
         self.mqttClient.start()
         self.mqttClient.mySubscribe(self.subscribeTopic)

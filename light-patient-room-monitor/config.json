@@ -4,5 +4,6 @@
     "serviceName" : "light-patient-room-monitor",
     "cloud-cover-theresold" : 60,
     "visibility-theresold" : 5,
-    "update-time-in-minutes" : 1
+    "update-time-in-minutes" : 1,
+    "base-message" : {"bn" : "light-patient-room-monitor","bt" : 0,"e" : {"n":"luminosity","u":"/","v":0}}
 }

@@ -33,7 +33,7 @@ class light_patient_room_monitor() :
         r = requests.get(self.conf_file['host']+"/patient-room-light-command-base-topic")
         c = r.json()
         self.commandTopic = c
-        self.__baseMessage={"bn" : self.serviceName,"bt" : 0,"e" : {"n":"luminosity","u":"/","v":0}}
+        self.__baseMessage=self.conf_file['base-message']
         self.mqttClient.start()
         time.sleep(2)
         self.mqttClient.mySubscribe(self.subscribeTopic)
