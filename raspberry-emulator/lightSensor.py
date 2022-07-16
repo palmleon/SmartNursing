@@ -16,7 +16,7 @@ class LightSensor :
 
     def simulateEvenRooms(self,id) :
         #self.baseMessage['roomID'] = id
-        self.baseMessage['e']['v'] = numpy.random.choice(numpy.arange(0,2), p=[0.2, 0.8]).item()
+        self.baseMessage['e']['v'] = numpy.random.choice(numpy.arange(0,2), p=[0.8, 0.2]).item()
         self.baseMessage['bn']=str(id)+'l'
         self.baseMessage["bt"]=time.time()
         return self.baseMessage 
