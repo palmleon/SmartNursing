@@ -16,7 +16,7 @@ class Oximeter_sensor():
             self.__baseMessage["e"][2]["v"]= (random.randint(low=96,high=100,size= self.__sampleNumber).tolist())
             #self.__baseMessage["e"][3]["v"]= (random.randint(low=70,high=74,size= self.__sampleNumber).tolist())
             pulse_rate_samples = random.normal(loc=75,scale=2,size= self.__sampleNumber).tolist()
-            self.__baseMessage["e"][3]["v"]= [round(num, 2) for num in pulse_rate_samples]
+            self.__baseMessage["e"][3]["v"]= [int(num) for num in pulse_rate_samples]
         elif ID_P==2:
             # Paziente sano con batteria scarica
             self.__baseMessage["e"][0]["v"]=round(random.uniform(low=2.78,high=2.79),2)
@@ -24,7 +24,7 @@ class Oximeter_sensor():
             self.__baseMessage["e"][2]["v"]= (random.randint(low=96,high=100,size= self.__sampleNumber).tolist())
             #self.__baseMessage["e"][3]["v"]= (random.randint(low=70,high=74,size= self.__sampleNumber).tolist())
             pulse_rate_samples = random.normal(loc=75,scale=2,size= self.__sampleNumber).tolist()
-            self.__baseMessage["e"][3]["v"]= [round(num, 2) for num in pulse_rate_samples]
+            self.__baseMessage["e"][3]["v"]= [int(num) for num in pulse_rate_samples]
         elif ID_P==3:
             # Paziente con pulsossimetro tolto
             self.__baseMessage["e"][0]["v"]=round(random.uniform(low=2.81,high=3.0),2)
@@ -32,7 +32,7 @@ class Oximeter_sensor():
             self.__baseMessage["e"][2]["v"]= (random.randint(low=96,high=100,size= self.__sampleNumber).tolist())
             #self.__baseMessage["e"][3]["v"]= (random.randint(low=70,high=74,size= self.__sampleNumber).tolist())
             pulse_rate_samples = random.normal(loc=75,scale=2,size= self.__sampleNumber).tolist()
-            self.__baseMessage["e"][3]["v"]= [round(num, 2) for num in pulse_rate_samples]
+            self.__baseMessage["e"][3]["v"]= [int(num) for num in pulse_rate_samples]
         elif ID_P==4:
             # Paziente con pulsossimetro messo male (solo per fibrillation)
             first_sample = int(self.__sampleNumber/2)+1
@@ -42,7 +42,7 @@ class Oximeter_sensor():
             self.__baseMessage["e"][2]["v"]= (random.randint(low=96,high=100,size= self.__sampleNumber).tolist())
             #self.__baseMessage["e"][3]["v"]= (random.randint(low=70,high=74,size= self.__sampleNumber).tolist())
             pulse_rate_samples = random.normal(loc=75,scale=2,size= self.__sampleNumber).tolist()
-            self.__baseMessage["e"][3]["v"]= [round(num, 2) for num in pulse_rate_samples]
+            self.__baseMessage["e"][3]["v"]= [int(num) for num in pulse_rate_samples]
         elif ID_P==5:
             # Paziente con saturazione bassa
             self.__baseMessage["e"][0]["v"]=round(random.uniform(low=2.81,high=3.0),2)
@@ -50,7 +50,7 @@ class Oximeter_sensor():
             self.__baseMessage["e"][2]["v"]= (random.randint(low=90,high=95,size= self.__sampleNumber).tolist())
             #self.__baseMessage["e"][3]["v"]= (random.randint(low=70,high=74,size= self.__sampleNumber).tolist())
             pulse_rate_samples = random.normal(loc=75,scale=2,size= self.__sampleNumber).tolist()
-            self.__baseMessage["e"][3]["v"]= [round(num, 2) for num in pulse_rate_samples]
+            self.__baseMessage["e"][3]["v"]= [int(num) for num in pulse_rate_samples]
         elif ID_P==6:
             # Paziente con battito cardiaco basso
             self.__baseMessage["e"][0]["v"]=round(random.uniform(low=2.81,high=3.0),2)
@@ -58,7 +58,7 @@ class Oximeter_sensor():
             self.__baseMessage["e"][2]["v"]= (random.randint(low=96,high=100,size= self.__sampleNumber).tolist())
             #self.__baseMessage["e"][3]["v"]= (random.randint(low=50,high=55,size= self.__sampleNumber).tolist())
             pulse_rate_samples = random.normal(loc=52,scale=2,size= self.__sampleNumber).tolist()
-            self.__baseMessage["e"][3]["v"]= [round(num, 2) for num in pulse_rate_samples]
+            self.__baseMessage["e"][3]["v"]= [int(num) for num in pulse_rate_samples]
         elif ID_P==7:
             # Paziente con battito cardiaco alto
             self.__baseMessage["e"][0]["v"]=round(random.uniform(low=2.81,high=3.0),2)
@@ -66,7 +66,7 @@ class Oximeter_sensor():
             self.__baseMessage["e"][2]["v"]= (random.randint(low=96,high=100,size= self.__sampleNumber).tolist())
             #self.__baseMessage["e"][3]["v"]= (random.randint(low=100,high=104,size= self.__sampleNumber).tolist())
             pulse_rate_samples = random.normal(loc=103,scale=2,size= self.__sampleNumber).tolist()
-            self.__baseMessage["e"][3]["v"]= [round(num, 2) for num in pulse_rate_samples]
+            self.__baseMessage["e"][3]["v"]= [int(num) for num in pulse_rate_samples]
         elif ID_P==8:
             # Paziente in fibrillazione
             self.__baseMessage["e"][0]["v"]=round(random.uniform(low=2.81,high=3.0),2)
@@ -74,7 +74,7 @@ class Oximeter_sensor():
             self.__baseMessage["e"][2]["v"]= (random.randint(low=96,high=100,size= self.__sampleNumber).tolist())
             #self.__baseMessage["e"][3]["v"]= (random.randint(low=70,high=90,size= self.__sampleNumber).tolist())
             pulse_rate_samples = random.normal(loc=80,scale=6,size= self.__sampleNumber).tolist()
-            self.__baseMessage["e"][3]["v"]= [round(num, 2) for num in pulse_rate_samples]
+            self.__baseMessage["e"][3]["v"]= [int(num) for num in pulse_rate_samples]
         elif ID_P==9:
             # Paziente combinato saturazione bassa e battito alto
             self.__baseMessage["e"][0]["v"]=round(random.uniform(low=2.81,high=3.0),2)
@@ -82,7 +82,7 @@ class Oximeter_sensor():
             self.__baseMessage["e"][2]["v"]= (random.randint(low=90,high=95,size= self.__sampleNumber).tolist())
             #self.__baseMessage["e"][3]["v"]= (random.randint(low=100,high=104,size= self.__sampleNumber).tolist())
             pulse_rate_samples = random.normal(loc=103,scale=2,size= self.__sampleNumber).tolist()
-            self.__baseMessage["e"][3]["v"]= [round(num, 2) for num in pulse_rate_samples]
+            self.__baseMessage["e"][3]["v"]= [int(num) for num in pulse_rate_samples]
         else:
             # Paziente combinato saturazione bassa e battito basso
             self.__baseMessage["e"][0]["v"]=round(random.uniform(low=2.81,high=3.0),2)
@@ -90,7 +90,7 @@ class Oximeter_sensor():
             self.__baseMessage["e"][2]["v"]= (random.randint(low=90,high=95,size= self.__sampleNumber).tolist())
             #self.__baseMessage["e"][3]["v"]= (random.randint(low=50,high=55,size= self.__sampleNumber).tolist())
             pulse_rate_samples = random.normal(loc=52,scale=2,size= self.__sampleNumber).tolist()
-            self.__baseMessage["e"][3]["v"]= [round(num, 2) for num in pulse_rate_samples]
+            self.__baseMessage["e"][3]["v"]= [int(num) for num in pulse_rate_samples]
 
         self.__baseMessage["bn"]=str(ID_P)+'o'
         self.__baseMessage["bt"]=time.time()

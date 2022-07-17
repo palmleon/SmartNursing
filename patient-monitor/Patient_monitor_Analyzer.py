@@ -39,11 +39,13 @@ class Patient_Monitor():
             return alarm
         # Check for iphotermia condition
         if incoming<self.__lowBodyTemperature:
-            alarm=self.__alarm_Tl[0]+ID_P+self.__alarm_Tl[1]+str(incoming)+" C"
+            incoming=round(incoming,1)
+            alarm=self.__alarm_Tl[0]+ID_P+self.__alarm_Tl[1]+str(incoming)+"°C"
             return alarm
         #Check for fever condition
         if incoming>=self.__highBodyTemperature:
-            alarm=self.__alarm_Th[0]+ID_P+self.__alarm_Th[1]+str(incoming)+" C"
+            incoming=round(incoming,1)
+            alarm=self.__alarm_Th[0]+ID_P+self.__alarm_Th[1]+str(incoming)+"°C"
             return alarm
 
     def Pulse(self,ID_P,PI,pulse,sat,battery):
@@ -78,12 +80,15 @@ class Patient_Monitor():
 
         # Check for hypoxia condition
         if sat<=self.__saturationThreshold:
-            alarm.append(self.__alarm_Sl[0]+ID_P+self.__alarm_Sl[1]+str(sat)+" %")
+            sat=round(sat)
+            alarm.append(self.__alarm_Sl[0]+ID_P+self.__alarm_Sl[1]+str(sat)+"%")
         # Check for low heart rate condition
-        if pulse<self.__pulseLower:
-            alarm.append(self.__alarm_Pl[0]+ID_P+self.__alarm_Pl[1]+str(pulse)+" bpm")
+        if pulse<=self.__pulseLower:
+            pulse=round(pulse)
+            alarm.append(self.__alarm_Pl[0]+ID_P+self.__alarm_Pl[1]+str(pulse)+"bpm")
         # Check for high heart rate condition
-        elif pulse>self.__pulseUpper:
-            alarm.append(self.__alarm_Ph[0]+ID_P+self.__alarm_Ph[1]+str(pulse)+" bpm")
+        elif pulse>=self.__pulseUpper:
+            pulse=round(pulse)
+            alarm.append(self.__alarm_Ph[0]+ID_P+self.__alarm_Ph[1]+str(pulse)+"bpm")
 
         return alarm
