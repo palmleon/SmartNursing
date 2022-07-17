@@ -14,21 +14,23 @@ class thingSpeakAdaptor():
         self.__thinkspeakUpdate = self.conf_file['thinkspeakUpdate']
         self.__updatePatientListInSecond = self.conf_file['updatePatientListInSecond']
         self.__updateServiceInSecond = self.conf_file['updateServiceInSecond']
-        r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
-            'serviceID' : self.__serviceId,
-            'name' : self.__serviceName
-        }))
-        if r.ok == False :
-            print('Error adding the service')
-        r = requests.get(self.conf_file['host']+"/message-broker")
-        mb = r.json()
-        self.clientID = self.__serviceName
-        self.mqttInterval = int(self.conf_file['mqtt-interval'])
-        r = requests.get(self.conf_file['host']+"/patient-temperature-base-topic")
-        self.topic=[]
-        self.topic.append(r.json() + '+')
-        r = requests.get(self.conf_file['host']+"/patient-saturation-base-topic")
-        self.topic.append(r.json() + '+')
+        try :
+            r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
+                'serviceID' : self.__serviceId,
+                'name' : self.__serviceName
+            }))
+            r = requests.get(self.conf_file['host']+"/message-broker")
+            mb = r.json()
+            self.clientID = self.__serviceName
+            self.mqttInterval = int(self.conf_file['mqtt-interval'])
+            r = requests.get(self.conf_file['host']+"/patient-temperature-base-topic")
+            self.topic=[]
+            self.topic.append(r.json() + '+')
+            r = requests.get(self.conf_file['host']+"/patient-saturation-base-topic")
+            self.topic.append(r.json() + '+')
+        except :
+            print("ERROR: init fails")
+            exit(-1)
         self.client=MyMQTT(self.clientID,mb['name'],mb['port'],self,self.mqttInterval)
         self.c = channelManager(self.conf_file['host'],self.__thinkspeakJson,self.__thinkspeakChannels,self.__thinkspeakUpdate)
     def thingSpeakAdaptorSetUp(self):
@@ -50,17 +52,24 @@ class thingSpeakAdaptor():
     def updateService(self) :
         while True :
             time.sleep(self.__updateServiceInSecond)
-            r = requests.put(self.conf_file['host']+"/update-service",data = json.dumps({
-                'serviceID' : self.__serviceId,
-                'name' : self.__serviceName
-            }))
+            try :
+                r = requests.put(self.conf_file['host']+"/update-service",data = json.dumps({
+                    'serviceID' : self.__serviceId,
+                    'name' : self.__serviceName
+                }))
+                if r.ok == False :
+                    print("ERROR: update failed")
+            except:
+                print("ERROR: update failed")
     def updatePatientList(self):
         while True:
             time.sleep(60*self.__updatePatientListInSecond)
-            r = requests.get(self.conf_file['host']+"/patients")
-            patients = r.json()
-            self.c.updateList(patients)
-
+            try :
+                r = requests.get(self.conf_file['host']+"/patients")
+                patients = r.json()
+                self.c.updateList(patients)
+            except :
+                print("ERROR: unable to update patient list")
 if __name__ == '__main__':
     tAdaptor = thingSpeakAdaptor()
     tAdaptor.thingSpeakAdaptorSetUp()
