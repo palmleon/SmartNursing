@@ -89,9 +89,13 @@ class temperature_patient_room_monitor() :
         currentHour =  datetime.datetime.now().hour
         print('current hour: ',currentHour,'\n')
         season = self.getSeason()
-        r = requests.get(self.__conf_file['host']+"/room-temperature/"+room)
-        t = r.json()
-        desiredTemperature = t['desired-temperature']
+        try :
+            r = requests.get(self.__conf_file['host']+"/room-temperature/"+room)
+            t = r.json()
+            desiredTemperature = t['desired-temperature']
+        except :
+            print("ERROR: unable to get the desired temperature")
+            return
         if  currentHour >= self.__hourlyScheduling['night'][0] or currentHour <= self.__hourlyScheduling['night'][1] : #night
             return self.defineCommand(desiredTemperature,currentTemperature,season)
         else : #not night

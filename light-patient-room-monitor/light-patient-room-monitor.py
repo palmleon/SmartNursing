@@ -56,8 +56,12 @@ class light_patient_room_monitor() :
                 updateOK = r.ok
     
     def setLuminosity(self) :
-        r = requests.get(self.__urlApi)
-        files = dict(r.json())
+        try :
+            r = requests.get(self.__urlApi)
+            files = dict(r.json())
+        except :
+            print("ERROR: unable to get the current wheater conditions")
+            return
         if files['current']['is_day'] == 'no' :
             return 100
         elif files['current']['cloudcover'] > self.cloudCoverTheresold : #cloud cover 
