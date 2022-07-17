@@ -1,4 +1,5 @@
 import json
+from traceback import print_tb
 import requests
 import time
 
@@ -13,16 +14,24 @@ class channelManager():
         self.thinkspeakJsonUrl = thinkspeakJsonUrl
         self.thinkspeakUpdateUrl = thinkspeakUpdateUrl
         self.thinkspeakChannelUrl = thinkspeakChannelUrl
-        r = requests.get(hostUrl+"/channel-data")
-        channel_data = r.json()
+        try :
+            r = requests.get(hostUrl+"/channel-data")
+            channel_data = r.json()
+        except :
+            print("ERROR: init failed, restart container")
+            exit(-1)
         self.channelData = channel_data
         self.mainApiKey = self.channelData["api_key"]
         self.channelList = []
     def listChannels(self):
         """All ThingSpeak channels will be added to the local channel list with rest API"""
-        thingSpeakList = requests.get(
-            self.thinkspeakJsonUrl+'?api_key={}'.format(self.mainApiKey))
-        thingSpeakList = json.loads(thingSpeakList.text)
+        try:
+            thingSpeakList = requests.get(
+                self.thinkspeakJsonUrl+'?api_key={}'.format(self.mainApiKey))
+            thingSpeakList = json.loads(thingSpeakList.text)
+        except :
+            print("ERROR: get list channel fails")
+            thingSpeakList = []
         for i in range(len(thingSpeakList)):
             self.channelList.append(thingSpeakList[i])
     def isChannelinList(self, channelID):
@@ -90,10 +99,15 @@ class channelManager():
         Returns
         -------
             Field Number: int (1-8)"""
-        feed = requests.get(
-            self.thinkspeakChannelUrl+'/{}/feeds.json?api_key={}&results=2'.format(channelID, read_api))
-        feed = feed.json()
-        feed = feed['channel']
+        try :
+            feed = requests.get(
+                self.thinkspeakChannelUrl+'/{}/feeds.json?api_key={}&results=2'.format(channelID, read_api))
+            feed = feed.json()
+            feed = feed['channel']
+        except :
+            print("ERROR: unable to feed channel")
+
+        
         for i in range(1, 9):
             if 'field{}'.format(i) in feed.keys():
                 if feed['field{}'.format(i)] == field_name:
