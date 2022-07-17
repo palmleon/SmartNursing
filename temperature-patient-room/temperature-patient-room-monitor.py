@@ -41,15 +41,17 @@ class temperature_patient_room_monitor() :
     def updateService(self) :
         while True :
             time.sleep(self.__updateTimeInSecond)
-            requestOK = False
-            while requestOK != True :
-                try :
-                    r = requests.put(self.__conf_file['host']+"/update-service",data = json.dumps({
+            
+            try :
+                r = requests.put(self.__conf_file['host']+"/update-service",data = json.dumps({
                         'serviceID' : self.__serviceId,
                         'name' : self.__serviceName
                     }))
-                except :
-                    print("ERROR: update service failed, retrying")
+                if r.ok == False :
+                    print("ERROR: update service failed")
+
+            except :
+                print("ERROR: update service failed")
     
 
     def getSeason(self) :
