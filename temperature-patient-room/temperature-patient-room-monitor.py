@@ -6,41 +6,50 @@ import datetime
 
 class temperature_patient_room_monitor() :
     def __init__(self) :
-        
-        self.conf_file = json.load(open('config.json'))
-        self.__serviceId = int(self.conf_file['serviceId'])
-        self.__serviceName = self.conf_file['serviceName']
-        self.__updateTimeInSecond = int(self.conf_file['updateTimeInSecond'])
-        r = requests.post(self.conf_file['host']+"/add-service",data = json.dumps({
-            'serviceID' : self.__serviceId,
-            'name' : self.__serviceName
-        }))
-        r = requests.get(self.conf_file['host']+"/message-broker")
-        mb = r.json()
-        self.mqttClient = MyMQTT('temperature-patient-room-monitor',mb['name'],mb['port'],self)
-        r = requests.get(self.conf_file['host']+"/patient-room-temperature-base-topic")
-        t = r.json()
-        self.subscribeTopic = t+"+"
-        
-        r = requests.get(self.conf_file['host']+"/patient-room-hourly-scheduling")
-        t = r.json()
-        self.hourlyScheduling = t
-        r = requests.get(self.conf_file['host']+"/patient-room-temperature-command-base-topic")
-        c = r.json()
-        self.commandTopic = c
-        self.__baseMessage=self.conf_file['base-message']
+        self.__fp = open('config.json')
+        self.__conf_file = json.load(self.__fp)
+        self.__serviceId = int(self.__conf_file['serviceId'])
+        self.__serviceName = self.__conf_file['serviceName']
+        self.__updateTimeInSecond = int(self.__conf_file['updateTimeInSecond'])
+        try : 
+            r = requests.post(self.__conf_file['host']+"/add-service",data = json.dumps({
+                'serviceID' : self.__serviceId,
+                'name' : self.__serviceName
+            }))
+            r = requests.get(self.__conf_file['host']+"/message-broker")
+            mb = r.json()
+            self.__mqttClient = MyMQTT('temperature-patient-room-monitor',mb['name'],mb['port'],self)
+            r = requests.get(self.__conf_file['host']+"/patient-room-temperature-base-topic")
+            t = r.json()
+            self.__subscribeTopic = t+"+"
+            
+            r = requests.get(self.__conf_file['host']+"/patient-room-hourly-scheduling")
+            t = r.json()
+            self.__hourlyScheduling = t
+            r = requests.get(self.__conf_file['host']+"/patient-room-temperature-command-base-topic")
+            c = r.json()
+            self.__commandTopic = c
+            self.__baseMessage=self.__conf_file['base-message']
+            self.__fp.close()
+        except :
+            print("ERROR: init failed, restart the container")
 
-        self.mqttClient.start()
-        self.mqttClient.mySubscribe(self.subscribeTopic)
+        self.__mqttClient.start()
+        self.__mqttClient.mySubscribe(self.__subscribeTopic)
         #print('start')
 
     def updateService(self) :
         while True :
             time.sleep(self.__updateTimeInSecond)
-            r = requests.put(self.conf_file['host']+"/update-service",data = json.dumps({
-                'serviceID' : self.__serviceId,
-                'name' : self.__serviceName
-            }))
+            requestOK = False
+            while requestOK != True :
+                try :
+                    r = requests.put(self.__conf_file['host']+"/update-service",data = json.dumps({
+                        'serviceID' : self.__serviceId,
+                        'name' : self.__serviceName
+                    }))
+                except :
+                    print("ERROR: update service failed, retrying")
     
 
     def getSeason(self) :
@@ -70,7 +79,7 @@ class temperature_patient_room_monitor() :
         return command
 
     def expectedPresence(self,currentHour) :
-        for rangeHour in self.hourlyScheduling['expected-range-hours'] :
+        for rangeHour in self.__hourlyScheduling['expected-range-hours'] :
             if currentHour >= rangeHour[0] and currentHour <= rangeHour[1] :
                 return True
         return False
@@ -80,10 +89,10 @@ class temperature_patient_room_monitor() :
         currentHour =  datetime.datetime.now().hour
         print('current hour: ',currentHour,'\n')
         season = self.getSeason()
-        r = requests.get(self.conf_file['host']+"/room-temperature/"+room)
+        r = requests.get(self.__conf_file['host']+"/room-temperature/"+room)
         t = r.json()
         desiredTemperature = t['desired-temperature']
-        if  currentHour >= self.hourlyScheduling['night'][0] or currentHour <= self.hourlyScheduling['night'][1] : #night
+        if  currentHour >= self.__hourlyScheduling['night'][0] or currentHour <= self.__hourlyScheduling['night'][1] : #night
             return self.defineCommand(desiredTemperature,currentTemperature,season)
         else : #not night
             if presence == True :
@@ -107,9 +116,9 @@ class temperature_patient_room_monitor() :
         
         command = self.setTemperature(room,message['e'][0]['v'],message['e'][1]['v'])  
         self.__baseMessage['bt'] = time.time()
-        topicPublish = self.commandTopic+room
+        topicPublish = self.__commandTopic+room
         self.__baseMessage['e']['v'] = command
-        self.mqttClient.myPublish(topicPublish,self.__baseMessage)     
+        self.__mqttClient.myPublish(topicPublish,self.__baseMessage)     
         print("command sends:\n"+str(self.__baseMessage))
     
         

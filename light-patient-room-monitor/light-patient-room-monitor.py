@@ -29,7 +29,7 @@ class light_patient_room_monitor() :
             self.__subscribeTopic = t+"+"
             r = requests.get(self.__conf_file['host']+"/patient-room-light-command-base-topic")
             c = r.json()
-            self.commandTopic = c
+            self.__commandTopic = c
             self.__baseMessage=self.__conf_file['base-message']
             self.__mqttClient.start()
             time.sleep(2)
@@ -73,7 +73,7 @@ class light_patient_room_monitor() :
         if message['e']['v'] == 1 : 
             luminosity = self.setLuminosity()  
             self.__baseMessage['bt'] = time.time()
-            publishTopic = self.commandTopic+room
+            publishTopic = self.__commandTopic+room
             self.__baseMessage['e']['v'] = luminosity
             self.__mqttClient.myPublish(publishTopic,self.__baseMessage)     
             print("command sends:\n"+str(self.__baseMessage))
