@@ -1,5 +1,6 @@
 {
     "host" : "http://cdrsi:8080/catalog",
     "serviceID" : 9,
-    "name" : "terminal"
+    "name" : "terminal",
+    "updateTimeInSeconds" : 100
 }

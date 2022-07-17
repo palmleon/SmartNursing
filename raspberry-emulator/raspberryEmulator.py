@@ -137,7 +137,7 @@ class RaspberryEmulator :
                 for sensor in self.commonRoomSensorsList :
                     try :
 
-                        r = requests.post(self.__conf_file['host']+"/add-device",data = json.dumps({
+                        r = requests.put(self.__conf_file['host']+"/update-device",data = json.dumps({
                                                                         'deviceID' : str(commonRoom)+sensor,
                                                                         'name' : sensor}))
                         if r.ok != True :
@@ -149,7 +149,7 @@ class RaspberryEmulator :
                 if len(self.__patientRooms[room]) != 0:
                     for sensor in self.patientRoomSensorsList :
                         try :
-                            r = requests.post(self.__conf_file['host']+"/add-device",data = json.dumps({
+                            r = requests.put(self.__conf_file['host']+"/update-device",data = json.dumps({
                                                                             'deviceID' : str(room)+sensor,
                                                                             'name' : sensor
                                                                         }))
@@ -163,7 +163,7 @@ class RaspberryEmulator :
                     for id in self.__patientRooms[room] :
                         for sensor in self.patientSensorsList :
                             try :
-                                r = requests.post(self.__conf_file['host']+"/add-device",data = json.dumps({
+                                r = requests.put(self.__conf_file['host']+"/update-device",data = json.dumps({
                                                                                     'deviceID' : str(id)+sensor,
                                                                                     'patientID' : int(id),
                                                                                     'name' : sensor}))

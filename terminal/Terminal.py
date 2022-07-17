@@ -5,7 +5,7 @@ import time
 import signal
 from threading import Thread
 from enum import Enum
-
+import time
 class CommandType(Enum):
     ROOM = 0
     USER = 1 
@@ -80,6 +80,8 @@ class Terminal(object):
                 self.__user_telegram_delete()
 
     def launch(self):
+
+        #add service here
 
         print("\nWelcome to the SmartClinic Terminal!\n"
           "You can use this terminal to manage rooms and users!")
@@ -694,10 +696,15 @@ class Terminal(object):
         config_file.close()
 
         self.__running = True
-
+        
+        r=requests.post(self.__config_settings['host']+"/add-service",data= json.dumps({"serviceID" : self.__config_settings['serviceID'], "name" : self.__config_settings['name']}))
+        if r.ok == False :
+            print("ERROR: add service fails")
         # Launch thread for service update
         self.__thread = Thread(target=self.__updateService, args=(), daemon=False)
         self.__thread.start()
+    
+    
 
 def alarm_handler(signum, frame):
     raise TimeoutError
