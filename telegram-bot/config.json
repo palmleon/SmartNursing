@@ -5,5 +5,6 @@
     "mqttClientName-Patient": "Smart-Clinic-Telegram-Bot-Patient",
     "mqttClientName-Room": "Smart-Clinic-Telegram-Bot-Room",
     "updateTimeInSecond" : 100,
-    "thresholdBlackListUpdate" : 300
+    "thresholdBlackListUpdate" : 300,
+    "minIntervalBetweenAlarms" : 60
 }

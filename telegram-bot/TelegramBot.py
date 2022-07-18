@@ -26,8 +26,6 @@ class SmartClinicBot(object):
         config_file = open('config.json')
         self.__config_settings = json.load(config_file)
         config_file.close()
-        self.__updateTimeInSecond = int(self.__config_settings['updateTimeInSecond'])
-        self.__thresholdBlackListUpdate = int(self.__config_settings['thresholdBlackListUpdate'])
         r = requests.get(self.__config_settings['host']+"/bot-token")
         while r.status_code != requests.codes.ok:
             r = requests.get(self.__config_settings['host']+"/bot-token")
@@ -209,20 +207,20 @@ class SmartClinicBot(object):
             # Construct an Alarm object
             new_alarm = {}
             new_alarm['alarm_type'] = alarm_type
-            new_alarm['msg'] = msg['alert']
+            new_alarm['msg'] = "".join([i for i in msg['alert'] if not i.isdigit() and i != '.'])
             new_alarm['localtime'] = msg['time']
             new_alarm['id'] = id
             new_alarm['timestamp'] = int(time())
             #print(new_alarm['timestamp'])
 
-            # Check if the current message is in the Black List and the message has been sent < 1 minutes before
+            # Check if the current message is in the Black List and the message has been sent < self.__minIntervalBetweenAlarms seconds before
             alarm_black_list = self.__alarm_black_list['alarms']
             already_sent = False
             found = False
             for alarm in alarm_black_list:
                 if alarm['alarm_type'] == new_alarm['alarm_type'] and alarm['id'] == new_alarm['id'] and alarm['msg'] == new_alarm['msg']:
                     found = True
-                    if new_alarm['timestamp'] - alarm['timestamp'] < 60:
+                    if new_alarm['timestamp'] - alarm['timestamp'] < int(self.__config_settings['minIntervalBetweenAlarms']):
                         already_sent = True
                         #print("Alarm already sent " + str(new_alarm['timestamp'] - alarm['timestamp']) + "s ago!")
                     else: # Remove the alarm since it will be reuploaded
@@ -243,13 +241,13 @@ class SmartClinicBot(object):
                 # Update the Black List
                 alarm_black_list.append(new_alarm)
 
-            # If more than 5 minutes have spent since the last update, update the Black List
+            # If more than self.__threasholdBlackListUpdate seconds have spent since the last update, update the Black List
             curr_time = int(time())
             last_update = self.__alarm_black_list['last_update']    
 
-            if curr_time - last_update > self.__thresholdBlackListUpdate:
+            if curr_time - last_update > int(self.__config_settings['thresholdBlackListUpdate']):
                   
-                alarm_black_list = [alarm for alarm in alarm_black_list if curr_time - alarm['timestamp'] < 60]
+                alarm_black_list = [alarm for alarm in alarm_black_list if curr_time - alarm['timestamp'] < int(self.__config_settings['minIntervalBetweenAlarms'])]
                 self.__alarm_black_list['last_update'] = curr_time
 
             self.__alarm_black_list['alarms'] = alarm_black_list
@@ -949,15 +947,15 @@ class SmartClinicBot(object):
 
     def updateService(self) :
         while True :
-            sleep(self.__updateTimeInSecond)
+            sleep(int(self.__config_settings['updateTimeInSecond']))
             nattempts = 1
             r = requests.put(self.__config_settings['host'] + "/update-service",data = json.dumps({
-            'serviceID' : self.__config_settings['serviceID'],
+            'serviceID' : int(self.__config_settings['serviceID']),
             'name' : self.__config_settings['name']
             }))
             while nattempts < 5 and r.status_code != requests.codes.ok:
                 r = requests.put(self.__config_settings['host'] + "/update-service",data = json.dumps({
-                'serviceID' : self.__config_settings['serviceID'],
+                'serviceID' : int(self.__config_settings['serviceID']),
                 'name' : self.__config_settings['name']
                 }))
 
