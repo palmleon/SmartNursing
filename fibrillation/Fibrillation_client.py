@@ -21,23 +21,26 @@ class Fibrillation_Monitor_client():
     messagesdict=conf_file["alarm_messages"]
     # Getting Thresholds
     ThresholdsDict=conf_file["Thresholds"]
-    # Registration
-    r = requests.post(self.__register+"/add-service",data= json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
+    try :
+      # Registration
+      r = requests.post(self.__register+"/add-service",data= json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
 
-    # Request for broker information
-    r = requests.get(self.__register+"/message-broker")
-    mb = r.json()
-    self.__broker=mb['name']
-    self.__port=mb['port']
-    # Request for subscibe and publish base topics
-    r = requests.get(self.__register+"/patient-saturation-base-topic")
-    mb = r.json()
-    self.__topic_sub=mb+"+"
+      # Request for broker information
+      r = requests.get(self.__register+"/message-broker")
+      mb = r.json()
+      self.__broker=mb['name']
+      self.__port=mb['port']
+      # Request for subscibe and publish base topics
+      r = requests.get(self.__register+"/patient-saturation-base-topic")
+      mb = r.json()
+      self.__topic_sub=mb+"+"
 
-    r = requests.get(self.__register+"/alarm-base-topic")
-    mb = r.json()
-    self.__base_topic_pub=mb
-
+      r = requests.get(self.__register+"/alarm-base-topic")
+      mb = r.json()
+      self.__base_topic_pub=mb
+    except :
+      print("ERROR: init fails, restart container")
+      exit(-1)
     # Creating analyzer
     self.analyzer=Fibrillation_Monitor(messagesdict,ThresholdsDict)
 
@@ -54,9 +57,13 @@ class Fibrillation_Monitor_client():
   def updateService(self) :
     while True :
       time.sleep(self.__update_service_time_seconds)
-      r = requests.put(self.__register+"/update-service",data = json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
-      #print("Updating service")
-
+      try:
+          r = requests.put(self.__register+"/update-service",data = json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
+          #print("Updating service")
+          if r.ok == False :
+            print("ERROR: update failed")
+      except:
+        print("ERROR: update failed")
   def notify(self,topic,msg):
     print(f"\nIncoming message from topic: {topic}\n")
     # Getting message in json format

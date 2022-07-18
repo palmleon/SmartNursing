@@ -11,25 +11,31 @@ class dataAnalysis():
         self.thinkspeakchannel = self.conf_file['thinkspeakchannel']
         self.thinkspeakUrl = self.conf_file['thinkspeakUrl']
         self.attendabilityThreshold = self.conf_file['attendability_threshold']
-        r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
-            'serviceID' : int(self.conf_file["serviceId"]),
-            'name' : 'data-analysis'
-        }))
-        r = requests.get(self.conf_file['host']+"/channel-data")
-        self.fields = r.json()
-        r = requests.get(self.conf_file['host']+"/patient-room-hourly-scheduling")
-        r = r.json()
-        self.timeInterval = r['night']
+        try:
+            r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
+                'serviceID' : int(self.conf_file["serviceId"]),
+                'name' : 'data-analysis'
+            }))
+            r = requests.get(self.conf_file['host']+"/channel-data")
+            self.fields = r.json()
+            r = requests.get(self.conf_file['host']+"/patient-room-hourly-scheduling")
+            r = r.json()
+            self.timeInterval = r['night']
+        except :
+            print("ERROR: init failed, restart container")
         self.watingTime = 60*int(self.conf_file['waitingTimeMinutes'])
     def retriveData(self,channelList):
         dataDict = dict()
         for i in range(0,len(channelList)):
             channelID = channelList[i]['id']
             read_api = channelList[i]['api_keys'][1]['api_key']
-            r = requests.get(
-                self.thinkspeakUrl+'/{}/feeds.json?api_key={}'.format(channelID, read_api))
-            data = r.json()
-            dataDict[data['channel']['name']] = data['feeds']
+            try:
+                r = requests.get(
+                    self.thinkspeakUrl+'/{}/feeds.json?api_key={}'.format(channelID, read_api))
+                data = r.json()
+                dataDict[data['channel']['name']] = data['feeds']
+            except :
+                print("ERROR: unable to retrieve data")
         return dataDict
     def uploadAVG(self,channelID,channelList,avgdata,stringField):
         print('Upload in progress')
@@ -40,9 +46,16 @@ class dataAnalysis():
                 read_api = channelList[i]['api_keys'][1]['api_key']
                 if stringField in self.fields.values():
                     field_number = int(str(self.get_key(stringField,self.fields)).replace('field',''))
-                    requests.get(self.thinkspeakchannel+'?api_key={}&field{}={}'.format(
-                            write_api, field_number,avgdata))
-                    print('...')
+                    try:
+                        r = requests.get(self.thinkspeakchannel+'?api_key={}&field{}={}'.format(
+                                write_api, field_number,avgdata))
+                        if r.ok == False :
+                            print("ERROR: upload AVG failed")
+
+                        print('...')
+
+                    except :
+                        print("ERROR: upload AVG failed")
                     time.sleep(16)
         print('Upload concluded')
     def get_key(self,val,dic):

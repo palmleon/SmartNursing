@@ -23,28 +23,33 @@ class PatientDeviceAnalyzer():
     # Getting alarm template and messages
     self.__alert=conf_file["template_alarm"]
     self.__alarm_message=conf_file["alarm_message_base"].split("{}")
-    # Registration
-    r=requests.post(self.__register+"/add-service",data= json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
-    
-    # Request for broker information
-    r = requests.get(self.__register+"/message-broker")
-    mb = r.json()
-    self.__broker=mb['name']
-    self.__port=mb['port']
-    # Request for publish base topic
-    r = requests.get(self.__register+"/alarm-base-topic")
-    self.__base_topic_pub = r.json()
+    try :
 
-    # Creating client
-    self.client = MyMQTT(self.__name, self.__broker, self.__port, None)
-    # Starting client
-    self.client.start()
-    time.sleep(2)
+      # Registration
+      r=requests.post(self.__register+"/add-service",data= json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
+      
+      # Request for broker information
+      r = requests.get(self.__register+"/message-broker")
+      mb = r.json()
+      self.__broker=mb['name']
+      self.__port=mb['port']
+      # Request for publish base topic
+      r = requests.get(self.__register+"/alarm-base-topic")
+      self.__base_topic_pub = r.json()
 
-    # Request for hourly scheduling (night time)
-    r = requests.get(self.__register+"/patient-room-hourly-scheduling")
-    d=r.json()
-    self.__hours=d["night"] #d[0]=Starting hour d[1]=Stop hour
+      # Creating client
+      self.client = MyMQTT(self.__name, self.__broker, self.__port, None)
+      # Starting client
+      self.client.start()
+      time.sleep(2)
+
+      # Request for hourly scheduling (night time)
+      r = requests.get(self.__register+"/patient-room-hourly-scheduling")
+      d=r.json()
+      self.__hours=d["night"] #d[0]=Starting hour d[1]=Stop hour
+    except :
+      print("ERROR: init failed, restart container")
+      exit(-1)
   
   def control(self):
     while True:
@@ -54,15 +59,20 @@ class PatientDeviceAnalyzer():
       #if time.localtime()[3]>=self.__hours[0] or time.localtime()[3]<=self.__hours[1]:
       if True:
         # Request for patient list
-        r = requests.get(self.__register+"/patients")
-        patient_dict=r.json()
-        #print(patient_dict)
-        patient_IDs=[]
-        for patient in patient_dict:
-          patient_IDs.append(patient["patientID"])
-        # Request for device list
-        r = requests.get(self.__register+"/devices")
-        all_devices=r.json()
+        try :
+          r = requests.get(self.__register+"/patients")
+          patient_dict=r.json()
+          #print(patient_dict)
+          patient_IDs=[]
+          for patient in patient_dict:
+            patient_IDs.append(patient["patientID"])
+          # Request for device list
+          r = requests.get(self.__register+"/devices")
+          all_devices=r.json()
+        except:
+          print("ERROR: control function fails getting information from catalog")
+          patient_IDs=[]
+          all_devices = []
         #print(all_devices)
         for patient in patient_IDs: #Checking one patient each time
           sensors=[]
@@ -85,8 +95,13 @@ class PatientDeviceAnalyzer():
   def updateService(self) :
     while True :
       time.sleep(self.__update_service_time_seconds)
-      r = requests.put(self.__register+"/update-service",data = json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
+      try :
 
+        r = requests.put(self.__register+"/update-service",data = json.dumps({"serviceID" : self.__clientID, "name" : self.__name}))
+        if r.ok == False :
+          print("ERROR: update service failed")
+      except :
+        print("ERROR: update service failed")
 if __name__ == "__main__" :
   A=PatientDeviceAnalyzer()
   t1 = threading.Thread(target=A.control)

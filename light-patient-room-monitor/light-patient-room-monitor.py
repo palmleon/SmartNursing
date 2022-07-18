@@ -6,55 +6,67 @@ import requests
 
 class light_patient_room_monitor() :
     def __init__(self) :
-        self.conf_file = json.load(open('config.json'))
-        self.serviceId = int(self.conf_file['serviceId'])
-        self.serviceName = self.conf_file['serviceName']
-        r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
-            'serviceID' : self.serviceId,
-            'name' : self.serviceName
-        }))
-        while r.ok != True :
-            r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
-            'serviceID' : self.serviceId,
-            'name' : self.serviceName
-        }))
-        r = requests.get(self.conf_file['host']+"/city")
-        c = r.json()
-        r = requests.get(self.conf_file['host']+"/api-weather")
-        a = r.json()
-        self.urlApi = a+c
-        r = requests.get(self.conf_file['host']+"/message-broker")
-        mb = r.json()
-        self.mqttClient = MyMQTT(self.serviceName,mb['name'],mb['port'],self)
-        r = requests.get(self.conf_file['host']+"/patient-room-light-base-topic")
-        t = r.json()
-        self.subscribeTopic = t+"+"
-        r = requests.get(self.conf_file['host']+"/patient-room-light-command-base-topic")
-        c = r.json()
-        self.commandTopic = c
-        self.__baseMessage={"bn" : self.serviceName,"bt" : 0,"e" : {"n":"luminosity","u":"/","v":0}}
-        self.mqttClient.start()
-        time.sleep(2)
-        self.mqttClient.mySubscribe(self.subscribeTopic)
-        self.cloudCoverTheresold = self.conf_file['cloud-cover-theresold']
-        self.visibilityTheresold = self.conf_file['visibility-theresold']
+        self.__fp = open('config.json')
+        self.__conf_file = json.load(self.__fp)
+        self.__serviceID = int(self.__conf_file['serviceId'])
+        self.__serviceName = self.__conf_file['serviceName']
+        self.__updateTimeInMinutes = int(self.__conf_file['update-time-in-minutes'])
+        try :
+            r = requests.post(self.__conf_file['host']+"/add-service",data =json.dumps( {
+                'serviceID' : self.__serviceID,
+                'name' : self.__serviceName
+            }))
+            r = requests.get(self.__conf_file['host']+"/city")
+            c = r.json()
+            r = requests.get(self.__conf_file['host']+"/api-weather")
+            a = r.json()
+            self.__urlApi = a+c
+            r = requests.get(self.__conf_file['host']+"/message-broker")
+            mb = r.json()
+            self.__mqttClient = MyMQTT(self.__serviceName,mb['name'],mb['port'],self)
+            r = requests.get(self.__conf_file['host']+"/patient-room-light-base-topic")
+            t = r.json()
+            self.__subscribeTopic = t+"+"
+            r = requests.get(self.__conf_file['host']+"/patient-room-light-command-base-topic")
+            c = r.json()
+            self.__commandTopic = c
+            self.__baseMessage=self.__conf_file['base-message']
+            self.__mqttClient.start()
+            time.sleep(2)
+            self.__mqttClient.mySubscribe(self.__subscribeTopic)
+            self.cloudCoverTheresold = self.__conf_file['cloud-cover-theresold']
+            self.visibilityTheresold = self.__conf_file['visibility-theresold']
+            self.__fp.close()
+        except :
+            print("ERROR: init failed, restart the container")
+            exit(-1)
 
     def updateService(self) :
         while True :
-            time.sleep(100)
-            r = requests.put(self.conf_file['host']+"/update-service",data = json.dumps({
-                'serviceID' : self.serviceId,
-                'name' :self.serviceName
-            }))
+            time.sleep(self.__updateTimeInMinutes*60)
+           
+            try : 
+                r = requests.put(self.__conf_file['host']+"/update-service",data = json.dumps({
+                        'serviceID' : self.__serviceID,
+                        'name' :self.__serviceName
+                    }))
+                if r.ok == False :
+                    print("ERROR: update service failed")
+            except :
+                print("ERROR: update service failed")
     
     def setLuminosity(self) :
-        r = requests.get(self.urlApi)
-        files = dict(r.json())
+        try :
+            r = requests.get(self.__urlApi)
+            files = dict(r.json())
+        except :
+            print("ERROR: unable to get the current wheater conditions")
+            return
         if files['current']['is_day'] == 'no' :
             return 100
-        elif files['current']['cloudcover'] > self.cloudCoverTheresold : #cloud cover è la percentuale di nuvolosità
+        elif files['current']['cloudcover'] > self.cloudCoverTheresold : #cloud cover 
             return 75
-        elif  files['current']['visibility'] < self.visibilityTheresold : #visibility è la visibilita in km 
+        elif  files['current']['visibility'] < self.visibilityTheresold : #visibility  
             return 60
         else : 
             return 15
@@ -62,14 +74,13 @@ class light_patient_room_monitor() :
     def notify(self,topic,payload) :
         message = dict(json.loads(payload))
         room = topic.split("/")[-1]
-        print('ricevo dato',message['e']['v'])
         if message['e']['v'] == 1 : 
             luminosity = self.setLuminosity()  
             self.__baseMessage['bt'] = time.time()
-            publishTopic = self.commandTopic+room
+            publishTopic = self.__commandTopic+room
             self.__baseMessage['e']['v'] = luminosity
-            self.mqttClient.myPublish(publishTopic,self.__baseMessage)     
-            print("command "+str(self.__baseMessage))#rimuovere
+            self.__mqttClient.myPublish(publishTopic,self.__baseMessage)     
+            print("command sends:\n"+str(self.__baseMessage))
     
         
 

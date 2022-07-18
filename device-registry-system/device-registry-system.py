@@ -255,7 +255,7 @@ class Catalog(object) :
 
         
 
-    def PUT(self,*uri,**path):
+    def PUT(self,*uri):
 
         if len(uri) != 1 :
             raise cherrypy.HTTPError(400,'Wrong parameters number')
@@ -341,7 +341,7 @@ class Catalog(object) :
         elif uri[0] == 'update-telegram-user':
             newUser = json.loads(cherrypy.request.body.read())
             if newUser['user-id'] not in list(map(lambda user: user['user-id'], self.catalogList['telegram-user-id-list'])) :
-                 raise cherrypy.HTTPError(404, 'user not found')
+                 raise cherrypy.HTTPError(400, 'user not found')
             self.catalogList['telegram-user-id-list'][:] = \
                 [newUser if newUser['user-id'] == user['user-id'] else user for user in self.catalogList['telegram-user-id-list']]
             return
@@ -350,7 +350,7 @@ class Catalog(object) :
             raise cherrypy.HTTPError(404,'operation not found')
 
     
-    def DELETE(self,*uri,**path) :
+    def DELETE(self,*uri) :
         if len(uri) != 2 :
             raise cherrypy.HTTPError(400,'Wrong parameters number')
 
@@ -365,7 +365,7 @@ class Catalog(object) :
                 if new_len < prev_len:
                     found = True
             if not found:
-                raise cherrypy.HTTPError(404,'patient not found')
+                raise cherrypy.HTTPError(400,'patient not found')
         
         elif uri[0] == 'delete-room' :
             roomID = int(uri[1])

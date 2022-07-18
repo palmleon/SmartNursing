@@ -27,6 +27,7 @@ class SmartClinicBot(object):
         self.__config_settings = json.load(config_file)
         config_file.close()
         self.__updateTimeInSecond = int(self.__config_settings['updateTimeInSecond'])
+        self.__thresholdBlackListUpdate = int(self.__config_settings['thresholdBlackListUpdate'])
         r = requests.get(self.__config_settings['host']+"/bot-token")
         while r.status_code != requests.codes.ok:
             r = requests.get(self.__config_settings['host']+"/bot-token")
@@ -246,7 +247,7 @@ class SmartClinicBot(object):
             curr_time = int(time())
             last_update = self.__alarm_black_list['last_update']    
 
-            if curr_time - last_update > 300:
+            if curr_time - last_update > self.__thresholdBlackListUpdate:
                   
                 alarm_black_list = [alarm for alarm in alarm_black_list if curr_time - alarm['timestamp'] < 60]
                 self.__alarm_black_list['last_update'] = curr_time
