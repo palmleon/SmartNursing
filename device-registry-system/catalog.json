@@ -66,7 +66,7 @@
         "field8" : null
       },
     "api-weather": "http://api.weatherstack.com/current?access_key=354a8fd8d83e78359700032ca93ff485&query=",
-    "bot-token" : "5553441519:AAFX3I2ooeeb0hER05cRsDN5ZYnFHw-EJlU",
+    "bot-token" : "5520104648:AAEW8ZPIsOTmggQNV8JfeBE2ZW25gRtfCWE",
     "common-room-list": [],
     "common-room-hourly-scheduling": {
         "night": [

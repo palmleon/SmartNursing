@@ -1,5 +1,5 @@
 #version: 3
-#name: SmartNursing
+#name: smartnursing
 volumes:
   drs:
 
@@ -7,7 +7,7 @@ services:
   #device registry system
   cdrsi:
 
-    image: SmartNursing-drsi
+    image: smartnursing-drsi
     build: ./device-registry-system
     ports:
       - 8080:8080
@@ -21,7 +21,7 @@ services:
   #Telegram
   ct:
     
-    image: SmartNursing-ti
+    image: smartnursing-ti
     build: ./telegram-bot
     links:
       - cdrsi
@@ -31,7 +31,7 @@ services:
   #Patient monitor
   cpm:
     build: ./patient-monitor
-    image: SmartNursing-pmi
+    image: smartnursing-pmi
     links:
       - cdrsi
     depends_on:
@@ -41,7 +41,7 @@ services:
 
   #Patient device analyzer
   cpai:
-    image: SmartNursing-pdai
+    image: smartnursing-pdai
     build: ./patient-device-analyzer
     links:
       - cdrsi
@@ -52,7 +52,7 @@ services:
 
   #temperature patient room
   ctpri:
-    image: SmartNursing-tpri
+    image: smartnursing-tpri
     build: ./temperature-patient-room
     links:
       - cdrsi
@@ -63,7 +63,7 @@ services:
 
   #light patient room monitor
   clprmi:
-    image: SmartNursing-lprmi
+    image: smartnursing-lprmi
     build: ./light-patient-room-monitor
     stdin_open: true
     tty: true
@@ -74,7 +74,7 @@ services:
 
   #temperature common room
   ctcri:
-    image: SmartNursing-tcri
+    image: smartnursing-tcri
     build: ./temperature-common-room
     links:
       - cdrsi
@@ -85,7 +85,7 @@ services:
 
   #fibrillation
   cf:
-    image: SmartNursing-fi
+    image: smartnursing-fi
     build: ./fibrillation
     links:
       - cdrsi
@@ -97,7 +97,7 @@ services:
   #data analysis
   cda:
     build: ./data-analysis
-    image: SmartNursing-dai
+    image: smartnursing-dai
     links:
       - cdrsi
     depends_on:
@@ -107,7 +107,7 @@ services:
 
   #thingspeak adaptor
   ctsai:
-    image: SmartNursing-tsai
+    image: smartnursing-tsai
     build: ./thing-speak-adaptor
     links:
       - cdrsi
@@ -119,7 +119,7 @@ services:
   #system terminal
   csti:
     build: ./terminal
-    image: SmartNursing-sti
+    image: smartnursing-sti
     links:
       - cdrsi
     depends_on:
@@ -129,7 +129,7 @@ services:
 
   #raspberry emulator
   crei : 
-    image : SmartNursing-rei
+    image : smartnursing-rei
     build: ./raspberry-emulator
     links : 
       - cdrsi
