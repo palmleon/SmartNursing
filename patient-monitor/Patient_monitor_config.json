@@ -5,15 +5,15 @@
     "template_alarm": {"alert":"","time":null},
     "alarm_messages":
     {
-        "alarm_Temperature_battery": "WARNING, the patient {} has the thermometer's battery low",
-        "alarm_Temperature_place": "WARNING, the patient {} has the thermomether bad positioned or removed",
-        "alarm_high_Temperature": "WARNING, the patient {} has fever, with a body temperatur of {}",
-        "alarm_low_Temperature": "WARNING, the patient {} is in hypothermia, of {}",
-        "alarm_Pulse_battery": "WARNING, the patient {} has the pulse oximeter's battery low",
-        "alarm_Pulse_place": "WARNING, the patient {} has the pulse oximeter bad positioned or removed",
-        "alarm_high_Pulse": "WARNING, the patient {} has a high heart rate: {}",
-        "alarm_low_Pulse": "WARNING, the patient {} has a low heart rate: {}",
-        "alarm_Saturation_Threshold": "WARNING, the patient {} is in hypoxia. Blood saturation at {}"
+        "alarm_Temperature_battery": "WARNING, patient {} has thermometer battery level low",
+        "alarm_Temperature_place": "WARNING, patient {} has thermomether bad positioned or removed",
+        "alarm_high_Temperature": "WARNING, patient {} has fever, with a body temperatur of {}",
+        "alarm_low_Temperature": "WARNING, patient {} is in hypothermia, of {}",
+        "alarm_Pulse_battery": "WARNING, patient {} has pulse oximeter battery level low",
+        "alarm_Pulse_place": "WARNING, patient {} has pulse oximeter bad positioned or removed",
+        "alarm_high_Pulse": "WARNING, patient {} has a high heart rate: {}",
+        "alarm_low_Pulse": "WARNING, patient {} has a low heart rate: {}",
+        "alarm_Saturation_Threshold": "WARNING, patient {} is in hypoxia. Blood saturation at {}"
     },
     "update_service_time_seconds" : 100,
     "Thresholds":
