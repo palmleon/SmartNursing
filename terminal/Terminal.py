@@ -83,7 +83,7 @@ class Terminal(object):
 
         #add service here
 
-        print("\nWelcome to the SmartClinic Terminal!\n"
+        print("\nWelcome to the SmartNursing Terminal!\n"
           "You can use this terminal to manage rooms and users!")
         print("-"*40)
 

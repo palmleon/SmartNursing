@@ -8,7 +8,7 @@ from MyMQTT import *
 
 class TestScript():
     def __init__(self) :
-        self.mqttClient = MyMQTT('scriptToTestTheSmartClinic',"mqtt.eclipseprojects.io",1883,self)
+        self.mqttClient = MyMQTT('scriptToTestTheSmartNursing',"mqtt.eclipseprojects.io",1883,self)
         self.patientId = 1
         self.roomId = 1
         self.mqttClient.start()

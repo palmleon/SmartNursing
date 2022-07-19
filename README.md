@@ -1,4 +1,4 @@
-# SmartClinic
+# SmartNursing
 
 <p align="center">
 <a href="https://imgbb.com/"><img src="https://i.ibb.co/Ny6wg11/polito-logo-new.png"></a>
@@ -17,11 +17,11 @@
 - <img alt="avatar" src="https://github.com/palmleon.png" width="20px" height="20px"> **Leonardo Palmucci** - [palmleon](https://github.com/palmleon)
 - <img alt="avatar" src="https://github.com/LorenzoCentamore.png" width="20px" height="20px"> **Lorenzo Giuseppe Centamore** - [LorenzoCentamore](https://github.com/LorenzoCentamore)
 
-## What is SmartClinic?
+## What is SmartNursing?
 
-SmartClinic is a tool that assists nurses and physicians in a nursing home in taking care of the residents.
+SmartNursing is a tool that assists nurses and physicians in a nursing home in taking care of the residents.
 
-SmartClinic automates many tedious tasks like health status monitoring, data recording and analysis, emergency detection and communication, and environment management.
+SmartNursing automates many tedious tasks like health status monitoring, data recording and analysis, emergency detection and communication, and environment management.
 
 Besides, it comes with a UI based on Thingspeak to consult resident health data and a Telegram Bot used by nurses and physicians to manage the residents.
 
@@ -29,7 +29,7 @@ The system is supposed to be deployed on a Raspberry acting as the core system; 
 
 For didactic reasons, it was not possible to use neither the gateway nodes nor the sensors. So, the project comprises a  ```raspberry emulator``` to simulate sensors and their communication to the core.
 
-## How to run SmartClinic
+## How to run SmartNursing
 
 ### Prerequisites
 
@@ -44,8 +44,8 @@ For didactic reasons, it was not possible to use neither the gateway nodes nor t
 
 **3**. Then, you can use the following commands:
 
-- `make all` or `make`: launch SmartClinic
-- `make stop`: stop SmartClinic (restart it by using `make run`)
+- `make all` or `make`: launch SmartNursing
+- `make stop`: stop SmartNursing (restart it by using `make run`)
 - `make clean`: remove everything (images and containers)
 
 **4**. If you want to use either the system terminal or the raspberry emulator, use the following scripts:

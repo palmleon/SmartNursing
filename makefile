@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-PROJECT_NAME := smartclinic
+PROJECT_NAME := SmartNursing
 green := $(shell echo -e '\033[0;32m')
 yellow := $(shell echo -e '\033[1;33m')
 nc := $(shell echo -e '\033[0m')
@@ -28,7 +28,7 @@ run: stop #Only one container at a time
 	@echo -e "$(yellow)Launching the containers...$(nc)"
 	@docker compose up -d
 	@echo -e "$(green)Containers launched!$(nc)"
-#	@docker run  --name crei -it --link cdrsi:localhost --net smartclinic_default rei
+#	@docker run  --name crei -it --link cdrsi:localhost --net SmartNursing_default rei
 
 .PHONY:
 stop:

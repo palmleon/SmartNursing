@@ -8,7 +8,7 @@ from TelegramBotExceptions import DuplicatePatientError, ServerNotFoundError, \
    PatientNotFoundError, RoomNotFoundError, ShiftStartedError, ShiftEndedError, TelegramTaskNotFoundError, TelegramUserNotFoundError
 from time import sleep, time
 
-class SmartClinicBot(object):
+class SmartNursingBot(object):
 
     ADD_PATIENT = 1
     EDIT_PATIENT_1 = 2
@@ -58,7 +58,7 @@ class SmartClinicBot(object):
                 CommandHandler('add_patient', self.__add_patient_entry)
             ],
             states={ 
-                SmartClinicBot.ADD_PATIENT: [MessageHandler(Filters.text & ~(Filters.command), self.__add_patient_update)]
+                SmartNursingBot.ADD_PATIENT: [MessageHandler(Filters.text & ~(Filters.command), self.__add_patient_update)]
             },
             fallbacks=[CommandHandler('cancel', self.__cancel)]
         )
@@ -69,8 +69,8 @@ class SmartClinicBot(object):
                 CommandHandler('edit_patient', self.__edit_patient_entry)
             ],
             states={ 
-                SmartClinicBot.EDIT_PATIENT_1: [MessageHandler(Filters.text & ~(Filters.command), self.__search_patient)],
-                SmartClinicBot.EDIT_PATIENT_2: [MessageHandler(Filters.text & ~(Filters.command), self.__edit_patient_update)]
+                SmartNursingBot.EDIT_PATIENT_1: [MessageHandler(Filters.text & ~(Filters.command), self.__search_patient)],
+                SmartNursingBot.EDIT_PATIENT_2: [MessageHandler(Filters.text & ~(Filters.command), self.__edit_patient_update)]
             },
             fallbacks=[CommandHandler('cancel', self.__cancel)])
         dispatcher.add_handler(edit_patient_handler)
@@ -80,8 +80,8 @@ class SmartClinicBot(object):
                 CommandHandler('delete_patient', self.__delete_patient_entry)
             ],
             states={ 
-                SmartClinicBot.DELETE_PATIENT_1: [MessageHandler(Filters.text & ~(Filters.command), self.__search_patient)],
-                SmartClinicBot.DELETE_PATIENT_2: [MessageHandler(Filters.text & ~(Filters.command), self.__delete_patient_update)]
+                SmartNursingBot.DELETE_PATIENT_1: [MessageHandler(Filters.text & ~(Filters.command), self.__search_patient)],
+                SmartNursingBot.DELETE_PATIENT_2: [MessageHandler(Filters.text & ~(Filters.command), self.__delete_patient_update)]
             },
             fallbacks=[CommandHandler('cancel', self.__cancel)])
         dispatcher.add_handler(delete_patient_handler)
@@ -91,7 +91,7 @@ class SmartClinicBot(object):
                 CommandHandler('search_patient', self.__search_patient_entry)
             ],
             states={ 
-                SmartClinicBot.SEARCH_PATIENT: [MessageHandler(Filters.text & ~(Filters.command), self.__search_patient)],
+                SmartNursingBot.SEARCH_PATIENT: [MessageHandler(Filters.text & ~(Filters.command), self.__search_patient)],
             },
             fallbacks=[CommandHandler('cancel', self.__cancel)])
         dispatcher.add_handler(search_patient_handler)
@@ -104,7 +104,7 @@ class SmartClinicBot(object):
                 CommandHandler('set_room_temperature', self.__set_room_temperature_entry)
             ],
             states={ 
-                SmartClinicBot.SET_ROOM_TEMPERATURE: [MessageHandler(Filters.text & ~(Filters.command), self.__set_room_temperature_update)]
+                SmartNursingBot.SET_ROOM_TEMPERATURE: [MessageHandler(Filters.text & ~(Filters.command), self.__set_room_temperature_update)]
             },
             fallbacks=[CommandHandler('cancel', self.__cancel)])
         dispatcher.add_handler(set_room_temperature_handler)
@@ -114,7 +114,7 @@ class SmartClinicBot(object):
                 CommandHandler('get_room_temperature', self.__get_room_temperature_entry)
             ],
             states={ 
-                SmartClinicBot.GET_ROOM_TEMPERATURE: [MessageHandler(Filters.text & ~(Filters.command), self.__get_room_temperature_update)]
+                SmartNursingBot.GET_ROOM_TEMPERATURE: [MessageHandler(Filters.text & ~(Filters.command), self.__get_room_temperature_update)]
             },
             fallbacks=[CommandHandler('cancel', self.__cancel)])
         dispatcher.add_handler(get_room_temperature_handler)
@@ -315,7 +315,7 @@ class SmartClinicBot(object):
 
     def __start(self, update: Update, context: CallbackContext):
         userID = update.message.from_user.id
-        update.message.reply_text("Welcome to the SmartClinicBot!")
+        update.message.reply_text("Welcome to the SmartNursingBot!")
         # Check if the User is among those recognized
         if self.__check_authZ_authN(update, 'start', userID):
             update.message.reply_text("Congratulations! You're in!")
@@ -347,7 +347,7 @@ class SmartClinicBot(object):
                 "surname - <insert_surname>\n"
                 "age - <insert_age>\n"
                 "description - <insert_description>")
-            return SmartClinicBot.ADD_PATIENT
+            return SmartNursingBot.ADD_PATIENT
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
             return ConversationHandler.END
@@ -355,7 +355,7 @@ class SmartClinicBot(object):
     def __add_patient_update(self, update: Update, context: CallbackContext):
         # Define a Patient from the User Data
         try:
-            new_patient = SmartClinicBot.__parse_input(update.message.text)
+            new_patient = SmartNursingBot.__parse_input(update.message.text)
             # Check if you have fetched the correct number of elements
             if len(new_patient) != 6:
                 raise ValueError("Incorrect number of elements")
@@ -399,19 +399,19 @@ class SmartClinicBot(object):
                 "age - <insert_age>\n"
                 "description - <insert_description>")
             print(e)
-            return SmartClinicBot.ADD_PATIENT
+            return SmartNursingBot.ADD_PATIENT
         except DuplicatePatientError as e:
             update.message.reply_text("This patient is already present! Retry")
             print(e)
-            return SmartClinicBot.ADD_PATIENT
+            return SmartNursingBot.ADD_PATIENT
         except RoomNotFoundError as e:
             update.message.reply_text("Room not found! Retry")
             print(e)
-            return SmartClinicBot.ADD_PATIENT
+            return SmartNursingBot.ADD_PATIENT
         except ServerNotFoundError as e:
             update.message.reply_text("Host unreachable. Abort")
             print(e)
-            return SmartClinicBot.ADD_PATIENT
+            return SmartNursingBot.ADD_PATIENT
         return ConversationHandler.END
 
     def __edit_patient_entry(self, update: Update, context: CallbackContext):
@@ -425,7 +425,7 @@ class SmartClinicBot(object):
                 "surname - <insert_surname>\n"
                 )
             context.chat_data['command'] = 'edit_patient'
-            return SmartClinicBot.EDIT_PATIENT_1
+            return SmartNursingBot.EDIT_PATIENT_1
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
             return ConversationHandler.END
@@ -435,7 +435,7 @@ class SmartClinicBot(object):
             # Understand which is the current command
             curr_command = context.chat_data['command']
             # Define a Patient from the User Data
-            req_patient = SmartClinicBot.__parse_input(update.message.text)
+            req_patient = SmartNursingBot.__parse_input(update.message.text)
             
             # Check if you have fetched the correct number of elements
             # Look for the Patient either by using the PatientID or their name and surname
@@ -515,9 +515,9 @@ class SmartClinicBot(object):
                         msg += "Choose the patient by using their ID with the following format:\n" "patientID - <insert_patientID>" 
                     update.message.reply_text(msg)
                     if curr_command == 'delete_patient':
-                        return SmartClinicBot.DELETE_PATIENT_1
+                        return SmartNursingBot.DELETE_PATIENT_1
                     elif curr_command == 'edit_patient':
-                        return SmartClinicBot.EDIT_PATIENT_1             
+                        return SmartNursingBot.EDIT_PATIENT_1             
             else:
                 raise PatientNotFoundError
 
@@ -536,31 +536,31 @@ class SmartClinicBot(object):
                 "name - <insert_name>\n"
                 "surname - <insert_surname>\n")
             if curr_command == 'delete_patient':
-                return SmartClinicBot.DELETE_PATIENT_1
+                return SmartNursingBot.DELETE_PATIENT_1
             elif curr_command == 'edit_patient':
-                return SmartClinicBot.EDIT_PATIENT_1 
+                return SmartNursingBot.EDIT_PATIENT_1 
             elif curr_command == 'search_patient':
-                return SmartClinicBot.SEARCH_PATIENT
+                return SmartNursingBot.SEARCH_PATIENT
 
         except PatientNotFoundError as e:
             update.message.reply_text("Patient not found! Retry")
             print(e)
             if curr_command == 'delete_patient':
-                return SmartClinicBot.DELETE_PATIENT_1
+                return SmartNursingBot.DELETE_PATIENT_1
             elif curr_command == 'edit_patient':
-                return SmartClinicBot.EDIT_PATIENT_1 
+                return SmartNursingBot.EDIT_PATIENT_1 
             elif curr_command == 'search_patient':
-                return SmartClinicBot.SEARCH_PATIENT
+                return SmartNursingBot.SEARCH_PATIENT
 
         if curr_command == 'delete_patient':
-            return SmartClinicBot.DELETE_PATIENT_2
+            return SmartNursingBot.DELETE_PATIENT_2
         elif curr_command == 'edit_patient':
-            return SmartClinicBot.EDIT_PATIENT_2
+            return SmartNursingBot.EDIT_PATIENT_2
         return ConversationHandler.END #default bhv (also expected behavior for search_patient)
 
     def __edit_patient_update(self, update: Update, context: CallbackContext):
         try:
-            edited_patient = SmartClinicBot.__parse_input(update.message.text)
+            edited_patient = SmartNursingBot.__parse_input(update.message.text)
             #print(edited_patient)
             # Check if you have fetched the correct number of elements
             if len(edited_patient) != 5:
@@ -604,7 +604,7 @@ class SmartClinicBot(object):
                 "age - <insert_age>\n"
                 "description - <insert_description>\n")
             # Retry until success
-            return SmartClinicBot.EDIT_PATIENT_2
+            return SmartNursingBot.EDIT_PATIENT_2
         
         except ServerNotFoundError:
             update.message.reply_text("Host unreachable. Abort")
@@ -615,7 +615,7 @@ class SmartClinicBot(object):
         except RoomNotFoundError:
             update.message.reply_text("Room not found! Retry")
             print(e)
-            return SmartClinicBot.EDIT_PATIENT_2
+            return SmartNursingBot.EDIT_PATIENT_2
  
         return ConversationHandler.END
 
@@ -630,7 +630,7 @@ class SmartClinicBot(object):
                 "surname - <insert_surname>\n"
                 )
             context.chat_data['command'] = 'delete_patient'
-            return SmartClinicBot.DELETE_PATIENT_1
+            return SmartNursingBot.DELETE_PATIENT_1
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
             return ConversationHandler.END
@@ -672,7 +672,7 @@ class SmartClinicBot(object):
             update.message.reply_text("Sorry, Reply with [Y/N]")
             print(e)
             # Retry until success
-            return SmartClinicBot.DELETE_PATIENT_2
+            return SmartNursingBot.DELETE_PATIENT_2
  
         return ConversationHandler.END
 
@@ -687,7 +687,7 @@ class SmartClinicBot(object):
                 "surname - <insert_surname>\n"
                 )
             context.chat_data['command'] = 'search_patient'
-            return SmartClinicBot.SEARCH_PATIENT
+            return SmartNursingBot.SEARCH_PATIENT
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
             return ConversationHandler.END
@@ -739,7 +739,7 @@ class SmartClinicBot(object):
                 "isCommon - <True/False>"
                 )
             context.chat_data['command'] = 'set_room_temperature'
-            return SmartClinicBot.SET_ROOM_TEMPERATURE
+            return SmartNursingBot.SET_ROOM_TEMPERATURE
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
             return ConversationHandler.END
@@ -747,7 +747,7 @@ class SmartClinicBot(object):
     def __set_room_temperature_update(self, update: Update, context: CallbackContext):
         
         try:
-            room = SmartClinicBot.__parse_input(update.message.text)
+            room = SmartNursingBot.__parse_input(update.message.text)
             # Check if you have fetched the correct number of elements
             if len(room) != 3:
                 raise ValueError("Incorrect number of elements")
@@ -805,7 +805,7 @@ class SmartClinicBot(object):
                 "isCommon - <True/False>")
             print(e)
             # Retry until success
-            return SmartClinicBot.SET_ROOM_TEMPERATURE
+            return SmartNursingBot.SET_ROOM_TEMPERATURE
         
         except ServerNotFoundError as e:
             update.message.reply_text("Host unreachable. Abort")
@@ -828,14 +828,14 @@ class SmartClinicBot(object):
                 "isCommon - <True/False>"
                 )
             context.chat_data['command'] = 'get_room_temperature'
-            return SmartClinicBot.GET_ROOM_TEMPERATURE
+            return SmartNursingBot.GET_ROOM_TEMPERATURE
         else:
             update.message.reply_text("Sorry, you cannot interact with the Bot!")
             return ConversationHandler.END
 
     def __get_room_temperature_update(self, update: Update, context: CallbackContext):
         try:
-            room = SmartClinicBot.__parse_input(update.message.text)
+            room = SmartNursingBot.__parse_input(update.message.text)
             # Check if you have fetched the correct number of elements
             if len(room) != 2:
                 raise ValueError("Incorrect number of elements")
@@ -885,7 +885,7 @@ class SmartClinicBot(object):
                 "isCommon - <True/False>")
             print(e)
             # Retry until success
-            return SmartClinicBot.GET_ROOM_TEMPERATURE
+            return SmartNursingBot.GET_ROOM_TEMPERATURE
 
         except RoomNotFoundError as e:
             update.message.reply_text("Room not found! Abort")
@@ -960,6 +960,6 @@ class SmartClinicBot(object):
                 }))
 
 if __name__ == '__main__':
-    bot = SmartClinicBot()
+    bot = SmartNursingBot()
     bot.launch()
     bot.updateService()
