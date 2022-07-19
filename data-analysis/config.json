@@ -5,4 +5,6 @@
     "thinkspeakUrl" : "https://api.thingspeak.com/channels",
     "waitingTimeMinutes" : 120,
     "serviceId" : 8,
-    "attendability_threshold" : 4}
+    "attendability_threshold" : 4,
+    "temperature_threshold" : 35
+}

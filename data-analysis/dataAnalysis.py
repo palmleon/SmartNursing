@@ -11,6 +11,7 @@ class dataAnalysis():
         self.thinkspeakchannel = self.conf_file['thinkspeakchannel']
         self.thinkspeakUrl = self.conf_file['thinkspeakUrl']
         self.attendabilityThreshold = self.conf_file['attendability_threshold']
+        self.temperatureThreshold= self.conf_file['temperature_threshold']
         try:
             r = requests.post(self.conf_file['host']+"/add-service",data =json.dumps( {
                 'serviceID' : int(self.conf_file["serviceId"]),
@@ -121,7 +122,7 @@ class dataAnalysis():
         count = 0
         if len(temperatureList) >= 1:
             for i in range(0,len(temperatureList)):
-                if float(temperatureList[i]) >= 35:
+                if float(temperatureList[i]) >= self.temperatureThreshold:
                     sum = sum + float(temperatureList[i])
                     count = count + 1
             if count != 0:
