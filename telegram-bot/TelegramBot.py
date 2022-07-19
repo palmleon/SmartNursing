@@ -204,21 +204,21 @@ class SmartNursingBot(object):
             # Extract the payload
             msg = json.loads(payload)
            
-            # Construct an Alarm object
+            # Construct an Alarm
             new_alarm = {}
             new_alarm['alarm_type'] = alarm_type
-            new_alarm['msg'] = "".join([i for i in msg['alert'] if not i.isdigit() and i != '.'])
+            new_alarm['msg'] = msg['alert']
+            new_alarm['msg_kind'] = "".join([i for i in msg['alert'] if not i.isdigit() and i != '.'])
             new_alarm['localtime'] = msg['time']
             new_alarm['id'] = id
             new_alarm['timestamp'] = int(time())
-            #print(new_alarm['timestamp'])
-
+            
             # Check if the current message is in the Black List and the message has been sent < self.__minIntervalBetweenAlarms seconds before
             alarm_black_list = self.__alarm_black_list['alarms']
             already_sent = False
             found = False
             for alarm in alarm_black_list:
-                if alarm['alarm_type'] == new_alarm['alarm_type'] and alarm['id'] == new_alarm['id'] and alarm['msg'] == new_alarm['msg']:
+                if alarm['alarm_type'] == new_alarm['alarm_type'] and alarm['id'] == new_alarm['id'] and alarm['msg_kind'] == new_alarm['msg_kind']:
                     found = True
                     if new_alarm['timestamp'] - alarm['timestamp'] < int(self.__config_settings['minIntervalBetweenAlarms']):
                         already_sent = True
