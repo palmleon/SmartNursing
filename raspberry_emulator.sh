@@ -1,9 +1,9 @@
 #!/bin/bash
 
-if [ -z $(docker ps -q --filter name=SmartNursing-crei) ] 
+if [ -z $(docker ps -q --filter name=smartnursing-crei) ] 
 then
-    docker start -ai SmartNursing-crei-1
+    docker start -ai smartnursing-crei-1
 else
-    docker attach SmartNursing-crei-1
+    docker attach smartnursing-crei-1
 fi
 exit 0
