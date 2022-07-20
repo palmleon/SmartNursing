@@ -4,8 +4,7 @@ import json
 from telegram.ext import Updater, CallbackContext, CommandHandler, ConversationHandler, MessageHandler, Filters
 from telegram import Update
 from MyMQTT import MyMQTT
-from TelegramBotExceptions import DuplicatePatientError, ServerNotFoundError, \
-   PatientNotFoundError, RoomNotFoundError, ShiftStartedError, ShiftEndedError, TelegramTaskNotFoundError, TelegramUserNotFoundError
+from TelegramBotExceptions import *
 from time import sleep, time
 
 class SmartNursingBot(object):
@@ -22,8 +21,10 @@ class SmartNursingBot(object):
     def __init__(self):
         """
             Constructor method that creates an instance of the SmartNursing Bot.
+
             It fetches the configuration file of the Bot and retrieve its information;
-            besides, it defines the alarm black list (initially empty), the working staff list (initially empty).
+            besides, it defines the alarm black list (initially empty) and the working staff list (initially empty).
+
             Finally, it defines the Telegram Bot with all the commands and handlers, and the MQTTClient(s) to communicate with
             the rest of the system, i.e. to receive alarms.
         """
@@ -144,7 +145,7 @@ class SmartNursingBot(object):
         self.__mqttPatientClient = MyMQTT(self.__config_settings['mqttClientName-Patient'], message_broker['name'], message_broker['port'], self)
         
         # Initialize MQTT Client for Room Alarms
-        self.__mqttRoomClient = MyMQTT(self.__config_settings['mqttClientName-Room'], message_broker['name'], message_broker['port'], self)
+        #self.__mqttRoomClient = MyMQTT(self.__config_settings['mqttClientName-Room'], message_broker['name'], message_broker['port'], self)
         
     # Start the Bot
     def launch(self):
@@ -152,30 +153,23 @@ class SmartNursingBot(object):
             Launch both the Bot and the MQTT Client(s).
             After launching this method, the Bot should be able to handle messages and receive notifications.
         """
-        # Extract info about the MQTT Topics for Patient Alarms and Room Alarms 
+        # Extract info about the MQTT Topics for Patient Alarms
         r = requests.get(self.__config_settings['host']+"/alarm-base-topic")
         while r.status_code != requests.codes.ok:
             r = requests.get(self.__config_settings['host']+"/alarm-base-topic")
         
         #patient_topic should be something like 'group01/IoTProject/PatientAlarm/+'
-        try:
-            patient_topic = r.json()+"+"
-        except ValueError:
-            print("Could not extract MQTT Topics - Abort")
+        patient_topic = r.json()+"+"
         
-        #r = requests.get(self.__config_settings['host'] + "/alarm-room-topic")
-        #while r.status_code != requests.codes.ok:
-        #    r = requests.get(self.__config_settings['host'] + "/alarm-room-topic")
-        #room_topic = r.json()
-        #TODO Integrate quando il Topic per Room Alarms sarà definito nel Device and Registry System
-        room_topic = 'group01/IoTProject/RoomAlarm/+'
+        # Integrare quando il Topic per Room Alarms sarà definito nel Device and Registry System
+        # room_topic = 'group01/IoTProject/RoomAlarm/+'
 
         # Launch the Bot and the MQTT Clients
         self.__updater.start_polling()
         self.__mqttPatientClient.start()
         self.__mqttPatientClient.mySubscribe(patient_topic)
-        self.__mqttRoomClient.start()
-        self.__mqttRoomClient.mySubscribe(room_topic)
+        #self.__mqttRoomClient.start()
+        #self.__mqttRoomClient.mySubscribe(room_topic)
         
         # Register the Bot to the Service Registry System
         
@@ -194,8 +188,8 @@ class SmartNursingBot(object):
         """
             Stop the Bot and the MQTT Client(s)
         """
-        self.__mqttRoomClient.unsubscribe()
-        self.__mqttRoomClient.stop()
+        #self.__mqttRoomClient.unsubscribe()
+        #self.__mqttRoomClient.stop()
         self.__mqttPatientClient.unsubscribe()
         self.__mqttPatientClient.stop()
         self.__updater.stop()
@@ -213,8 +207,8 @@ class SmartNursingBot(object):
             last update of the alarm black list, remove all alarms that have been sent more than minIntervalBetweenAlarms before.
 
             Args:
-                topic - topic of the MQTT message
-                payload - the MQTT message
+                topic - topic of the MQTT message, which contains the ID of the Patient
+                payload - the MQTT message, as a raw string encoded in utf-8
         """
         print("Message received")
         try:
@@ -222,8 +216,8 @@ class SmartNursingBot(object):
             topics = topic.split('/')
             if topics[-2] == 'PatientAlarm':
                 alarm_type = 'PATIENT'
-            elif topics[-2] == 'RoomAlarm':
-                alarm_type = 'ROOM'
+            #elif topics[-2] == 'RoomAlarm':
+            #    alarm_type = 'ROOM'
             id = int(topics[-1])
 
             # Extract the payload
@@ -247,7 +241,6 @@ class SmartNursingBot(object):
                     found = True
                     if new_alarm['timestamp'] - alarm['timestamp'] < int(self.__config_settings['minIntervalBetweenAlarms']):
                         already_sent = True
-                        #print("Alarm already sent " + str(new_alarm['timestamp'] - alarm['timestamp']) + "s ago!")
                     else: # Remove the alarm since it will be reuploaded
                         alarm_index = alarm_black_list.index(alarm)
             if found and not already_sent:
@@ -530,6 +523,7 @@ class SmartNursingBot(object):
         try:
             # Understand which is the current command
             curr_command = context.chat_data['command']
+            
             # Define a Patient from the User Data
             req_patient = SmartNursingBot.__parse_input(update.message.text)
             
@@ -538,8 +532,6 @@ class SmartNursingBot(object):
             patient_present = False
             found_patients = [] 
             if len(req_patient) == 1: # Case in which the User provides the PatientID
-                #if 'patientID' not in req_patient:
-                #    raise ValueError("Missing key")
                 req_patientID = int(req_patient['patientID'])
                 nattempts = 1
                 r = requests.get(self.__config_settings['host']+"/patient/"+str(req_patientID))
@@ -553,8 +545,6 @@ class SmartNursingBot(object):
                           
             # Case in which the User provides the Name and Surname of the patient
             elif len(req_patient) == 2:
-                #if 'name' not in req_patient or 'surname' not in req_patient:
-                #    raise Exception("Missing key")
                 # Check that both the name and the surname contain alphabetic chars only
                 if not req_patient['name'].isalpha() or not req_patient['surname'].isalpha():
                     raise ValueError("Patient Name/Surname is not alphabetic")
@@ -694,14 +684,11 @@ class SmartNursingBot(object):
         """
         try:
             edited_patient = SmartNursingBot.__parse_input(update.message.text)
-            #print(edited_patient)
+            
             # Check if you have fetched the correct number of elements
             if len(edited_patient) != 5:
                 raise ValueError("Incorrect number of elements")
-            # Check if all the excepted keys are present
-            #if 'name' not in edited_patient or 'surname' not in edited_patient or \
-            #    'age' not in edited_patient or 'description' not in edited_patient:
-            #    raise Exception("Missing key")
+            
             # Check that both the name and the surname contain alphabetic chars only
             if not edited_patient['name'].isalpha() or not edited_patient['surname'].isalpha():
                 raise ValueError("Patient Name/Surname is not alphabetic")
@@ -1046,14 +1033,14 @@ class SmartNursingBot(object):
         """
         try:
             room = SmartNursingBot.__parse_input(update.message.text)
+
             # Check if you have fetched the correct number of elements
             if len(room) != 2:
                 raise ValueError("Incorrect number of elements")
-            # Check if all the excepted keys are present
-            #if 'roomID' not in room:
-            #    raise Exception("Missing key")
+
             # Treat the Room Number as an integer
             roomID = int(room['roomID'])
+
             # Treat the fact that the Room is common as a boolean
             isCommon = room['isCommon'] == 'True'
             if isCommon:
@@ -1120,8 +1107,7 @@ class SmartNursingBot(object):
         """
         
         try:
-            userID = update.message.from_user.id   
-            chatID = update.effective_chat.id
+            userID = update.message.from_user.id
 
             # Authentication and Authorization
             if self.__check_authZ_authN(update, 'start_work', userID):
@@ -1129,7 +1115,7 @@ class SmartNursingBot(object):
 
                 # Check if the user has already launched a /start_work command, i.e. they're in the working staff
                 if userID not in self.__working_staff:
-                    self.__working_staff[userID] = chatID
+                    self.__working_staff[userID] = userID
                     update.message.reply_text("You have been added to the Working Staff!")
                 else:
                     raise ShiftStartedError
