@@ -1,4 +1,3 @@
-from subprocess import TimeoutExpired
 import requests
 import json
 import time
@@ -6,6 +5,7 @@ import signal
 from threading import Thread
 from enum import Enum
 import time
+
 class CommandType(Enum):
     ROOM = 0
     USER = 1 
@@ -30,6 +30,13 @@ class Terminal(object):
     # Very simple dispatcher
     ##########################
     def __handle_command(self, command: Command, command_type: CommandType):
+        """
+            Very simple dispatcher that executes the command handler corresponding to the given command.
+
+            Args:
+                command: the input command
+                command_type: the kind of command [ROOM/USER]
+        """
         
         if command_type == CommandType.ROOM:
 
@@ -80,9 +87,10 @@ class Terminal(object):
                 self.__user_telegram_delete()
 
     def launch(self):
-
-        #add service here
-
+        """
+            Launch the Terminal as an endless loop where the menu is printed and then a command is read and processed.  
+        """
+        
         print("\nWelcome to the SmartNursing Terminal!\n"
           "You can use this terminal to manage rooms and users!")
         print("-"*40)
@@ -133,13 +141,19 @@ class Terminal(object):
                 print("-"*40)
 
     def stop(self):
+        """
+            Stop the Terminal
+        """
         self.__running = False
         self.__thread.join()
 
-    #########################################
-    # Add a Room
-    #########################################
     def __room_add(self):
+        """
+            Add a Room to the Room Catalog.
+            The Room can be common or not. To define a new Room, a new RoomID should be provided.
+            If it is already taken, the command fails and user can either retry or cancel the operation.
+            Otherwise, a the new Room is added to the Room Catalog.
+        """
         
         try:
             
@@ -192,11 +206,12 @@ class Terminal(object):
         except ValueError:
             print("Input not recognized! Abort.")
 
-    #########################################
-    # Search a Room
-    #########################################
     def __room_search(self):
-
+        """
+            Search a Room in the Room Catalog.
+            Given a roomID, the Terminal looks for a corresponding room in the Room Catalog.
+            If it exists, all Room data is displayed, otherwise the Terminal informs the User that it has not been found.
+        """
         try:
             
             end = False
@@ -236,11 +251,12 @@ class Terminal(object):
             print("Input not recognized! Abort.")
         pass      
 
-    #########################################
-    # Edit a Room
-    #########################################
     def __room_edit(self):
-       
+        """
+            Edit a Room in the Room Catalog, i.e. change its roomID.
+            The Terminal asks for the roomID of the Room to edit; if it exists, the User can change its roomID.
+            Otherwise, the Terminal informs the User that it has not been found.
+        """
         try:
 
             end = False
@@ -305,10 +321,10 @@ class Terminal(object):
         except ValueError:
             print("Input not recognized! Abort.")     
 
-    #########################################
-    # Show all Rooms
-    #########################################
     def __room_show(self):
+        """
+            Display all Rooms in the Room Catalog, with their data.
+        """
         # Show all rooms, the patients inside and the sensors
         r = requests.get(self.__config_settings['host']+"/room-list")
         nattempts = 1
@@ -345,13 +361,13 @@ class Terminal(object):
             else:
                 print("Operation failed: Unknown error!")        
             
-
-
-    #########################################
-    # Delete a Room
-    #########################################
     def __room_delete(self):
-    
+        """
+            Remove a Room from the Room Catalog.
+            The Terminal asks for the roomID of the Room to be removed and if it is common.
+            If present, it asks for confirmation and acts according to the reply.
+            Otherwise, the Terminal informs the User that the Room does not exists.
+        """
         try:
 
             end = False
@@ -426,11 +442,12 @@ class Terminal(object):
         except (ValueError, KeyError):
             print("Input not recognized! Abort.")
 
-    #########################################
-    # Add a User to the Telegram ID List
-    #########################################
     def __user_telegram_add(self):
-         
+        """
+            Add a new User to the list of authenticated Telegram Users.
+            The Terminal asks for both the Telegram userID and the role [Nurse, Doctor, SuperUser] of the new User,
+            then it proceeds to insert the new user in the list.
+        """
         try:
 
             end = False
@@ -466,11 +483,12 @@ class Terminal(object):
         except (ValueError, KeyError):
             print("Input not recognized! Abort.")
 
-    #########################################
-    # Search a User in the Telegram ID List
-    #########################################
     def __user_telegram_search(self):
-
+        """
+            Look for a Telegram User using the userID to search them.
+            The Terminal looks for the User and, if present, it shows all the User related data (i.e. userID and role).
+            Otherwise, the Terminal informs that the User does not exist.        
+        """
         try:
 
             end = False
@@ -508,11 +526,13 @@ class Terminal(object):
         except (ValueError, KeyError):
             print("Input not recognized! Abort.")
 
-    #########################################
-    # Edit a User of the Telegram ID List
-    #########################################
     def __user_telegram_edit(self):
-
+        """
+            Edit a Telegram User, i.e. set their role.
+            Given a userID, the Terminal checks if it is present and, if that is the case, it asks for the new user role.
+            Finally, it updates the Telegram User list.
+            If it is not present, the Terminal informs the User that the User is not present.
+        """
         try:
 
             end = False
@@ -571,11 +591,11 @@ class Terminal(object):
         except (ValueError, KeyError):
             print("Input not recognized! Abort.")
 
-    #########################################
-    # Show all Users from the Telegram ID List
-    #########################################
     def __user_telegram_show(self):
-        
+        """
+            Display all Telegram Users and their data
+        """
+
         # Retrieve the Telegram ID List
         nattempts = 1
         request = requests.get(self.__config_settings['host']+ "/telegram-user-id-list")
@@ -594,11 +614,13 @@ class Terminal(object):
             print("UserID: {userID}, Role: {role}".format(userID=user['user-id'], role=user['role']))
         
 
-    #########################################
-    # Delete a User from the Telegram ID List
-    #########################################
+   
     def __user_telegram_delete(self):
-
+        """
+            Remove a User from the Telegram User List.
+            The Terminal asks for the userID of the User to be removed and, if it is present, it asks for confirmation and
+            acts according to the reply. If it is not present, the Terminal informs the User and asks either to reply or to cancel the command.
+        """
         try:
 
             end = False
@@ -663,13 +685,16 @@ class Terminal(object):
             print("Input not recognized! Abort.")
 
     def __updateService(self) :
+        """
+            Notify the Device Registry System that the Terminal is up and running every 'updateTimeInSecond' seconds
+        """
 
         while self.__running :
 
-            nwait = 0
-            while nwait < 20 and self.__running:
+            wait_time = 0
+            while wait_time < self.__config_settings['updateTimeInSeconds'] and self.__running:
                 time.sleep(5)
-                nwait += 1
+                wait_time += 5
 
             if self.__running:
                 nattempts = 1
@@ -689,6 +714,9 @@ class Terminal(object):
     # During initialization, only the configuration file is set, and the updating thread is launched
     ###################################################################################################
     def __init__(self):
+        """
+            Constructor where the configuration settings are loaded and the thread which updates the service in the Device Registry System is launched.
+        """
         
         # Load settings
         config_file = open('./config.json')
