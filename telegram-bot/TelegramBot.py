@@ -18,11 +18,17 @@ class SmartNursingBot(object):
     SEARCH_PATIENT = 6
     SET_ROOM_TEMPERATURE = 7
     GET_ROOM_TEMPERATURE = 8
-    GET_SENSOR_BATTERY = 9
 
     def __init__(self):
+        """
+            Constructor method that creates an instance of the SmartNursing Bot.
+            It fetches the configuration file of the Bot and retrieve its information;
+            besides, it defines the alarm black list (initially empty), the working staff list (initially empty).
+            Finally, it defines the Telegram Bot with all the commands and handlers, and the MQTTClient(s) to communicate with
+            the rest of the system, i.e. to receive alarms.
+        """
 
-        # Retrieve the Token from the Config File
+        # Retrieve the Config File
         config_file = open('config.json')
         self.__config_settings = json.load(config_file)
         config_file.close()
@@ -128,6 +134,7 @@ class SmartNursingBot(object):
         r = requests.get(self.__config_settings['host']+"/message-broker")
         while r.status_code != requests.codes.ok:
             r = requests.get(self.__config_settings['host']+"/message-broker")
+        
         mb = r.json()
         message_broker = {}
         message_broker['name'] = mb['name']
@@ -141,7 +148,10 @@ class SmartNursingBot(object):
         
     # Start the Bot
     def launch(self):
-
+        """
+            Launch both the Bot and the MQTT Client(s).
+            After launching this method, the Bot should be able to handle messages and receive notifications.
+        """
         # Extract info about the MQTT Topics for Patient Alarms and Room Alarms 
         r = requests.get(self.__config_settings['host']+"/alarm-base-topic")
         while r.status_code != requests.codes.ok:
@@ -181,6 +191,9 @@ class SmartNursingBot(object):
 
     # Stop the Bot and the MQTT Clients
     def stop(self):
+        """
+            Stop the Bot and the MQTT Client(s)
+        """
         self.__mqttRoomClient.unsubscribe()
         self.__mqttRoomClient.stop()
         self.__mqttPatientClient.unsubscribe()
@@ -191,6 +204,18 @@ class SmartNursingBot(object):
     # The topic contains the ID of the Patient/Room
     # The Payload is a raw string, encoded in utf-8
     def notify(self, topic, payload):
+        """
+            Handle notifications received from MQTT.
+            Extract all information about the alarm (e.g. name, msg, msg kind), then
+            check if the alarm is in the black list and, if it is, whether it has been forwarded more than minIntervalBetweenAlarms seconds before.
+            If that is the case, forward the message to every nurse in the Working Staff List.
+            To remove outdated messages from the alarm black list, if this method is called more then thresholdBlackListUpdate seconds after the 
+            last update of the alarm black list, remove all alarms that have been sent more than minIntervalBetweenAlarms before.
+
+            Args:
+                topic - topic of the MQTT message
+                payload - the MQTT message
+        """
         print("Message received")
         try:
             # Extract the kind of topic and the ID
@@ -262,7 +287,19 @@ class SmartNursingBot(object):
 
     # Method for Authentication and Authorization
     def __check_authZ_authN(self, update, command, userID):
-        
+        """
+            Authentication and Authorization method:
+            it checks whether the user is in the list of authenticated Telegram User (defined using the Terminal Service)
+            and whether the user has the right role to perform the desired command.
+
+            Args:
+                update: incoming update
+                command: the command to perform
+                userID: the ID of the Telegram User
+
+            Returns:
+                True/False - depending on the result of the check
+        """
         try:
             # Retrieve the list of recognized Users 
             nattempts = 1
@@ -314,6 +351,15 @@ class SmartNursingBot(object):
         return False #default bhv
 
     def __start(self, update: Update, context: CallbackContext):
+        """
+            Command Handler for the '/start' command
+            It only checks whether the User is authenticated or not.
+
+            Args:
+                update: incoming update
+                context: the context of the chat
+
+        """
         userID = update.message.from_user.id
         update.message.reply_text("Welcome to the SmartNursingBot!")
         # Check if the User is among those recognized
@@ -324,18 +370,46 @@ class SmartNursingBot(object):
 
     @staticmethod
     def __parse_input(text):
+        """
+            Given a text formatted like this:
+                <field1> - <text1>
+
+                <field2> - <text2>
+
+                .
+
+                <fieldN> - <textN>
+
+            This method constructs a dictionary where <field> is the key and <text> is the value.                
+
+            Args:
+                text: the input text to parse
+
+            Returns: 
+                dictionary: the result of the parsing
+        """
         text_entries = text.split("\n")
-        patient = {}
+        dictionary = {}
         for entry in text_entries:
             entry_list = entry.split("-")
             if len(entry_list) != 2:
                 raise ValueError
             entry_key = entry_list[0].strip()
             entry_value = entry_list[1].strip()         
-            patient[entry_key] = entry_value
-        return patient
+            dictionary[entry_key] = entry_value
+        return dictionary
 
     def __add_patient_entry(self, update: Update, context: CallbackContext):
+        """
+            First Command Handler for the '/add_patient' command.
+            This method only checks whether the User is authenticated and authorized and, if that is the case,
+            it asks for a description of the new patient to add.
+            The '__add_patient_update' method completes the request and constitutes the second part of the Command Handler.
+
+            Args:
+                update: incoming update
+                context: the context of the chat.
+        """
         userID = update.message.from_user.id
         if self.__check_authZ_authN(update, 'add_patient', userID):
             context.chat_data['command'] = 'add_patients'
@@ -353,6 +427,16 @@ class SmartNursingBot(object):
             return ConversationHandler.END
 
     def __add_patient_update(self, update: Update, context: CallbackContext):
+        """
+            Second Command Handler for the '/add_patient' command.
+            This method checks whether the patient description provided is valid and, if that is the case, it checks
+            whether there is already another patient with the same patientID.
+            If this happens, the handler asks to retry until either an acceptable description is provided or the command is cancelled.
+
+            Args:
+                update: incoming update
+                context: the context of the chat
+        """
         # Define a Patient from the User Data
         try:
             new_patient = SmartNursingBot.__parse_input(update.message.text)
@@ -414,23 +498,35 @@ class SmartNursingBot(object):
             return SmartNursingBot.ADD_PATIENT
         return ConversationHandler.END
 
-    def __edit_patient_entry(self, update: Update, context: CallbackContext):
-        userID = update.message.from_user.id
-        if self.__check_authZ_authN(update, 'edit_patient', userID):
-            update.message.reply_text(
-                "To edit a Patient, insert their patient ID or their name using the following format:\n"
-                "patientID - <insert_patientID>\n" 
-                "OR\n"
-                "name - <insert_name>\n"
-                "surname - <insert_surname>\n"
-                )
-            context.chat_data['command'] = 'edit_patient'
-            return SmartNursingBot.EDIT_PATIENT_1
-        else:
-            update.message.reply_text("Sorry, you cannot interact with the Bot!")
-            return ConversationHandler.END
-
     def __search_patient(self, update: Update, context: CallbackContext):
+        """
+            Method to search a Patient, shared by some commands.
+            Given either a patientID or a name and surname using the context arg,
+            the method looks for the corresponding patient in the Patient Catalog.
+
+            If it is present and is unique, the method asks for an user reply, depending on the current command:
+            
+            - '/search_patient': no reply needed, the search has finished
+
+            - '/edit_patient': ask for a new description of the patient, without varying the patientID
+
+            - '/delete_patient': confirm the deletion of the patient
+            
+            If it is present and it is not unique, the method shows all the matching patients and asks to decide using the patientID of the chosen patient, 
+            if the current command is not '/search_patient', otherwise the command has been executed and the method returns. 
+
+            If it is not present, the method asks to reply, depending on the current command:
+
+            - '/search_patient': no reply needed, the search has finished
+
+            - '/edit_patient': ask for a new patientID/patient name and surname, hoping that it is present in the Patient catalog
+
+            - '/delete_patient': same as for '/edit_patient'
+
+            Args:
+                update: incoming update
+                context: the context of the chat.
+        """
         try:
             # Understand which is the current command
             curr_command = context.chat_data['command']
@@ -558,7 +654,44 @@ class SmartNursingBot(object):
             return SmartNursingBot.EDIT_PATIENT_2
         return ConversationHandler.END #default bhv (also expected behavior for search_patient)
 
+    def __edit_patient_entry(self, update: Update, context: CallbackContext):
+        """
+            First Command Handler for the '/edit_patient' command.
+            This method only checks whether the User is authenticated and authorized and, if that is the case,
+            it asks for the patient to be edited either as a patientID or as a combination of name and surname.
+            Then, the bot looks for the patient using the __search_patient method and finally completes the request using the 
+            '__edit_patient_update' method, which constitutes the last part of the Command Handler.
+
+            Args:
+                update: incoming update
+                context: the context of the chat.
+        """
+        userID = update.message.from_user.id
+        if self.__check_authZ_authN(update, 'edit_patient', userID):
+            update.message.reply_text(
+                "To edit a Patient, insert their patient ID or their name using the following format:\n"
+                "patientID - <insert_patientID>\n" 
+                "OR\n"
+                "name - <insert_name>\n"
+                "surname - <insert_surname>\n"
+                )
+            context.chat_data['command'] = 'edit_patient'
+            return SmartNursingBot.EDIT_PATIENT_1
+        else:
+            update.message.reply_text("Sorry, you cannot interact with the Bot!")
+            return ConversationHandler.END
+
     def __edit_patient_update(self, update: Update, context: CallbackContext):
+        """
+            Last Command Handler for the '/edit_patient' command.
+            This method checks whether the patient description provided is valid and, if that is the case, it checks
+            whether there is already another patient with the same patientID.
+            If this happens, the handler asks to retry until either an acceptable description is provided or the command is cancelled.
+
+            Args:
+                update: incoming update
+                context: the context of the chat
+        """
         try:
             edited_patient = SmartNursingBot.__parse_input(update.message.text)
             #print(edited_patient)
@@ -620,6 +753,17 @@ class SmartNursingBot(object):
         return ConversationHandler.END
 
     def __delete_patient_entry(self, update: Update, context: CallbackContext):
+        """
+            First Command Handler for the '/delete_patient' command.
+            This method only checks whether the User is authenticated and authorized and, if that is the case,
+            it asks for the patient to be edited either as a patientID or as a combination of name and surname.
+            Then, the bot looks for the patient using the __search_patient method and finally completes the request using the 
+            '__delete_patient_update' method, which constitutes the last part of the Command Handler.
+
+            Args:
+                update: incoming update
+                context: the context of the chat.
+        """
         userID = update.message.from_user.id
         if self.__check_authZ_authN(update, 'delete_patient', userID):
             update.message.reply_text(
@@ -636,6 +780,14 @@ class SmartNursingBot(object):
             return ConversationHandler.END
 
     def __delete_patient_update(self, update: Update, context: CallbackContext):
+        """
+            Last Command Handler for the '/delete_patient' command.
+            This method checks if the user has confirmed the deletion of the patient and acts accordingly
+
+            Args:
+                update: incoming update
+                context: the context of the chat
+        """
         try:
             text = update.message.text
             # Delete Patient
@@ -677,6 +829,16 @@ class SmartNursingBot(object):
         return ConversationHandler.END
 
     def __search_patient_entry(self, update: Update, context: CallbackContext):
+        """
+            First Handler of the '/search_patient' command.
+            This method only checks whether the User is authenticated and authorized and, if that is the case,
+            it asks for the patient to be edited either as a patientID or as a combination of name and surname.
+            Then, the bot looks for the patient using the __search_patient method.
+
+            Args:
+                update: incoming update
+                context: the context of the chat.
+        """
         userID = update.message.from_user.id
         if self.__check_authZ_authN(update, 'search_patient', userID):
             update.message.reply_text(
@@ -693,7 +855,15 @@ class SmartNursingBot(object):
             return ConversationHandler.END
 
     def __show_patients(self, update: Update, context: CallbackContext):
-        
+        """
+            Command Handler of the '/show_patients' command.
+
+            It displays all the patients in Patient Catalog.
+
+            Args:
+                update: incoming update
+                context: the context of the chat.
+        """
         try:
             userID = update.message.from_user.id
             if self.__check_authZ_authN(update, 'show_patients', userID):
@@ -730,6 +900,20 @@ class SmartNursingBot(object):
 
  
     def __set_room_temperature_entry(self, update: Update, context: CallbackContext):
+        
+        """
+            Entry Handler of the '/set_room_temperature' command.
+
+            This method only checks whether the User is authenticated and authorized and, if that is the case,
+            it asks for the room info (roomID + isCommon) and the desired temperature.
+
+            Then, the bot tries to update the room temperature using __set_room_temperature_update.            
+
+            Args:
+                update: incoming update
+                context: the context of the chat.
+        """
+
         userID = update.message.from_user.id
         if self.__check_authZ_authN(update, 'get_room_temperature', userID):
             update.message.reply_text(
@@ -745,7 +929,14 @@ class SmartNursingBot(object):
             return ConversationHandler.END
 
     def __set_room_temperature_update(self, update: Update, context: CallbackContext):
-        
+        """
+            Last Handler of the '/set_room_temperature' command.
+            It checks that the given room description exists and, if that is the case, it sets its temperature.
+
+            Args:
+                update: incoming update
+                context: the context of the chat.
+        """
         try:
             room = SmartNursingBot.__parse_input(update.message.text)
             # Check if you have fetched the correct number of elements
@@ -820,6 +1011,17 @@ class SmartNursingBot(object):
         return ConversationHandler.END
 
     def __get_room_temperature_entry(self, update: Update, context: CallbackContext):
+        """
+            First Handler of the '/get_room_temperature' command.
+            This method only checks whether the User is authenticated and authorized and, if that is the case,
+            it asks for the room info (roomID + isCommon).
+
+            Then, the bot tries to update the room temperature using __get_room_temperature_update.            
+
+            Args:
+                update: incoming update
+                context: the context of the chat.
+        """
         userID = update.message.from_user.id
         if self.__check_authZ_authN(update, 'get_room_temperature', userID):
             update.message.reply_text(
@@ -834,6 +1036,14 @@ class SmartNursingBot(object):
             return ConversationHandler.END
 
     def __get_room_temperature_update(self, update: Update, context: CallbackContext):
+        """
+            Last Handler of the '/get_room_temperature' command.
+            It checks that the given room description exists and, if that is the case, it displays its temperature.
+
+            Args:
+                update: incoming update
+                context: the context of the chat.
+        """
         try:
             room = SmartNursingBot.__parse_input(update.message.text)
             # Check if you have fetched the correct number of elements
@@ -895,6 +1105,19 @@ class SmartNursingBot(object):
         return ConversationHandler.END
 
     def __start_work(self, update: Update, context: CallbackContext):
+        """
+            Command Handler for the '/start_work' command.
+
+            If the authentication and authorization check is successful,
+            it takes the userID of the Telegram User it is interacting with and inserts it into the Working Staff list.
+
+            From this moment, the user shall be able to receive alarm notifications from the Bot. 
+            If the userID is already present in the Working Staff, the Bot informs the User that it is already present in the Working Staff List.
+
+            Args:
+                update: incoming update
+                context: the context of the chat.
+        """
         
         try:
             userID = update.message.from_user.id   
@@ -919,7 +1142,20 @@ class SmartNursingBot(object):
             print(e)
 
     def __end_work(self, update: Update, context: CallbackContext):
-             
+        """
+            Command Handler for the '/end_work' command.
+
+            If the authentication and authorization check is successful,
+            it takes the userID of the Telegram User it is interacting with and removes it from the Working Staff list.
+
+            From this moment, the user shall not be able anymore to receive alarm notifications from the Bot. 
+            If the userID is not present in the List, the Bot informs the user that it was not in the Working Staff.
+
+            Args:
+                update: incoming update
+                context: the context of the chat.
+        """
+
         try:
             userID = update.message.from_user.id   
             
@@ -942,10 +1178,20 @@ class SmartNursingBot(object):
             print(e)
 
     def __cancel(self, update: Update, context: CallbackContext):
+        """
+            Cancel the current command.
+
+            Args:
+                update: incoming update
+                context: the context of the chat.
+        """
         update.message.reply_text("Command aborted!")
         return ConversationHandler.END
 
     def updateService(self) :
+        """
+            Inform the Device Registry System that the Service is still up and running every updateTimeInSecond seconds
+        """
         while True :
             sleep(int(self.__config_settings['updateTimeInSecond']))
             nattempts = 1

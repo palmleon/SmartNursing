@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-PROJECT_NAME := SmartNursing
+PROJECT_NAME := smartnursing
 green := $(shell echo -e '\033[0;32m')
 yellow := $(shell echo -e '\033[1;33m')
 nc := $(shell echo -e '\033[0m')
