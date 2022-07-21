@@ -1,6 +1,7 @@
 from Fibrillation_Analyzer import *
 from MyMQTT import MyMQTT
 import time
+from datetime import datetime
 import json
 import requests
 
@@ -91,7 +92,8 @@ class Fibrillation_Monitor_client():
       if r!=None:
         to_pub=self.__alert
         to_pub["alert"]=r
-        to_pub["time"]=time.strftime('%Y/%m/%d %H:%M:%S', time.localtime())
+        #to_pub["time"]=time.strftime('%Y/%m/%d %H:%M:%S', time.localtime())
+        to_pub["time"]=datetime.now().replace(microsecond=0).isoformat(' ')
         # Publish alert
         self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
 

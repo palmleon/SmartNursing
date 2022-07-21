@@ -1,5 +1,6 @@
 from MyMQTT import MyMQTT
 import time
+from datetime import datetime
 import json
 import requests
 import threading
@@ -87,7 +88,8 @@ class PatientDeviceAnalyzer():
               alarm=self.__alarm_message[0]+str(patient)+self.__alarm_message[1]+name+self.__alarm_message[2]
               to_pub=self.__alert
               to_pub["alert"]=alarm
-              to_pub["time"]=time.strftime('%Y/%m/%d %H:%M:%S', time.localtime())
+              #to_pub["time"]=time.strftime('%Y/%m/%d %H:%M:%S', time.localtime())
+              to_pub["time"]=datetime.now().replace(microsecond=0).isoformat(' ')
               self.client.myPublish(self.__base_topic_pub+str(patient),to_pub)
           
           #print(alarm)

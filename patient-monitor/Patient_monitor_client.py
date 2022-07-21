@@ -1,6 +1,7 @@
 from Patient_monitor_Analyzer import *
 from MyMQTT import MyMQTT
 import time
+from datetime import datetime
 import json
 import requests
 
@@ -119,7 +120,8 @@ class Patient_Monitor_client():
       for alert in r:
         to_pub=self.__alert
         to_pub["alert"]=alert
-        to_pub["time"]=time.strftime('%Y/%m/%d %H:%M:%S', time.localtime())
+        #to_pub["time"]=time.strftime('%Y/%m/%d %H:%M:%S', time.localtime())
+        to_pub["time"]=datetime.now().replace(microsecond=0).isoformat(' ')
         # Publish alert
         self.client.myPublish(self.__base_topic_pub+ID_P,to_pub)
 
