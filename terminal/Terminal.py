@@ -164,6 +164,7 @@ class Terminal(object):
                 # Insert Room Number
                 roomID = int(input("Please insert the ID of the new room: "))
                 isCommon_str = input("Is it common [Y/N]? ")
+                print()
 
                 newRoom = None
                  
@@ -219,6 +220,7 @@ class Terminal(object):
                 # Insert Room Number
                 roomID = int(input("Please insert the ID of room to search: "))
                 isCommon_str = input("Is it common [Y/N]? ")
+                print()
 
                 # Check if it exists
                 if isCommon_str == 'Y' or isCommon_str == 'y':
@@ -234,8 +236,24 @@ class Terminal(object):
                 
                 # If so, show it and all its data
                 if r.status_code == requests.codes.ok:
-                    print("Room found!")
-                    print(json.dumps(r.json(), indent=4))
+                    print("ROOM FOUND!",end='')
+                    room = r.json()
+                    if isCommon_str == 'Y' or isCommon_str == 'y':
+                        msg = "\nRoomID: {roomID}".format(roomID=room['roomID']) + \
+                            "\nDesired Temperature: {temperature}°C".format(temperature=room['desired-temperature'])
+                    else:
+                        msg = "\nRoomID: {roomID}".format(roomID=room['roomID']) + \
+                            "\nDesired Temperature: {temperature}°C".format(temperature=room['desired-temperature']) + \
+                            "\nPatients: {"
+                        for patient in room['patients']:
+                            msg += "\n"
+                            msg += "\tPatientID: {patientID}\n".format(patientID=patient['patientID'])
+                            msg += "\tName: {name}\n".format(name=patient['name'])
+                            msg += "\tSurname: {surname}\n".format(surname=patient['surname'])
+                            msg += "\tAge: {age}\n".format(age=patient['age'])
+                            msg += "\tDescription: {description}\n".format(description=patient['description'])
+                        msg += "}"   
+                    print(msg)
                     end = True
                     
                 # Otherwise, retry or cancel the command
@@ -264,6 +282,7 @@ class Terminal(object):
                 # Insert Room Number
                 roomID = int(input("Please insert the ID of the room to edit: "))
                 isCommon_str = input("Is it common [Y/N]? ")
+                print()
 
                 # Check if it exists
                 if isCommon_str == 'Y' or isCommon_str == 'y':
@@ -280,9 +299,24 @@ class Terminal(object):
                 
                 # If so, show it and all its data
                 if r.status_code == requests.codes.ok:
-                    print("Room found!")
+                    print("ROOM FOUND!",end='')
                     room = r.json()
-                    print(json.dumps(room, indent=4))
+                    if isCommon_str == 'Y' or isCommon_str == 'y':
+                        msg = "\nRoomID: {roomID}".format(roomID=room['roomID']) + \
+                            "\nDesired Temperature: {temperature}°C".format(temperature=room['desired-temperature'])
+                    else:
+                        msg = "\nRoomID: {roomID}".format(roomID=room['roomID']) + \
+                            "\nDesired Temperature: {temperature}°C".format(temperature=room['desired-temperature']) + \
+                            "\nPatients: {"
+                        for patient in room['patients']:
+                            msg += "\n"
+                            msg += "\tPatientID: {patientID}\n".format(patientID=patient['patientID'])
+                            msg += "\tName: {name}\n".format(name=patient['name'])
+                            msg += "\tSurname: {surname}\n".format(surname=patient['surname'])
+                            msg += "\tAge: {age}\n".format(age=patient['age'])
+                            msg += "\tDescription: {description}\n".format(description=patient['description'])
+                        msg += "}"   
+                    print(msg)
 
                     # Ask for the new room number
                     newRoomID = int(input("Please insert the new ID of the room to edit: "))
@@ -335,7 +369,21 @@ class Terminal(object):
 
         if r.status_code == requests.codes.ok:
             print("Registered Rooms and their content:")
-            print(json.dumps(r.json(), indent=4))
+            print("*"*40)
+            rooms = r.json()
+            for room in sorted(rooms, key=lambda room: room['roomID']):
+                msg = "RoomID: {roomID}\n".format(roomID=room['roomID']) + \
+                        "Desired Temperature: {temperature}°C\n".format(temperature=room['desired-temperature']) + \
+                        "Patients: {"
+                for patient in room['patients']:
+                    msg += "\n"
+                    msg += "\tPatientID: {patientID}\n".format(patientID=patient['patientID'])
+                    msg += "\tName: {name}\n".format(name=patient['name'])
+                    msg += "\tSurname: {surname}\n".format(surname=patient['surname'])
+                    msg += "\tAge: {age}\n".format(age=patient['age'])
+                    msg += "\tDescription: {description}\n".format(description=patient['description'])
+                msg += "}\n"    
+                print(msg)
 
         else:
             if nattempts == 5 and str(r.status_code).startswith('5'):
@@ -353,7 +401,12 @@ class Terminal(object):
 
         if r.status_code == requests.codes.ok:
             print("Registered Common Rooms and their content:")
-            print(json.dumps(r.json(), indent=4))
+            print("*"*40,end='')
+            rooms = r.json()
+            for room in rooms:
+                msg = "\nRoomID: {roomID}".format(roomID=room['roomID']) + \
+                        "\nDesired Temperature: {temperature}°C".format(temperature=room['desired-temperature'])
+                print(msg)
 
         else:
             if nattempts == 5 and str(r.status_code).startswith('5'):
@@ -377,6 +430,7 @@ class Terminal(object):
                 # Insert Room Number
                 roomID = int(input("Please insert the ID of the room to delete: "))
                 isCommon_str = input("Is it common [Y/N]? ")
+                print()
                 
                 # Check if it exists
                 if isCommon_str == 'Y' or isCommon_str == 'y':
@@ -392,13 +446,28 @@ class Terminal(object):
                 
                 # If so, show it and all its data
                 if r.status_code == requests.codes.ok:
-                    print("Room found!")
+                    print("ROOM FOUND!",end='')
                     room = r.json()
-                    print(json.dumps(room, indent=4))
+                    if isCommon_str == 'Y' or isCommon_str == 'y':
+                        msg = "\nRoomID: {roomID}".format(roomID=room['roomID']) + \
+                            "\nDesired Temperature: {temperature}°C".format(temperature=room['desired-temperature'])
+                    else:
+                        msg = "\nRoomID: {roomID}".format(roomID=room['roomID']) + \
+                            "\nDesired Temperature: {temperature}°C".format(temperature=room['desired-temperature']) + \
+                            "\nPatients: {"
+                        for patient in room['patients']:
+                            msg += "\n"
+                            msg += "\tPatientID: {patientID}\n".format(patientID=patient['patientID'])
+                            msg += "\tName: {name}\n".format(name=patient['name'])
+                            msg += "\tSurname: {surname}\n".format(surname=patient['surname'])
+                            msg += "\tAge: {age}\n".format(age=patient['age'])
+                            msg += "\tDescription: {description}\n".format(description=patient['description'])
+                        msg += "}"   
+                    print(msg)
 
                     # If so, and if there is no patient inside, ask for confirmation
                     if isCommon_str == 'Y' or isCommon_str == 'y' or len(room['patients']) == 0:
-                        confirm_reply = input("Are you sure you want to delete this user [Y/N]? ")
+                        confirm_reply = input("Are you sure you want to delete this Room [Y/N]? ")
                         
                         # Delete or not depending on confirmation reply
                         if confirm_reply == 'Y' or confirm_reply == 'y':
@@ -497,6 +566,7 @@ class Terminal(object):
 
                 # Retrieve UserID
                 userID = int(input("Please insert the UserID to search: "))
+                print()
                 
                 # Look for the UserID in the Telegram ID List
                 r = requests.get(self.__config_settings['host'] + "/telegram-user/" + str(userID))
@@ -509,17 +579,16 @@ class Terminal(object):
                 # If present, show it
                 if r.status_code == requests.codes.ok:
                     user = r.json()
-                    print("User found!")
+                    print("USER FOUND!")
                     print("UserID: {userID},\t Role: {role}".format(userID=user['user-id'], role=user['role']))
                     end = True
 
                 # Otherwise, notify that it does not exist
                 else:
                     if nattempts == 5:
-                        command = input(("Operation failed: Server not reachable! Retry [r] or quit [q]: "))
+                        command = input("Operation failed: Server not reachable! Retry [r] or quit [q]: ")
                     else:
-                        print("User not found!")
-                        end = True
+                        command = input("Operation failed: User not found! Retry [r] or quit [q]: ")
                     if command == 'q':
                         end = True
 
@@ -541,6 +610,7 @@ class Terminal(object):
 
                 # Retrieve UserID
                 userID = int(input("Please insert the UserID to edit: "))
+                print()
                 
                 # Look for the UserID in the Telegram ID List
                 r = requests.get(self.__config_settings['host'] + "/telegram-user/" + str(userID))
@@ -553,6 +623,10 @@ class Terminal(object):
                 # If present, ask for the new role
                 if r.status_code == requests.codes.ok:
 
+                    user = r.json()
+                    print("USER FOUND!")
+                    print("UserID: {userID},\t Role: {role}".format(userID=user['user-id'], role=user['role']))
+                   
                     # Retrieve the new Role and check that it is meaningful
                     role = Role[input("Set the new role: ").upper()].value
 
@@ -592,6 +666,7 @@ class Terminal(object):
             print("Input not recognized! Abort.")
 
     def __user_telegram_show(self):
+        
         """
             Display all Telegram Users and their data
         """
@@ -610,11 +685,10 @@ class Terminal(object):
         # Display it in a clear format
         print("Registered users and their roles:")
         user_id_list = request.json()
-        for user in user_id_list:
+        for user in sorted(user_id_list, key=lambda user: user['user-id']):
             print("UserID: {userID}, Role: {role}".format(userID=user['user-id'], role=user['role']))
         
 
-   
     def __user_telegram_delete(self):
         """
             Remove a User from the Telegram User List.
@@ -629,6 +703,7 @@ class Terminal(object):
 
                 # Retrieve UserID
                 userID = int(input("Please insert the UserID to delete: "))
+                print()
                 
                 # Look for the UserID in the Telegram ID List
                 r = requests.get(self.__config_settings['host'] + "/telegram-user/" + str(userID))
@@ -643,7 +718,7 @@ class Terminal(object):
 
                     end = True
                     user = r.json()
-                    print("User found!")
+                    print("USER FOUND!")
                     print("UserID: {userID}, Role: {role}".format(userID=user['user-id'], role=user['role']))
                     confirm_reply = input("Are you sure you want to delete this user [Y/N]? ")
                     
@@ -733,7 +808,6 @@ class Terminal(object):
         self.__thread.start()
     
     
-
 def alarm_handler(signum, frame):
     raise TimeoutError
 
@@ -764,6 +838,3 @@ if __name__ == '__main__':
     # Launch Service
     terminal.launch()
     terminal.stop()
-
-
-

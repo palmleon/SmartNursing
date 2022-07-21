@@ -210,9 +210,8 @@ class SmartNursingBot(object):
                 topic - topic of the MQTT message, which contains the ID of the Patient
                 payload - the MQTT message, as a raw string encoded in utf-8
         """
-        print("Message received")
         try:
-            # Extract the kind of topic and the ID
+            # Extract the kind of topic and the patientID
             topics = topic.split('/')
             if topics[-2] == 'PatientAlarm':
                 alarm_type = 'PATIENT'
@@ -273,9 +272,6 @@ class SmartNursingBot(object):
         except (json.JSONDecodeError, KeyError, ValueError) as e:
             print("The msg is not in the expected format!")
             print(e)
-        #except Exception as e:
-        #    print("Exception found")
-        #    print(e)
 
 
     # Method for Authentication and Authorization
