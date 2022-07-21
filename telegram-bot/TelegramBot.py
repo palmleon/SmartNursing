@@ -144,9 +144,6 @@ class SmartNursingBot(object):
         # Initialize MQTT Client for Patient Alarms
         self.__mqttPatientClient = MyMQTT(self.__config_settings['mqttClientName-Patient'], message_broker['name'], message_broker['port'], self)
         
-        # Initialize MQTT Client for Room Alarms
-        #self.__mqttRoomClient = MyMQTT(self.__config_settings['mqttClientName-Room'], message_broker['name'], message_broker['port'], self)
-        
     # Start the Bot
     def launch(self):
         """
@@ -158,18 +155,13 @@ class SmartNursingBot(object):
         while r.status_code != requests.codes.ok:
             r = requests.get(self.__config_settings['host']+"/alarm-base-topic")
         
-        #patient_topic should be something like 'group01/IoTProject/PatientAlarm/+'
+        # Patient Alarm Topic should be something like 'group01/IoTProject/PatientAlarm/+'
         patient_topic = r.json()+"+"
         
-        # Integrare quando il Topic per Room Alarms sarà definito nel Device and Registry System
-        # room_topic = 'group01/IoTProject/RoomAlarm/+'
-
         # Launch the Bot and the MQTT Clients
         self.__updater.start_polling()
         self.__mqttPatientClient.start()
         self.__mqttPatientClient.mySubscribe(patient_topic)
-        #self.__mqttRoomClient.start()
-        #self.__mqttRoomClient.mySubscribe(room_topic)
         
         # Register the Bot to the Service Registry System
         
@@ -188,8 +180,6 @@ class SmartNursingBot(object):
         """
             Stop the Bot and the MQTT Client(s)
         """
-        #self.__mqttRoomClient.unsubscribe()
-        #self.__mqttRoomClient.stop()
         self.__mqttPatientClient.unsubscribe()
         self.__mqttPatientClient.stop()
         self.__updater.stop()
@@ -215,8 +205,6 @@ class SmartNursingBot(object):
             topics = topic.split('/')
             if topics[-2] == 'PatientAlarm':
                 alarm_type = 'PATIENT'
-            #elif topics[-2] == 'RoomAlarm':
-            #    alarm_type = 'ROOM'
             id = int(topics[-1])
 
             # Extract the payload
@@ -925,9 +913,6 @@ class SmartNursingBot(object):
             # Check if you have fetched the correct number of elements
             if len(room) != 3:
                 raise ValueError("Incorrect number of elements")
-            # Check if all the excepted keys are present
-            #if 'roomID' not in room and 'temp' not in room:
-            #    raise Exception("Missing key")
             # Treat the Room Number as an integer
             roomID = int(room['roomID'])
             # Treat the Room Temperature as an integer
