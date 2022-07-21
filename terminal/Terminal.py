@@ -761,7 +761,7 @@ class Terminal(object):
 
     def __updateService(self) :
         """
-            Notify the Device Registry System that the Terminal is up and running every 'updateTimeInSecond' seconds
+            Notify the device service registry that the Terminal is up and running every 'updateTimeInSecond' seconds
         """
 
         while self.__running :
@@ -790,7 +790,7 @@ class Terminal(object):
     ###################################################################################################
     def __init__(self):
         """
-            Constructor where the configuration settings are loaded and the thread which updates the service in the Device Registry System is launched.
+            Constructor where the configuration settings are loaded and the thread which updates the service in the device service registry is launched.
         """
         
         # Load settings
@@ -800,9 +800,10 @@ class Terminal(object):
 
         self.__running = True
         
-        r=requests.post(self.__config_settings['host']+"/add-service",data= json.dumps({"serviceID" : self.__config_settings['serviceID'], "name" : self.__config_settings['name']}))
-        if r.ok == False :
-            print("ERROR: add service fails")
+        r=requests.post(self.__config_settings['host']+"/add-service",data=json.dumps({"serviceID" : self.__config_settings['serviceID'], "name" : self.__config_settings['name']}))
+        if r.status_code != requests.codes.ok:
+            print("ERROR: add service failed!")
+        
         # Launch thread for service update
         self.__thread = Thread(target=self.__updateService, args=(), daemon=False)
         self.__thread.start()

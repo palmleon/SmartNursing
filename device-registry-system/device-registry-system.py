@@ -15,6 +15,7 @@ class Catalog(object) :
         except:
             self.fp = open("catalog.json","r")
             self.catalogList = json.load(self.fp)
+        self.catalogList['services'] = []
         self.fp.close()
         
     #compute the differences in minutes to determine which services or devices are not updated
@@ -250,10 +251,9 @@ class Catalog(object) :
             newService['timestamp'] = str(datetime.datetime.today())
             self.catalogList['services'].append(newService)
             return 
+
         else : 
             raise cherrypy.HTTPError(404,'operation not found')
-
-        
 
     def PUT(self,*uri):
 
@@ -333,9 +333,13 @@ class Catalog(object) :
             newService = json.loads(cherrypy.request.body.read())
             newService['timestamp'] = str(datetime.datetime.today())
             id = newService['serviceID']
+            found = False
             for i in range(len(self.catalogList['services'])) :
                 if self.catalogList['services'][i]['serviceID'] == id :
                     self.catalogList['services'][i]['timestamp'] = str(datetime.datetime.today())
+                    found = True
+            if not found:
+                self.catalogList['services'].append(newService)
             return 
 
         elif uri[0] == 'update-telegram-user':
