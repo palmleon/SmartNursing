@@ -11,6 +11,10 @@ class light_patient_room_monitor() :
         self.__serviceID = int(self.__conf_file['serviceId'])
         self.__serviceName = self.__conf_file['serviceName']
         self.__updateTimeInMinutes = int(self.__conf_file['update-time-in-minutes'])
+        self.lightOpen = int(self.__conf_file['light-open'])
+        self.highLuminosity = int(self.__conf_file['high-luminosity'])
+        self.mediumLuminosity = int(self.__conf_file['medium-luminosity'])
+        self.lowLuminosity = int(self.__conf_file['low-luminosity'])
         try :
             r = requests.post(self.__conf_file['host']+"/add-service",data =json.dumps( {
                 'serviceID' : self.__serviceID,
@@ -63,13 +67,13 @@ class light_patient_room_monitor() :
             print("ERROR: unable to get the current wheater conditions")
             return
         if files['current']['is_day'] == 'no' :
-            return 100
+            return self.lightOpen
         elif files['current']['cloudcover'] > self.cloudCoverTheresold : #cloud cover 
-            return 75
+            return self.highLuminosity
         elif  files['current']['visibility'] < self.visibilityTheresold : #visibility  
-            return 60
+            return self.mediumLuminosity
         else : 
-            return 15
+            return self.lowLuminosity
     
     def notify(self,topic,payload) :
         message = dict(json.loads(payload))
