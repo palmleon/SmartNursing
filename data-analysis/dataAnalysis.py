@@ -165,8 +165,6 @@ def perform():
     flag_time = 1
     print('Starting data analysis')
     lastTimeExec = datetime.fromtimestamp(time.time())
-    #TODO remove for the real implementation, this is just for test to compute the average
-    lastTimeExec = datetime.fromtimestamp(1657017306) ###### TEST ######
     lastTimeExec = d.convertData(str(lastTimeExec))
     while True:
         now = datetime.fromtimestamp(time.time())
@@ -202,7 +200,6 @@ def perform():
                     for i in range(0,len(latestDate[keys])):
                         check = d.checkDate(d.convertData(\
                             latestDate[keys][i]['created_at']))
-                        #check = True ########## TEST ###########
                         if check == True:
                             if latestDate[keys][i]['field5'] != None:
                                 tempList.append(latestDate[keys][i]['field5'])
