@@ -1,11 +1,11 @@
 {
-    "host": "http://cdrsi:8080/catalog",
-    "serviceName" : "thingspeak-adaptor",
-    "serviceId" : 6,
-    "thinkspeakJson" : "https://api.thingspeak.com/channels.json",
-    "thinkspeakChannels" : "https://api.thingspeak.com/channels",
-    "thinkspeakUpdate" : "https://api.thingspeak.com/update",
-    "updatePatientListInSecond" : 60,
-    "updateServiceInSecond" : 100,
-    "mqtt-interval" : 600
+  "host": "http://cdrsi:8080/catalog",
+  "serviceName": "thingspeak-adaptor",
+  "serviceId": 6,
+  "thinkspeakJson": "https://api.thingspeak.com/channels.json",
+  "thinkspeakChannels": "https://api.thingspeak.com/channels",
+  "thinkspeakUpdate": "https://api.thingspeak.com/update",
+  "updatePatientListInSecond": 60,
+  "updateServiceInSecond": 60,
+  "mqtt-interval": 600
 }

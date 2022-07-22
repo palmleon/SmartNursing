@@ -1,31 +1,29 @@
 {
-    "host" : "http://cdrsi:8080/catalog",
-    "serviceID" : 2,
-    "name": "Patient-monitor-service2",
-    "template_alarm": {"alert":"","time":null},
-    "alarm_messages":
-    {
-        "alarm_Temperature_battery": "WARNING, patient {} has thermometer battery level low",
-        "alarm_Temperature_place": "WARNING, patient {} has thermomether bad positioned or removed",
-        "alarm_high_Temperature": "WARNING, patient {} has fever, with a body temperatur of {}",
-        "alarm_low_Temperature": "WARNING, patient {} is in hypothermia, of {}",
-        "alarm_Pulse_battery": "WARNING, patient {} has pulse oximeter battery level low",
-        "alarm_Pulse_place": "WARNING, patient {} has pulse oximeter bad positioned or removed",
-        "alarm_high_Pulse": "WARNING, patient {} has a high heart rate: {}",
-        "alarm_low_Pulse": "WARNING, patient {} has a low heart rate: {}",
-        "alarm_Saturation_Threshold": "WARNING, patient {} is in hypoxia. Blood saturation at {}"
-    },
-    "update_service_time_seconds" : 100,
-    "Thresholds":
-    {
-        "battery_PulseOximeter_threshold" : 2.8,
-        "saturation_threshold" : 95,
-        "pulse_lower_threshold" : 55,
-        "pulse_upper_threshold" : 100,
-        "attendability_threshold" : 4,
-        "battery_Thermometer_threshold" : 2.8,
-        "wrong_body_temperature" : 35,
-        "low_body_temperature" : 36,
-        "high_body_temperature" : 37
-    }
+  "host": "http://cdrsi:8080/catalog",
+  "serviceID": 2,
+  "name": "Patient-monitor-service2",
+  "template_alarm": { "alert": "", "time": null },
+  "alarm_messages": {
+    "alarm_Temperature_battery": "WARNING, patient {} has thermometer battery level low",
+    "alarm_Temperature_place": "WARNING, patient {} has thermomether bad positioned or removed",
+    "alarm_high_Temperature": "WARNING, patient {} has fever, with a body temperatur of {}",
+    "alarm_low_Temperature": "WARNING, patient {} is in hypothermia, of {}",
+    "alarm_Pulse_battery": "WARNING, patient {} has pulse oximeter battery level low",
+    "alarm_Pulse_place": "WARNING, patient {} has pulse oximeter bad positioned or removed",
+    "alarm_high_Pulse": "WARNING, patient {} has a high heart rate: {}",
+    "alarm_low_Pulse": "WARNING, patient {} has a low heart rate: {}",
+    "alarm_Saturation_Threshold": "WARNING, patient {} is in hypoxia. Blood saturation at {}"
+  },
+  "update_service_time_seconds": 60,
+  "Thresholds": {
+    "battery_PulseOximeter_threshold": 2.8,
+    "saturation_threshold": 95,
+    "pulse_lower_threshold": 55,
+    "pulse_upper_threshold": 100,
+    "attendability_threshold": 4,
+    "battery_Thermometer_threshold": 2.8,
+    "wrong_body_temperature": 35,
+    "low_body_temperature": 36,
+    "high_body_temperature": 37
+  }
 }

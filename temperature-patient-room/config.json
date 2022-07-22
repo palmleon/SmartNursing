@@ -1,7 +1,11 @@
 {
-    "host" : "http://cdrsi:8080/catalog",
-    "serviceId" : 5,
-    "serviceName" : "temperature-patient-room-monitor",
-    "updateTimeInSecond" : 100,
-    "base-message" : {"bn" : "temperature-patient-room-monitor","bt":0,"e" : {"n":"switch","u":"/","v":0}}
+  "host": "http://cdrsi:8080/catalog",
+  "serviceId": 5,
+  "serviceName": "temperature-patient-room-monitor",
+  "updateTimeInSecond": 60,
+  "base-message": {
+    "bn": "temperature-patient-room-monitor",
+    "bt": 0,
+    "e": { "n": "switch", "u": "/", "v": 0 }
+  }
 }
