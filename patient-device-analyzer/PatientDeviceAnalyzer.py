@@ -56,9 +56,9 @@ class PatientDeviceAnalyzer():
     while True:
       time.sleep(self.__control_time_seconds)
       #It's Night?
+      if time.localtime()[3]>=self.__hours[0] or time.localtime()[3]<=self.__hours[1]:
       ###TODO###: REMOVE COMMENT AFTER DEBUG
-      #if time.localtime()[3]>=self.__hours[0] or time.localtime()[3]<=self.__hours[1]:
-      if True:
+      #if True:
         # Request for patient list
         try :
           r = requests.get(self.__register+"/patients")
