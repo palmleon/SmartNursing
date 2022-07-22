@@ -49,7 +49,8 @@ class TestScript():
                 #  ipossia
                 self.mqttClient.myPublish("group01/IoTProject/Patient/Pulsation/1",{"bn" :"testOximeter","bt":0,"e":[{"n":"battery","u":"V","v":3},{"n":"perfusion index","u":"perc","v":[5,5,5,5,5,5,5,5,5,5]},{"n":"saturation","u":"perc","v":[90,91,91,90,91,90,91,91,91,90]}, {"n":"pulse rate","u":"bpm","v":[80,80,80,80,80,80,80,80,80,80]}]})
                 print({"bn" :"testOximeter","bt":0,"e":[{"n":"battery","u":"V","v":3},{"n":"perfusion index","u":"perc","v":[5,5,5,5,5,5,5,5,5,5]},{"n":"saturation","u":"perc","v":[90,91,91,90,91,90,91,91,91,90]}, {"n":"pulse rate","u":"bpm","v":[80,80,80,80,80,80,80,80,80,80]}]})
-            
+                
+
             
             choice = int(input('\n\n1 to emulate a temperature 27 °C in the patient room, when the patient is not present \n2 to emulate a temperature of 24 °C in a common room during an unexpected presence, when there are no patients\n3 to send a data to the light monitor, indicating that the light is on\n4 to send a message to the patient monitor where the sensor battery is low\n5 to emulate a patient with a body temperature of 39 °C\n6 to emulate a patient in a fibbrillation state\n7 to emulate a bad positioned sensor\n8 to emulate a low pulse rate\n9 to emulate am hypoxia'))
 

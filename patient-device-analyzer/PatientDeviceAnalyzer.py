@@ -104,6 +104,7 @@ class PatientDeviceAnalyzer():
           print("ERROR: update service failed")
       except :
         print("ERROR: update service failed")
+        
 if __name__ == "__main__" :
   A=PatientDeviceAnalyzer()
   t1 = threading.Thread(target=A.control)

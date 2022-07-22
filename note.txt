@@ -1,5 +1,0 @@
-Why should I use SmartNursing? Because:
-- It is scalable: any number of rooms and patients can be handled
-- It is reliable: the system is always active and ready to communicate
-- It is extendible: new features could be implemented in the future
-- About Security: the only access point from outside is the Telegram Bot, whose Security has been discussed

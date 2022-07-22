@@ -801,8 +801,11 @@ class Terminal(object):
         self.__running = True
         
         r=requests.post(self.__config_settings['host']+"/add-service",data=json.dumps({"serviceID" : self.__config_settings['serviceID'], "name" : self.__config_settings['name']}))
-        if r.status_code != requests.codes.ok:
-            print("ERROR: add service failed!")
+        while r.status_code != requests.codes.ok:
+            r = requests.post(self.__config_settings['host'] + "/add-service",data = json.dumps({
+            'serviceID' : self.__config_settings['serviceID'],
+            'name' : self.__config_settings['name']
+            }))
         
         # Launch thread for service update
         self.__thread = Thread(target=self.__updateService, args=(), daemon=False)

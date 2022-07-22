@@ -45,10 +45,6 @@
         {
             "command": "end_work",
             "roles": ["Nurse", "SuperUser"]
-        },
-        {
-            "command": "get_sensor_battery",
-            "roles": ["Nurse", "Doctor", "SuperUser"]
         }
     ],
     "room-list": [],

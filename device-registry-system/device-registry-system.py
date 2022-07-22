@@ -225,7 +225,7 @@ class Catalog(object) :
                 if room['roomID'] == newPatient['roomID']:
                     found_room = True
             if not found_room:
-                raise cherrypy.HTTPError(400, "room does not exist")
+                raise cherrypy.HTTPError(406, "room does not exist")
             for patient in patients:
                 if patient['patientID'] == newPatient['patientID'] :
                     raise cherrypy.HTTPError(400,"patient already exists")
@@ -262,10 +262,15 @@ class Catalog(object) :
         
         if uri[0] == 'update-device' :
             newDevice = json.loads(cherrypy.request.body.read())
+            newDevice['timestamp'] = str(datetime.datetime.today())
             id = newDevice['deviceID']
+            found = False
             for i in range(len(self.catalogList['devices'])) :
                 if self.catalogList['devices'][i]['deviceID'] == id :
                     self.catalogList['devices'][i]['timestamp'] = str(datetime.datetime.today())
+                    found = True
+            if not found:
+                self.catalogList['devices'].append(newDevice)
             return
 
         elif uri[0] == 'update-patient' :
@@ -277,7 +282,7 @@ class Catalog(object) :
                 if room['roomID'] == newPatient['roomID']:
                     found_room = True
             if not found_room:
-                raise cherrypy.HTTPError(400,'room does not exist')
+                raise cherrypy.HTTPError(406,'room does not exist')
             found_patient = False
             for room in self.catalogList['room-list']:
                 for patient in room['patients']:
